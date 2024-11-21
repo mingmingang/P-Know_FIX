@@ -66,7 +66,7 @@ function Select2Dropdown({
                 id={forInput}
                 name={forInput}
                 ref={selectRef}
-                style={{ width: '100%' }}
+                style={{ width: '100%', border:"1px solid #DFDFDF", borderRadius:"10px", padding:"5px 10px" }}
                 disabled={isDisabled}
                 {...props}
             >

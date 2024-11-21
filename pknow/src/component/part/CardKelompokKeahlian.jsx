@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "./Button";
+import Button from "./Button copy";
 import Icon from "./Icon";
 import "../../style/KelompokKeahlian.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,7 +11,10 @@ import {
   faClock,
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
-import developerImage from "../../assets/developer.png"
+import developerImage from "../../assets/developer.png";
+import { API_LINK } from "../util/Constants";
+import { useState } from "react";
+import Input from "./Input";
 
 function CardKelompokKeahlian({
   config = { footer: "", icon: "", className: "", label: "", page: "" },
@@ -22,8 +25,6 @@ function CardKelompokKeahlian({
     pic: { key: "", nama: "" },
     desc: "",
     status: "",
-    members: [],
-    memberCount: 0,
     gambar,
   },
   ketButton,
@@ -40,8 +41,11 @@ function CardKelompokKeahlian({
   onChangeStatus,
   onDelete,
   title,
-  image,
+  showMenu=true,
 }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+
   const handleStatusChange = (newStatus) => {
     if (onChangeStatus) {
       onChangeStatus(data, newStatus);
@@ -54,134 +58,392 @@ function CardKelompokKeahlian({
     }
   };
 
-  return (
-    <div className="kelompokKeahlian">
-      <div className="bg-white-kk">
-        <img
-          alt={`${title} image`}
-          className="cover-daftar-kk"
-          height="200"
-          src={data.gambar || developerImage}
-          width="300"
-        />
-        <div className="d-flex justify-content-between align-items-center mt-4">
-          <h3 className="text-xl font-bold text-blue-600">{data.title}</h3>
-        </div>
-      <div className="pemilik">
-        <div className="prodi">
-          <FontAwesomeIcon
-            icon={showProdi ? faGraduationCap : faPeopleGroup}
-            className="icon-style"
-          />
-          <p className="text-gray-700" style={{marginLeft:"15px"}}>{showProdi ? data.prodi.nama : anggota}</p>
-        </div>
-        <div className="userProdi">
-          <FontAwesomeIcon
-            icon={showUserProdi ? faUser : faClock}
-            className="icon-style"
-          />
-          <p className="text-gray-700">
-            {showUserProdi ? `PIC: ${data.pic.nama.replace(/-/g, '')}` : statusPersetujuan}
-          </p>
-        </div>
-        {/* <div className="userProdi">
-          <FontAwesomeIcon icon={faUsers} className="icon-style" />
-          <span className="text-gray-700" style={{marginLeft:"15px", fontWeight:"600"}}>{data.memberCount} Members</span>
-        </div> */}
-        </div>
-        <div className="">
-          <p className="deskripsi" style={{marginTop:"10px"}}>{data.desc}</p>
-        </div>
-        <div className="status-open">
-          <table>
-            <tbody>
-              <tr>
-                <td>
-                  {showStatusText ? (
-                    <>
-                      <i className="fas fa-circle"
+  const toggleDescription = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  // Limit the description to 100 characters if not expanded
+  const truncatedDesc =
+    data.desc.length > 100 && !isExpanded
+      ? `${data.desc.substring(0, 100)}...`
+      : data.desc;
+
+
+      let footerStatus;
+      if (data.status === "Draft" && !data.pic.key) {
+        footerStatus = (
+          <p className="mb-0 text-secondary"><i
+          className="fas fa-circle"
+          icon="circle"
+          style={{
+            color: colorCircle,
+            marginRight: "20px",
+            width: "10px",
+          }}
+        />Draft - Belum dikirimkan ke Prodi</p>
+        );
+      } else if (data.status === "Draft" && data.pic.key) {
+        footerStatus = (
+          <p className="mb-0 text-secondary"><i
+          className="fas fa-circle"
+          icon="circle"
+          style={{
+            color: colorCircle,
+            marginRight: "20px",
+            width: "10px",
+          }}
+        />Draft - Belum dipublikasi</p>
+        );
+      } else if (data.status === "Menunggu" && !data.pic.key) {
+        footerStatus = (
+          <p className="mb-0 text-secondary"><i
+          className="fas fa-circle"
+          icon="circle"
+          style={{
+            color: colorCircle,
+            marginRight: "20px",
+            width: "10px",
+          }}
+        />Menunggu PIC dari Prodi</p>
+        );
+      } else if (data.status === "Aktif" && data.pic.key){
+        footerStatus = (
+          <p className="mb-0 text-secondary"><i
+          className="fas fa-circle"
+          icon="circle"
+          style={{
+            color: colorCircle,
+            marginRight: "20px",
+            width: "10px",
+          }}
+        />Aktif</p>
+        );
+      } else if (data.status === "Tidak Aktif" && data.pic.key){
+        footerStatus = (
+          <p className="mb-0 text-secondary"><i
+          className="fas fa-circle"
+          icon="circle"
+          style={{
+            color: "red",
+            marginRight: "20px",
+            width: "10px",
+          }}
+        />Tidak Aktif</p>
+        );
+      }
+
+      const members = data.members || []; // memastikan members selalu berupa array
+
+
+      let personInCharge;
+      if (data.status === "Draft" && !data.pic.key) {
+        personInCharge = (
+          <div className=" d-flex">
+            <FontAwesomeIcon icon={showUserProdi ? faUser : faClock} className="icon-style" />
+            <p className="text-gray-700">{" "}
+            PIC : Belum ada PIC KK
+            </p>
+          </div>
+        );
+      } else {
+        personInCharge = (
+          <div className="d-flex" >
+           <FontAwesomeIcon icon={showUserProdi ? faUser : faClock} className="icon-style" />
+              <p className="text-gray-700">
+              PIC :{" "}
+              {data.pic.key ? (
+                data.pic.nama
+              ) : (
+                <span className="text-danger-emphasis fw-bold">
+                  Menunggu PIC dari Prodi
+                </span>
+              )}
+           </p>
+          </div>
+        );
+      }
+
+
+      let cardContent;
+      if (config.footer === "Btn") {
+        cardContent = (
+          <div className="d-flex justify-content-between">
+            <Button
+              iconName={config.icon}
+              classType={config.className}
+              label={config.label}
+              onClick={() => onChangePage(config.page, data)}
+              style={{border:"none"}}
+            />
+          </div>
+        );
+      } else if (config.footer === "Draft") {
+        cardContent = (
+          <div className="d-flex justify-content-between">
+           {showStatusText ? (
+                    <div className="">
+                      
+                      <span style={{ fontSize: "14px" }}>{footerStatus}</span>
+                    </div>
+                  ) : (
+                    <a href="#selengkapnya" className="text-blue-600" style={{ textDecoration: "none" }}>
+                      Selengkapnya <FontAwesomeIcon icon={faArrowRight} />
+                    </a>
+                  )}
+            <div className="d-flex justify-content-end" style={{marginTop:"10px", marginLeft:"-20px"}}>
+              <Icon
+                name="edit"
+                type="Bold"
+                cssClass="btn px-2 py-0 text-primary"
+                title="Ubah data"
+                onClick={() => onChangePage("edit", data)}
+                style={{border:"none"}}
+              />
+              <Icon
+                name="trash"
+                type="Bold"
+                cssClass="btn px-2 py-0 text-primary"
+                title="Hapus data permanen"
+                onClick={() => handleDeleteClick(data)}
+                style={{border:"none"}}
+              />
+              <Icon
+                name="list"
+                type="Bold"
+                cssClass="btn px-2 py-0 text-primary"
+                title="Lihat detail Kelompok Keahlian"
+                onClick={() => onChangePage("detailDraft", data)}
+                style={{border:"none"}}
+              />
+              {data.pic.key ? (
+                <Icon
+                  name="paper-plane"
+                  type="Bold"
+                  cssClass="btn px-1 py-0 text-primary"
+                  title="Publikasi Kelompok Keahlian"
+                  onClick={() => handleStatusChange(data, "Aktif")}
+                  style={{border:"none"}}
+                />
+              ) : (
+                <Icon
+                  name="paper-plane"
+                  type="Bold"
+                  cssClass="btn px-1 py-0 text-primary"
+                  title="Kirim ke Prodi bersangkutan untuk menentukan PIC"
+                  onClick={() => handleStatusChange(data, "Menunggu")}
+                  style={{border:"none"}}
+                />
+              )}
+            </div>
+          </div>
+        );
+      } else if (config.footer === "Menunggu") {
+        cardContent = (
+          <div className="d-flex justify-content-between">
+            {showStatusText ? (
+                    <div className="" style={{display:"flex"}}>
+                     
+                      <span style={{ fontSize: "14px" }}> <i
+                        className="fas fa-circle"
                         icon="circle"
                         style={{
                           color: colorCircle,
                           marginRight: "20px",
+                          width: "10px",
                         }}
-                      />
-                      <span style={{ fontSize: "14px" }}>{data.status}</span>
-                    </>
+                      />{footerStatus}</span>
+                    </div>
                   ) : (
-                    <a
-                      href="#selengkapnya"
-                      className="text-blue-600"
-                      style={{ textDecoration: "none" }}
-                    >
+                    <a href="#selengkapnya" className="text-blue-600" style={{ textDecoration: "none" }}>
                       Selengkapnya <FontAwesomeIcon icon={faArrowRight} />
                     </a>
                   )}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          {ketButton && (
-            <button
-              className="bg-blue-100 text-white px-6 rounded-full open"
-              aria-label={`Action for ${title}`}
-              onClick={onClick}
-            >
-              <FontAwesomeIcon
-                icon={iconClass}
-                style={{ color: "white", marginRight: "10px" }}
+            <div className="d-flex justify-content-end">
+              <Icon
+                name="edit"
+                type="Bold"
+                cssClass="btn px-2 py-0 text-primary"
+                title="Ubah data"
+                onClick={() => onChangePage("edit", data)}
               />
-              {ketButton}
-            </button>
-          )}
-        </div>
-      </div>
-      {/* <div className="card-body">
-        <div className="pic-info">
-          <Icon name="user" />
-          <span>{data.pic.nama}</span>
-        </div>
-        <div className="status-info">
-          <p>
-            Status: <strong>{data.status}</strong>
-          </p>
-        </div>
-      </div>
-      <div className="card-footer">
-        {data.status === "Draft" && (
-          <div>
-            <Button
-              label="Publish"
-              classType="success"
-              onClick={() => handleStatusChange("Aktif")}
-            />
-            <Button
-              label="Delete"
-              classType="danger"
-              onClick={handleDeleteClick}
-            />
+              <Icon
+                name="trash"
+                type="Bold"
+                cssClass="btn px-2 py-0 text-primary"
+                title="Hapus data permanen"
+              />
+              <Icon
+                name="list"
+                type="Bold"
+                cssClass="btn px-2 py-0 text-primary"
+                title="Lihat detail Kelompok Keahlian"
+                onClick={() => onChangePage("detailDraft", data)}
+              />
+              {data.pic.key ? (
+                <Icon
+                  name="paper-plane"
+                  type="Bold"
+                  cssClass="btn px-1 py-0 text-primary"
+                  title="Kirim ke Prodi bersangkutan untuk menentukan PIC"
+                />
+              ) : (
+                ""
+              )}
+            </div>
           </div>
-        )}
-        {data.status === "Aktif" && (
-          <Button
-            label="Deactivate"
-            classType="warning"
-            onClick={() => handleStatusChange("Tidak Aktif")}
-          />
-        )}
-        {data.status === "Tidak Aktif" && (
-          <Button
-            label="Activate"
-            classType="success"
-            onClick={() => handleStatusChange("Aktif")}
-          />
-        )}
-        <Button
-          label="View"
-          classType="info"
-          onClick={() => onChangePage(data.id)}
+        );
+      } else {
+        cardContent = (
+          <div className="d-flex justify-content-between">
+            {showStatusText ? (
+                    <div className="">
+                      <span style={{ fontSize: "14px" }}>{footerStatus}</span>
+                    </div>
+                  ) : (
+                    <a href="#selengkapnya" className="text-blue-600" style={{ textDecoration: "none" }}>
+                      Selengkapnya <FontAwesomeIcon icon={faArrowRight} />
+                    </a>
+                  )}
+            {data.members ? (
+              <div className="img-container" style={{ width: "28%" }}>
+                {members.map((person, index) => (
+                  <div style={{ width: "55%", marginLeft: "-10px" }}>
+                    <p className="lh-sm mb-0">
+                      {members.map((person, index) => (
+                        <span key={index}>
+                          <a
+                            href={person.link}
+                            className="fw-bold text-dark text-decoration-none"
+                          >
+                            {person.name}
+                            {", "}
+                          </a>
+                        </span>
+                      ))}
+                      dan {data.memberCount} Lainnya sudah bergabung!
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              ""
+            )}
+            <div className="d-flex" style={{ width: "10%", marginTop:"15px" }}>
+            {showMenu ? (
+    <>
+      <Icon
+        name="edit"
+        type="Bold"
+        cssClass="btn px-2 py-0 text-primary"
+        title="Ubah data"
+        onClick={() => onChangePage("edit", data)}
+      />
+      <Icon
+        name="list"
+        type="Bold"
+        cssClass="btn px-2 py-0 text-primary"
+        title="Lihat detail Kelompok Keahlian"
+        onClick={() => onChangePage("detailPublish", data)}
+      />
+      <div
+        className="form-check form-switch py-0 ms-2"
+        style={{ width: "fit-content" }}
+      >
+        <Input
+          type="checkbox"
+          title="Aktif / Nonaktif"
+          className="form-check-input"
+          checked={data.status === "Aktif"}
+          onChange={() =>
+            handleStatusChange(
+              data,
+              data.status === "Aktif" ? "Tidak Aktif" : "Aktif"
+            )
+          }
         />
-      </div> */}
+        <label
+          className="form-check-label"
+          htmlFor="flexSwitchCheckDefault"
+        ></label>
+      </div>
+    </>
+  ) : <div className=""> {ketButton && (
+    <div className="button-keterangan" style={{marginLeft:"-60px"}}>
+    <button
+      className="bg-blue-100 text-white px-6 rounded-full open"
+      aria-label={`Action for ${title}`}
+      onClick={onClick}
+      style={{width:"200px"}}
+    >
+     <i className="fas fa-users" style={{marginRight:"10px"}}></i>
+      {ketButton}
+    </button>
+    </div>
+  )}</div>}
+            </div>
+          </div>
+        );
+      }
+      
+  return (
+    <div className="kelompokKeahlian">
+      <div className="bg-white-kk">
+
+        <img
+          alt={`${title} image`}
+          className="cover-daftar-kk"
+          height="200"
+          src={`${API_LINK}Upload/GetFile/${data.gambar}`}
+          width="300"
+        />
+        <div className="row">
+            <div className="d-flex justify-content-between align-items-center mt-4">
+              <h3 className="text-xl font-bold text-blue-600" style={{ fontSize: "20px", textAlign: "justify" }}>
+                {data.title}
+              </h3>
+            </div>
+        </div>
+
+        <div className="pemilik ">
+            <div className="prodi" style={{fontSize:"14px"}}>
+              <FontAwesomeIcon icon={showProdi ? faGraduationCap : faPeopleGroup} className="icon-style" />
+              <p className="text-gray-700" style={{ marginLeft: "15px" }}>
+                {showProdi ? data.prodi.nama : anggota}
+              </p>
+            </div>
+            <div className="userProdi">
+              {personInCharge}
+            </div>
+        </div>
+
+        <div className="deskripsi-container " style={{ alignItems: "center", width:"100%" }}>
+              <p className="deskripsi" style={{ marginBottom: "10px" }}>
+                {truncatedDesc}{" "}
+                {data.desc.length > 50 && (
+                  <button
+                    onClick={toggleDescription}
+                    className="text-blue-600"
+                    style={{
+                      border: "none",
+                      background: "none",
+                      cursor: "pointer",
+                      fontSize: "15px",
+                      color: "#0E6EFE",
+                      padding: 0,
+                    }}
+                  >
+                    {isExpanded ? "Lihat Sedikit" : "Selengkapnya"}
+                  </button>
+                )}
+              </p>
+        </div>
+
+        <div className="status-open">
+                    <div className="card-content" style={{alignItems:"center"}}>
+                    {cardContent}
+                    </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import Icon from "./Icon";
-import "../../style/Table.css"
+import "../../style/Table.css";
 
 export default function Table({
-  data,
+  data = [], // Set default data as an empty array to prevent undefined issues
   onToggle = () => {},
   onCancel = () => {},
   onDelete = () => {},
@@ -187,25 +187,32 @@ export default function Table({
       <div className="flex-fill">
         <table className="dynamic-table table-hover table-striped table table-light border">
           <thead>
-            <tr>
-              {Object.keys(data[0]).map((value, index) => {
-                if (
-                  value !== "Key" &&
-                  value !== "Count" &&
-                  value !== "Alignment"
-                ) {
-                  colCount++;
-                  return (
-                    <th key={"Header" + index} className="text-center">
-                      {value}
-                    </th>
-                  );
-                }
-              })}
-            </tr>
+            {/* Check if data exists and has at least one object */}
+            {data && data[0] ? (
+              <tr>
+                {Object.keys(data[0]).map((value, index) => {
+                  if (
+                    value !== "Key" &&
+                    value !== "Count" &&
+                    value !== "Alignment"
+                  ) {
+                    colCount++;
+                    return (
+                      <th key={"Header" + index} className="text-center">
+                        {value}
+                      </th>
+                    );
+                  }
+                })}
+              </tr>
+            ) : (
+              <tr>
+                <td colSpan={colCount}>Tidak ada data.</td>
+              </tr>
+            )}
           </thead>
           <tbody>
-            {data[0].Count !== 0 &&
+            {data && data.length > 0 ? (
               data.map((value, rowIndex) => {
                 colPosition = -1;
                 return (
@@ -232,7 +239,9 @@ export default function Table({
                           <td
                             key={rowIndex + "" + colIndex}
                             style={{
-                              textAlign: value["Alignment"][colPosition],
+                              textAlign: value["Alignment"]
+                                ? value["Alignment"][colPosition]
+                                : "left", // Default to left if alignment is undefined
                             }}
                           >
                             {generateActionButton(
@@ -248,8 +257,8 @@ export default function Table({
                     })}
                   </tr>
                 );
-              })}
-            {data[0].Count === 0 && (
+              })
+            ) : (
               <tr>
                 <td colSpan={colCount}>Tidak ada data.</td>
               </tr>

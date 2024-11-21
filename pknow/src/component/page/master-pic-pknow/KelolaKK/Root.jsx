@@ -1,8 +1,9 @@
 import { useState } from "react";
 import MasterKelolaKelompokKeahlian from "./KelolaKK";
 import MasterTambahKelompokKeahlian from "./TambahKK";
-import MasterLihatKelompokKeahlian from "./LihatKK";
+import MasterLihatKelompokKeahlianDraft from "./LihatKKDraft";
 import MasterEditKelompokKeahlian from "./EditKK";
+import MasterLihatKelompokKeahlianPublish from "./LihatKKPublish";
 
 export default function MasterPICPKNOW() {
   const [pageMode, setPageMode] = useState("index");
@@ -16,13 +17,14 @@ function getPageMode() {
         return <MasterKelolaKelompokKeahlian onChangePage={handleSetPageMode} />;
       case "add":
         return <MasterTambahKelompokKeahlian onChangePage={handleSetPageMode} />;
-      case "detail":
-        return (
-          <MasterLihatKelompokKeahlian
-            onChangePage={handleSetPageMode}
-            withID={dataID}
-          />
-        );
+        case "detailDraft":
+          return (
+            <MasterLihatKelompokKeahlianDraft onChangePage={handleSetPageMode} withID={dataID} />
+          );
+        case "detailPublish":
+          return (
+            <MasterLihatKelompokKeahlianPublish onChangePage={handleSetPageMode} withID={dataID} />
+          );
       case "edit":
         return (
           <MasterEditKelompokKeahlian

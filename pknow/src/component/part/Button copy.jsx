@@ -19,7 +19,7 @@ export default function Button({
       disabled={isDisabled}
     >
       {iconName && (
-        <Icon name={iconName} cssClass={label === "" ? undefined : "pe-2"} />
+        <Icon name={iconName} cssClass={label === "" ? undefined : "pe-2"} style={{marginTop:"5px"}}/>
       )}
       {label}
     </button>

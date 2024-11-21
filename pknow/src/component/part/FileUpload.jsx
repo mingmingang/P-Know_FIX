@@ -16,7 +16,7 @@ const FileUpload = forwardRef(function FileUpload(
 ) {
   return (
     <>
-      <div className="mb-3">
+      <div className="mb-3" style={{width:"600px"}}>
         <label htmlFor={forInput} className="form-label fw-bold">
           {label}
           {isRequired ? <span className="text-danger"> *</span> : ""}
@@ -39,6 +39,7 @@ const FileUpload = forwardRef(function FileUpload(
               accept={formatFile}
               ref={ref}
               {...props}
+              required={isRequired}
             />
             <sub>Maksimum ukuran berkas adalah 10 MB</sub>
             {hasExisting && (
