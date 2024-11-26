@@ -1,101 +1,314 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGraduationCap, faUser, faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons"; // Import dropdown icons
-import Button from "./Button";
+import Button from "./Button copy";
 import "../../style/DetailAKK.css";
-import developerImage from "../../assets/developer.png";
-import budi from "../../assets/fotobudi.png";
 import Konfirmasi from "./Konfirmasi"; // Import Konfirmasi component
+import { API_LINK } from "../util/Constants";
+import BackPage from "../../assets/backPage.png";
+import { useEffect, useRef } from "react";
+import UseFetch from "../util/UseFetch";
+import DropDown from "./Dropdown";
+import Input from "./Input";
+import Loading from "./Loading";
+import Alert from "./Alert";
+import Filter from "./Filter";
+import Icon from "./Icon";
+import SweetAlert from "../util/SweetAlert";
+import pknowmaskot from "../../assets/pknowmaskot.png";
 
 export default function DetailAKK({
-  title,
   prodi,
-  deskripsi,
-  pic,
-  showFormAnggota = true, 
-  showFormTambahAnggota = true, // Default visibility of the tambah anggota form
-  anggotaList = [], // List of existing anggota
-  calonAnggotaList = [], // List of calon anggota to be added
-  kategoriList = [], // List of categories for Kelompok Keahlian
-  showKategori = true, // New prop to control visibility of the Kategori section
-  onAddAnggota, // Function called when adding anggota
-  onRemoveAnggota, // Function called when removing anggota
+  onChangePage,
+  withID
 }) {
-  const [showConfirmation, setShowConfirmation] = useState(false);
   const [konfirmasi, setKonfirmasi] = useState("");
   const [pesanKonfirmasi, setPesanKonfirmasi] = useState("");
   const [actionType, setActionType] = useState(null);
   const [selectedAnggota, setSelectedAnggota] = useState(null);
+  const [expandedKategori, setExpandedKategori] = useState({}); 
+  const [expandedDescription, setExpandedDescription] = useState({}); 
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isBackAction, setIsBackAction] = useState(false);  
+  const [errors, setErrors] = useState({});
+  const [isError, setIsError] = useState({ error: false, message: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingAnggota, setIsLoadingAnggota] = useState(true);
+  const [isLoadingDosen, setIsLoadingDosen] = useState(true);
+  const [isLoadingProdi, setIsLoadingProdi] = useState(true);
+  const [listAnggota, setListAnggota] = useState([]);
+  const [listDosen, setListDosen] = useState([]);
+  const [listProdi, setListProdi] = useState([]);
+  const [currentFilter, setCurrentFilter] = useState({
+    page: 1,
+    query: "",
+    sort: "[Nama Anggota] asc",
+    status: "Aktif",
+    kke_id: withID.id,
+  });
 
-  const [expandedKategori, setExpandedKategori] = useState({}); // State to track expanded categories
-  const [expandedDescription, setExpandedDescription] = useState({}); // State for toggling descriptions for each kategori
-
-  const placeholder = "Cari Anggota";
-  const buttons = [
-    {
-      label: "Urutkan",
-      className: "add-button",
-      icon: "fas fa-sort",
-    },
-  ];
-
-  const handleAddClick = (anggota) => {
-    setActionType("add");
-    setSelectedAnggota(anggota);
-    setKonfirmasi("Konfirmasi Tambah");
-    setPesanKonfirmasi(
-      `Apakah anda yakin ingin menambah anggota ${anggota.name} ke keahlian?`
-    );
-    setShowConfirmation(true);
+  const handleGoBack = () => {
+    setIsBackAction(true);  
+    setShowConfirmation(true);  
   };
 
-  const handleTrashClick = (anggota) => {
-    setActionType("trash");
-    setSelectedAnggota(anggota);
-    setKonfirmasi("Konfirmasi Hapus");
-    setPesanKonfirmasi(
-      `Apakah anda yakin ingin menghapus anggota ${anggota.name} dari keahlian?`
-    );
-    setShowConfirmation(true);
+  const handleConfirmYesBack = () => {
+    setShowConfirmation(false); 
+    onChangePage("index");
   };
 
-  const handleConfirmYes = () => {
-    if (actionType === "add" && selectedAnggota && onAddAnggota) {
-      onAddAnggota(selectedAnggota);
-    } else if (actionType === "trash" && selectedAnggota && onRemoveAnggota) {
-      onRemoveAnggota(selectedAnggota);
+
+  const handleConfirmNoBack = () => {
+    setShowConfirmation(false);  
+  };
+
+  const [currentDosenFilter, setCurrentDosenFilter] = useState({
+    prodi: "",
+  });
+
+  const formDataRef = useRef({
+    key: "",
+    nama: "",
+    programStudi: "",
+    personInCharge: "",
+    deskripsi: "",
+    status: "",
+  });
+
+  const searchAnggotaQuery = useRef();
+
+  const handleAnggotaSearch = () => {
+    setCurrentFilter((prevFilter) => ({
+      ...prevFilter,
+      page: 1,
+      query: searchAnggotaQuery.current.value || "",
+    }));
+  };
+
+  const handleSetCurrentPage = (newCurrentPage) => {
+    setIsLoading(true);
+    setCurrentFilter((prevFilter) => {
+      return {
+        ...prevFilter,
+        page: newCurrentPage,
+      };
+    });
+  };
+
+  const getListAnggota = async () => {
+    setIsError({ error: false, message: "" });
+    setIsLoadingAnggota(true);
+
+    try {
+      while (true) {
+        let data = await UseFetch(
+          API_LINK + "AnggotaKK/GetAnggotaKK",
+          currentFilter
+        );
+        console.log("data kk",currentFilter);
+
+        if (data === "ERROR") {
+          throw new Error("Terjadi kesalahan: Gagal mengambil daftar anggota.");
+        } else if (data === "data kosong") {
+          setListAnggota([]);
+          setIsLoadingAnggota(false);
+          break;
+        } else if (data.length === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        } else {
+          setListAnggota(data);
+          setIsLoadingAnggota(false);
+          break;
+        }
+      }
+    } catch (e) {
+      setIsLoadingAnggota(false);
+      console.log(e.message);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: e.message,
+      }));
     }
-    setShowConfirmation(false); // Close the confirmation modal
   };
 
-  const handleConfirmNo = () => {
-    setShowConfirmation(false); // Close the confirmation modal without doing anything
+
+  const getListProdi = async () => {
+    setIsLoadingProdi(true);
+
+    try {
+      while (true) {
+        let data = await UseFetch(API_LINK + "KK/GetListProdi", {});
+
+        if (data === "ERROR") {
+          throw new Error("Terjadi kesalahan: Gagal mengambil daftar prodi.");
+        } else if (data.length === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        } else {
+          setListProdi(data);
+          setIsLoadingProdi(false);
+          break;
+        }
+      }
+    } catch (e) {
+      setIsLoadingProdi(false);
+      console.log(e.message);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: e.message,
+      }));
+    }
   };
 
-  const toggleKategoriVisibility = (index) => {
-    setExpandedKategori((prev) => ({
-      ...prev,
-      [index]: !prev[index], // Toggle visibility of the clicked kategori
-    }));
+  const getListDosen = async () => {
+    setIsLoadingDosen(true);
+
+    try {
+      while (true) {
+        let data = await UseFetch(API_LINK + "AnggotaKK/GetListDosen", {});
+
+        if (data === "ERROR") {
+          throw new Error("Terjadi kesalahan: Gagal mengambil daftar dosen.");
+        } else if (data.length === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        } else {
+          setListDosen(data);
+          setIsLoadingDosen(false);
+          break;
+        }
+      }
+    } catch (e) {
+      setIsLoadingDosen(false);
+      console.log(e.message);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: e.message,
+      }));
+    }
   };
 
-  const toggleDescriptionVisibility = (index) => {
-    setExpandedDescription((prev) => ({
-      ...prev,
-      [index]: !prev[index], // Toggle visibility of the description
-    }));
+  useEffect(() => {
+    if (withID) {
+      formDataRef.current = {
+        key: withID.id,
+        nama: withID.title,
+        programStudi: withID.prodi.nama,
+        personInCharge: withID.pic.nama,
+        deskripsi: withID.desc,
+        status: withID.status,
+      };
+      setCurrentFilter((prevFilter) => ({
+        ...prevFilter,
+        kke_id: withID.id,
+      }));
+    }
+    getListProdi();
+    getListDosen();
+  }, [withID]);
+
+  useEffect(() => {
+    getListAnggota();
+    getListDosen();
+  }, [currentFilter]);
+
+  useEffect(() => {
+    console.log(JSON.stringify(listAnggota));
+  });
+
+
+  useEffect(() => {
+    setIsLoading(isLoadingProdi || isLoadingAnggota || isLoadingDosen);
+  }, [isLoadingProdi, isLoadingAnggota, isLoadingDosen]);
+
+  const handleDelete = (id) => () => {
+    setIsError(false);
+    SweetAlert(
+      "Konfirmasi Hapus",
+      "Anda yakin ingin mengeluarkan anggota ini dari Keahlian?",
+      "warning",
+      "Ya"
+    ).then((confirm) => {
+      if (confirm) {
+        setIsLoading(true);
+        UseFetch(API_LINK + "AnggotaKK/SetStatusAnggotaKK", {
+          idAkk: id,
+          status: "Dibatalkan",
+        })
+          .then((data) => {
+            if (data === "ERROR" || data.length === 0) setIsError(true);
+            else {
+              SweetAlert(
+                "Berhasil",
+                "Karyawan telah dihapus dari Anggota Keahlian.",
+                "success"
+              );
+              handleSetCurrentPage(currentFilter.page);
+            }
+          })
+          .finally(() => setIsLoading(false));
+      }
+    });
   };
 
-  const truncatedDescription =
-    deskripsi.length > 50 ? deskripsi.slice(0, 150) + "..." : deskripsi;
+  
+  const handleTambahAnggota = (id) => () => {
+    setIsError(false);
+    SweetAlert(
+      "Konfirmasi Tambah",
+      "Anda yakin ingin menambahkan anggota ini dari Keahlian?",
+      "info",
+      "Ya"
+    ).then((confirm) => {
+      if (confirm) {
+        setIsLoading(true);
+        UseFetch(API_LINK + "AnggotaKK/TambahAnggotaByPIC", {
+          idAkk: formDataRef.current.key,
+          kry: id,
+        })
+          .then((data) => {
+            console.log(data);
+            if (data === "ERROR" || data.length === 0) setIsError(true);
+            else {
+              SweetAlert(
+                "Berhasil",
+                "Karyawan telah ditambahkan ke Anggota Keahlian.",
+                "success"
+              );
+              handleSetCurrentPage(currentFilter.page);
+            }
+          })
+          .finally(() => setIsLoading(false));
+      } else {
+        setIsLoading(false);
+        console.log("Penghapusan dibatalkan.");
+      }
+    });
+  };
+
+  const handleProdiChange = (e) => {
+    const selectedProdiText = e.target.options[e.target.selectedIndex].text;
+    setCurrentDosenFilter({
+      prodi: selectedProdiText === "-- Semua --" ? "" : selectedProdiText,
+    });
+  };
+
+  const filteredDosen = listDosen.filter((dosen) =>
+    currentDosenFilter.prodi ? dosen.Prodi === currentDosenFilter.prodi : true
+  );
 
   return (
     <>
+     <div className="back-and-title" style={{display:"flex", marginLeft:"80px", marginTop:"100px"}}>
+      <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Kelompok Keahlian</h4>
+              </div>
       <div className="content-container">
         <div className="information-kelompok-keahlian">
           <div className="informasi-kk">
-            <h1 className="title">{title}</h1>
-            <div className="prodi">
+            <h1 className="title">{withID.title}</h1>
+            <div className="prodi" style={{marginBottom:"-20px"}}>
               <FontAwesomeIcon
                 icon={faGraduationCap}
                 style={{ fontSize: "1.5rem", marginRight: "-5px" }}
@@ -104,170 +317,237 @@ export default function DetailAKK({
                 {prodi}
               </p>
             </div>
-            <p className="about">Tentang Kelompok Keahlian</p>
-            <p className="deskripsi">{deskripsi}</p>
+            <p className="about" style={{fontSize:"22px"}}>Tentang Kelompok Keahlian</p>
+            <p className="deskripsi" style={{fontSize:"20px", width:"500px"}}>{withID.desc}</p>
             <div className="userProdi">
               <FontAwesomeIcon
                 icon={faUser}
                 style={{ fontSize: "1.5rem", marginRight: "5px" }}
               />
               <p className="text-gray-700" style={{ fontFamily: "Poppins" }}>
-                PIC: {pic}
+                PIC: {withID.pic.nama}
               </p>
             </div>
           </div>
-          <div className="cover-kk-show">
-            <img src={developerImage} alt="" />
-          </div>
+          <div className="cover-kk-show" style={{ width: "500px", height: "400px" }}>
+  <img 
+    src={`${API_LINK}Upload/GetFile/${withID.gambar}`} 
+    alt="" 
+    style={{ width:"500px", height: "60%", objectFit: "cover" }} 
+  />
+</div>
         </div>
-
-        <div className="detail-anggota-add">
-          {showFormAnggota && (
-            <div className="form-anggota">
-              <div className="form-data-anggota">
-                <div className="form-daftar-anggota">
-                  <h1>Daftar Anggota</h1>
-                  <div className="input-search">
-                    <i className="fas fa-search search-icon"></i>
-                    <input
-                      type="text"
-                      className="search"
-                      placeholder={placeholder}
-                    />
+        <>
+      {isError.error && (
+        <div className="flex-fill">
+          <Alert type="danger" message={isError.message} />
+        </div>
+      )}
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <div className="d-flex flex-column" style={{marginLeft:"-20px"}}>
+          <div className="flex-fill">
+            <div className="container">
+              <div className="row pt-2">
+                <div className="col-lg-7 px-4">
+                  <div className="card" style={{
+                              border: "none",
+                              boxShadow: "0px 0px 8px rgba(0, 0, 0, 0.1)", // Gray shadow
+                              borderRadius: "15px" // Rounded corners
+                            }}>
+                    <div className="fw-bold ml-3 mt-4" style={{fontSize:"22px", color:"#0A5EA8"}}>
+                      Daftar Anggota
+                    </div>
+                    <div className="card-body">
+                      {/* <h3 className="mb-2 fw-semibold">
+                        {formDataRef.current.nama}
+                      </h3>
+                      <h6 className="fw-semibold">
+                        <span
+                          className="bg-primary me-2"
+                          style={{ padding: "2px" }}
+                        ></span>
+                        {formDataRef.current.programStudi}
+                      </h6>
+                      <div className="pt-2 ps-2">
+                        <Icon
+                          name="user"
+                          cssClass="p-0 ps-1 text-dark"
+                          title="PIC Kelompok Keahlian"
+                        />{" "}
+                        <span>PIC : {formDataRef.current.personInCharge}</span>
+                      </div>
+                      <hr className="mb-0" style={{ opacity: "0.2" }} />
+                      <p className="pt-2">{formDataRef.current.deskripsi}</p>
+                      <hr style={{ opacity: "0.2" }} />
+                      <h6 className="fw-semibold mt-4">Daftar Anggota</h6> */}
+                      <div className="input-group mb-3">
+                        <Input
+                          ref={searchAnggotaQuery}
+                          forInput="pencarianProduk"
+                          placeholder="Cari"
+                        />
+                        <Button
+                          iconName="search"
+                          classType="primary"
+                          title="Cari"
+                          onClick={handleAnggotaSearch}
+                          style={{height:"38px", marginTop:"0px"}}
+                        />
+                      </div>
+                      {listAnggota.length > 0 ? (
+                        listAnggota[0].Message ? (
+                          <p>Tidak Ada Anggota Aktif</p>
+                        ) : (
+                          listAnggota.map((ag, index) => (
+                            <div
+                              className="card-profile mb-3 d-flex justify-content-between shadow-sm"
+                              key={ag.Key}
+                            >
+                              <div className="d-flex w-100">
+                                <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
+                                  {index + 1}
+                                </p>
+                                <div
+                                  className="bg-primary"
+                                  style={{ width: "1.5%" }}
+                                ></div>
+                                <div className="p-1 ps-2 d-flex">
+                                  <img
+                                    src={pknowmaskot}
+                                    alt={ag["Nama Anggota"]}
+                                    className="img-fluid rounded-circle"
+                                    width="45"
+                                  />
+                                  <div className="ps-3">
+                                    <p className="mb-0">{ag["Nama Anggota"]}</p>
+                                    <p
+                                      className="mb-0"
+                                      style={{ fontSize: "13px" }}
+                                    >
+                                      {ag.Prodi}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="d-flex align-items-center">
+                                <Icon
+                                  name="square-minus"
+                                  type="Bold"
+                                  cssClass="btn px-2 py-0 text-primary"
+                                  title="Hapus Anggota"
+                                  onClick={handleDelete(ag.Key)}
+                                />
+                              </div>
+                            </div>
+                          ))
+                        )
+                      ) : (
+                        <p>Tidak Ada Anggota Aktif</p>
+                      )}
+                    </div>
                   </div>
-                  {anggotaList.length > 0 ? (
-                    anggotaList.map((anggota, index) => (
-                      <div className="list-anggota" key={index}>
-                        <div className="nama-prodi">
-                          <img src={budi} alt="" className="profile-anggota" />
-                          <div className="identitas-anggota">
-                            <h3>{anggota.name}</h3>
-                            <p>{anggota.prodi}</p>
+                  {/* <div className="mt-3">
+                    <Button
+                      classType="secondary me-2 px-4 py-2"
+                      label="Kembali"
+                      onClick={() => onChangePage("index")}
+                    />
+                  </div> */}
+                </div>
+                <div className="col-lg-5">
+                  <div className="card" style={{
+                              border: "none",
+                              boxShadow: "0px 0px 8px rgba(0, 0, 0, 0.1)", // Gray shadow
+                              borderRadius: "15px" // Rounded corners
+                            }}>
+                    <div className="d-flex" style={{justifyContent:"space-between"}}>
+                      <div className="fw-bold ml-3 mt-4" style={{fontSize:"22px", color:"#0A5EA8", width:"500px", }} >
+                      Tambah Anggota
+                      </div>
+                      <div className=" mt-3 mr-3">
+                        <Filter>
+                          <DropDown
+                            forInput="ddProdi"
+                            label="Program Studi"
+                            type="semua"
+                            defaultValue=""
+                            arrData={listProdi}
+                            onChange={handleProdiChange}
+                          />
+                        </Filter>
+                      </div>
+                    </div>
+                    <div className="card-body">
+                      
+                      {filteredDosen.map((value) => (
+                        <div key={value.Key}>
+                          <h6 className="fw-semibold mb-3" >{value.Text}</h6>
+                          <div className="card-profile mb-4 d-flex justify-content-between shadow-sm" style={{border: "none",
+                              boxShadow: "0px 0px 20px rgba(0, 0, 0, 0.1)", // Gray shadow
+                              borderRadius: "15px"}}>
+                            <div className="d-flex w-100">
+                              <div className="p-1 ps-2 d-flex">
+                                <img
+                                  src={pknowmaskot}
+                                  alt={value["Nama Karyawan"]}
+                                  className="img-fluid rounded-circle"
+                                  width="45"
+                                  style={{width:"50px", height:"50px", objectFit:"cover"}}
+                                />
+                                <div className="ps-3">
+                                  <p className="mb-0" style={{color:"#0A5EA8", fontWeight:"bold"}}>
+                                    {value["Nama Karyawan"]}
+                                  </p>
+                                  <p
+                                    className="mb-0"
+                                    style={{ fontSize: "13px", color:"#0A5EA8", fontWeight:"600" }}
+                                  >
+                                    {value.Prodi}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="d-flex align-items-center">
+                              <Icon
+                                name="plus"
+                                type="Bold"
+                                cssClass="btn px-2 py-0 text-primary"
+                                title="Tambah Menjadi Anggota"
+                                onClick={handleTambahAnggota(value.Key)}
+                                style={{
+                                  backgroundColor:"rgba(0, 0, 0, 0.05)",
+                                  marginRight:"20px",
+                                  padding:"50px",
+                                  fontWeight:"bold"
+                                }}
+                              />
+                            </div>
                           </div>
                         </div>
-                        <div
-                          className="delete-trash"
-                          onClick={() => handleTrashClick(anggota)}
-                        >
-                          <i className="fas fa-trash"></i>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p>Tidak ada anggota yang terdaftar.</p>
-                  )}
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
-
-          <div
-            className={`form-anggota full-width ${showFormTambahAnggota ? "" : "expand"}`}
-          >
-            <div className="form-daftar-anggota">
-              <h1>Daftar Anggota</h1>
-              <div className="input-search">
-                <i className="fas fa-search search-icon"></i>
-                <input
-                  type="text"
-                  className="search"
-                  placeholder={placeholder}
-                />
-              </div>
-              {anggotaList.length > 0 ? (
-                anggotaList.map((anggota, index) => (
-                  <div className="list-anggota" key={index}>
-                    <div className="nama-prodi">
-                      <img src={budi} alt="" className="profile-anggota" />
-                      <div className="identitas-anggota">
-                        <h3>{anggota.name}</h3>
-                        <p>{anggota.prodi}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p>Tidak ada anggota yang terdaftar.</p>
-              )}
-            </div>
           </div>
-
-          {showKategori && (
-            <div className="kategori-kelompok-keahlian">
-              <h1>Program Kelompok Keahlian</h1>
-              {kategoriList.length > 0 ? (
-                kategoriList.map((kategori, index) => (
-                  <div className="kategori-item" key={index}>
-                    <h3>{kategori.name}</h3>
-                    <p>
-                      {expandedDescription[index]
-                        ? kategori.deskripsi
-                        : truncatedDescription}
-                    </p>
-                    <div className="detail-program-button">
-                    {kategori.deskripsi.length > 50 && (
-                      <button
-                        className="see-more-button"
-                        onClick={() => toggleDescriptionVisibility(index)}
-                      >
-                        {expandedDescription[index]
-                          ? "Lihat Lebih Sedikit"
-                          : "Lihat Selengkapnya"}
-                      </button>
-                    )}
-                    <div
-                      className="more-kategori"
-                      onClick={() => toggleKategoriVisibility(index)}
-                    >
-                      <FontAwesomeIcon
-                        icon={expandedKategori[index] ? faCaretUp : faCaretDown} // Change icon based on state
-                      />
-                    </div>
-                    </div>
-                    {expandedKategori[index] && (
-                      <ul>
-                        {kategori.programs.map((program, idx) => (
-                         <li key={idx} style={{listStyle:'none', marginLeft:'-30px'}}>
-                         <h4 style={{ fontSize: '16px', color:'#0A5EA8'}}>{program.name}</h4>
-                         <p>
-                           {program.deskripsi.length > 150
-                             ? expandedDescription[index]
-                               ? program.deskripsi
-                               : program.deskripsi.slice(0, 150) + "..."
-                             : program.deskripsi}
-                         </p>
-                         {program.deskripsi.length > 150 && (
-                           <button
-                             className="see-more-button"
-                             onClick={() => toggleDescriptionVisibility(index)}
-                           >
-                             {expandedDescription[index]
-                               ? "Lihat Lebih Sedikit"
-                               : "Lihat Selengkapnya"}
-                           </button>
-                         )}
-                       </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p>Tidak ada kategori yang tersedia.</p>
-              )}
-            </div>
-          )}
         </div>
-      </div>
-      {showConfirmation && (
-        <Konfirmasi
-          isOpen={showConfirmation}
-          onClose={handleConfirmNo}
-          onConfirm={handleConfirmYes}
-          konfirmasi={konfirmasi}
-          pesan={pesanKonfirmasi}
-        />
       )}
+    </>
+
+
+
+      </div>
+     {showConfirmation && (
+        <Konfirmasi
+          title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
+          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYesBack}
+          onNo={handleConfirmNoBack}
+        />
+        )}
     </>
   );
 }

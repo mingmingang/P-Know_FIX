@@ -12,6 +12,8 @@ const Mahasiswa = lazy(() => import("../page/master-mahasiswa/Index"));
 const PengajuanKelompokKeahlian = lazy(() => import("../page/master-tenaga-pendidik/PengajuanAnggotaKeahlian/Root"));
 const RiwayatPengajuan = lazy(() => import("../page/master-tenaga-pendidik/RiwayatPengajuan/Root"));
 const Notifikasi = lazy(() => import("../page/notifikasi/Root"));
+const KelolaProgram = lazy(()=> import("../page/master-pic-kk/KelolaProgram/Root"));
+
 
 const routeList = [
   { path: "/", element: <Login /> },
@@ -27,6 +29,7 @@ const routeList = [
   { path: "/beranda_tenaga_kependidikan", element: <TenagaKependidikan /> },
   { path: "/beranda_mahasiswa", element: <Mahasiswa /> },
   { path: "/notifications", element: <Notifikasi />},
+  { path: "/kelola_program", element: <KelolaProgram />},
 ];
 
 export default routeList;

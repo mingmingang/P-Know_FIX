@@ -34,13 +34,13 @@ export default function Footer() {
               <a href="#">Career</a>
             </li>
             <li>
-              <a href="#">About Us</a>
+              <a href="https://www.polytechnic.astra.ac.id/tentang/">About Us</a>
             </li>
             <li>
-              <a href="#">Partner</a>
+              <a href="https://lppm.polytechnic.astra.ac.id/">Penelitian & Publikasi</a>
             </li>
             <li>
-              <a href="#">Blog</a>
+              <a href="https://www.polytechnic.astra.ac.id/berita/">Blog</a>
             </li>
           </ul>
         </div>
@@ -50,35 +50,35 @@ export default function Footer() {
             <div className="footer-program-studi">
               <ul>
                 <li>
-                  <a href="">Pembuatan Peralatan dan Perkakas Produksi</a>
+                  <a href="https://www.polytechnic.astra.ac.id/program-studi/">Pembuatan Peralatan dan Perkakas Produksi</a>
                 </li>
                 <li>
-                  <a href="">Teknik Produksi dan Proses Manufaktur</a>
+                  <a href="https://www.polytechnic.astra.ac.id/program-studi/">Teknik Produksi dan Proses Manufaktur</a>
                 </li>
                 <li>
-                  <a href="">Manajemen Informatika</a>
+                  <a href="https://www.polytechnic.astra.ac.id/program-studi/">Manajemen Informatika</a>
                 </li>
                 <li>
-                  <a href="">Mesin Otomotif</a>
+                  <a href="https://www.polytechnic.astra.ac.id/program-studi/">Mesin Otomotif</a>
                 </li>
                 <li>
-                  <a href="">Mekatronika</a>
+                  <a href="https://www.polytechnic.astra.ac.id/program-studi/">Mekatronika</a>
                 </li>
               </ul>
             </div>
             <div className="footer-program-studi">
               <ul>
                 <li>
-                  <a href="">Teknologi Konstruksi Bangunan Gedung</a>
+                  <a href="https://www.polytechnic.astra.ac.id/program-studi/">Teknologi Konstruksi Bangunan Gedung</a>
                 </li>
                 <li>
-                  <a href="">Teknologi Rekayasa Pemeliharaan Alat Berat</a>
+                  <a href="https://www.polytechnic.astra.ac.id/program-studi/">Teknologi Rekayasa Pemeliharaan Alat Berat</a>
                 </li>
                 <li>
-                  <a href="">Teknologi Rekayasa Logistik</a>
+                  <a href="https://www.polytechnic.astra.ac.id/program-studi/">Teknologi Rekayasa Logistik</a>
                 </li>
                 <li>
-                  <a href="">Teknologi Rekayasa Perangkat Lunak</a>
+                  <a href="https://www.polytechnic.astra.ac.id/program-studi/">Teknologi Rekayasa Perangkat Lunak</a>
                 </li>
               </ul>
             </div>

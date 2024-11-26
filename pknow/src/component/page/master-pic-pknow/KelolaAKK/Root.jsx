@@ -13,21 +13,7 @@ function getPageMode() {
       case "index":
         return <MasterKelolaAnggotaKelompokKeahlian onChangePage={handleSetPageMode} />;
       case "add":
-        return <MasterTambahAnggotaKelompokKeahlian onChangePage={handleSetPageMode} />;
-      // case "detail":
-      //   return (
-      //     <MasterLihatKelompokKeahlian
-      //       onChangePage={handleSetPageMode}
-      //       withID={dataID}
-      //     />
-      //   );
-      // case "edit":
-      //   return (
-      //     <MasterEditKelompokKeahlian
-      //       onChangePage={handleSetPageMode}
-      //       withID={dataID}
-      //     />
-      //   );
+        return <MasterTambahAnggotaKelompokKeahlian onChangePage={handleSetPageMode} withID={dataID}/>;
     }
   }
   

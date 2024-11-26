@@ -14,7 +14,7 @@ function getPageMode() {
         return (
           <MasterDetailPersetujuan
             onChangePage={handleSetPageMode}
-            // withID={dataID}
+            withID={dataID}
           />
         );
     }

@@ -1,37 +1,64 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PDF_Viewer from "./PDF_Viewer";
 import imgDapus from "../../assets/DaftarPustaka/sistemAbsensiMenggunakanFace.png";
 import "../../style/DaftarPustaka.css";
 import backPage from "../../assets/backPage.png";
 import Konfirmasi from "./Konfirmasi";
+import { API_LINK } from "../util/Constants";
+import Video_Viewer from "../part/VideoPlayer";
 
-
-export default function DetailDaftarPustaka({ onChangePage }) {
+export default function DetailDaftarPustaka({ onChangePage, withID }) {
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [isBackAction, setIsBackAction] = useState(false);  
-  const [konfirmasi, setKonfirmasi] = useState("Konfirmasi"); 
-  const [pesanKonfirmasi, setPesanKonfirmasi] = useState("Apakah Anda ingin meninggalkan halaman ini?"); 
+  const [isBackAction, setIsBackAction] = useState(false);
+  const [konfirmasi, setKonfirmasi] = useState("Konfirmasi");
+  const [pesanKonfirmasi, setPesanKonfirmasi] = useState(
+    "Apakah Anda ingin meninggalkan halaman ini?"
+  );
+  const [fileExtension, setFileExtension] = useState("");
 
   const handleGoBack = () => {
-    setIsBackAction(true);  
-    setShowConfirmation(true);  
+    setIsBackAction(true);
+    setShowConfirmation(true);
   };
 
   const handleConfirmYes = () => {
-    setShowConfirmation(false); 
+    setShowConfirmation(false);
     onChangePage("index");
   };
 
-
   const handleConfirmNo = () => {
-    setShowConfirmation(false);  
+    setShowConfirmation(false);
   };
+
+  const [fileData, setFileData] = useState({
+    key: "",
+    judul: "",
+    deskripsi: "",
+    gambar: "",
+    katakunci: "",
+    file: "",
+  });
+
+  useEffect(() => {
+    if (withID) {
+      setFileData({
+        key: withID.id,
+        judul: withID.Judul,
+        deskripsi: withID.Keterangan,
+        gambar: withID.Gambar,
+        katakunci: withID.kataKunci,
+        file: withID.File,
+      });
+      const ext = withID.File.split(".").pop().toLowerCase();
+      setFileExtension(ext);
+    }
+  }, [withID]);
 
   return (
     <div className="dapus-container">
       <div className="back-title-daftar-pustaka">
         <button
-         onClick={handleGoBack}
+          onClick={handleGoBack}
           style={{ background: "none", border: "none", cursor: "pointer" }}
         >
           <img src={backPage} alt="Back" className="back" />
@@ -39,30 +66,64 @@ export default function DetailDaftarPustaka({ onChangePage }) {
         <h1 className="title">Daftar Pustaka</h1>
       </div>
       <div className="daftar-pustaka-content">
+        <div className="pustaka-layout" style={{display:"flex"}}>
         <div className="daftar-pustaka-title-layout">
-          <img src={imgDapus} alt="Daftar Pustaka" />
-          <div className="detail-daftar-pustaka">
-            <div className="detail-informasi-daftar-pustaka">
-              <h3>Judul</h3>
-              <p>Menghitung Peluang Statis</p>
-            </div>
-            <div className="detail-informasi-daftar-pustaka">
-              <h3>Deskripsi</h3>
-              <p>
-                Data science merupakan ilmu yang menggabungkan sebuah kemahiran
-                di bidang ilmu tertentu dengan keahlian pemrograman matematika
-                dan statistik.
-              </p>
-            </div>
-            <div className="detail-informasi-daftar-pustaka">
-              <h3>Kata Kunci</h3>
-              <p>Big Data, Machine Learning</p>
-            </div>
-          </div>
+          <img
+            src={`${API_LINK}Upload/GetFile/${fileData.gambar}`}
+            alt="Daftar Pustaka"
+            style={{borderRadius:"20px", width:"500px", height:"200px", objectFit:"cover"}}
+          />
         </div>
 
-        <div className="pdf-file-daftar-pustaka">
-          <PDF_Viewer pdfFileName="prg5.pdf" />
+        <div className="detail-daftar-pustaka">
+          <div className="detail-informasi-daftar-pustaka">
+            <h3>Judul</h3>
+            <p>{fileData.judul}</p>
+          </div>
+          <div className="detail-informasi-daftar-pustaka">
+            <h3>Deskripsi</h3>
+            <p>{fileData.deskripsi}</p>
+          </div>
+          <div className="detail-informasi-daftar-pustaka">
+            <h3>Kata Kunci</h3>
+            <p>
+              <span>
+                {Array.isArray(withID["Kata Kunci"])
+                  ? withID["Kata Kunci"].join(", ")
+                  : withID["Kata Kunci"]}
+              </span>
+            </p>
+          </div>
+        </div>
+        </div>
+
+        {/* Menampilkan file berdasarkan ekstensi */}
+        <div className="file-preview">
+          {fileExtension === "pdf" && (
+            <PDF_Viewer pdfFileName={fileData.file} />
+          )}
+          {fileExtension === "mp4" && (
+            <Video_Viewer videoFileName={fileData.file} />
+          )}
+          {/* Anda bisa menambahkan lebih banyak kondisi untuk file lain seperti .docx atau .xlsx */}
+          {fileExtension === "docx" && (
+            <p>
+              Dokumen Word tidak dapat ditampilkan di sini. Silahkan{" "}
+              <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
+                unduh
+              </a>{" "}
+              untuk melihatnya.
+            </p>
+          )}
+          {fileExtension === "xlsx" && (
+            <p>
+              File Excel tidak dapat ditampilkan di sini. Silahkan{" "}
+              <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
+                unduh
+              </a>{" "}
+              untuk melihatnya.
+            </p>
+          )}
         </div>
       </div>
       {showConfirmation && (

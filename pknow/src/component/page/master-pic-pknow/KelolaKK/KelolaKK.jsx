@@ -68,7 +68,6 @@ export default function KelolaKK({ onChangePage }) {
     sort: "[Nama Kelompok Keahlian] asc",
     status: "",
   });
-
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
@@ -131,6 +130,8 @@ export default function KelolaKK({ onChangePage }) {
   };
 
   function handleSetStatus(data, status) {
+    console.log(status);
+    console.log(data.status);
     setIsError(false);
     let message;
     if (data.status === "Draft" && !data.pic.key)
@@ -152,15 +153,18 @@ export default function KelolaKK({ onChangePage }) {
           if (data === "ERROR" || data.length === 0) setIsError(true);
           else {
             let messageResponse;
-            if (data[0].Status === "Menunggu") {
+            if (status === "Menunggu") {
               messageResponse =
                 "Sukses! Data sudah dikirimkan ke Prodi. Menunggu Prodi menentukan PIC Kelompok Keahlian..";
-            } else if (data[0].Status === "Aktif") {
+            } else if (status === "Aktif") {
+              messageResponse =
+                "Sukses! Data berhasil dipublikasi. PIC Kelompok Keahlian dapat menentukan kerangka Program Belajar..";
+            } else if (status === "Tidak Aktif") {
               messageResponse =
                 "Sukses! Data berhasil dipublikasi. PIC Kelompok Keahlian dapat menentukan kerangka Program Belajar..";
             }
             SweetAlert("Sukses", messageResponse, "success");
-            onChangePage("index");
+            handleSetCurrentPage(currentFilter.page);
           }
         });
       }
@@ -189,7 +193,6 @@ export default function KelolaKK({ onChangePage }) {
       }
     }
   }
-  
 
   return (
     <div className="app-container">
@@ -307,60 +310,154 @@ export default function KelolaKK({ onChangePage }) {
             </div>
           </div>
         </div>
+        
         <div className="container">
           {isEmpty ? (
             <Alert
               type="warning mt-3"
-              message="Tidak ada data! Silahkan klik tombol tambah kelompok keahlian diatas.."
+              message="Tidak ada data! Silahkan cari kelompok keahlian diatas.."
             />
           ) : (
-            <div className="row mt-0 gx-4">
+            <>
+              <div
+                className="card-keterangan"
+                style={{
+                  background: "#61A2DC",
+                  borderRadius: "5px",
+                  padding: "10px 20px",
+                  width: "40%",
+                  marginLeft: "20px",
+                  marginBottom: "20px",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                ↓ Data Aktif / Sudah Dipublikasikan
+              </div>
+              <div className="row mt-0 gx-4">
+                {currentData
+                  .filter(
+                    (value) =>
+                      value.config.footer !== "Draft" &&
+                      value.config.footer !== "Menunggu" && value.config.footer !== "Tidak Aktif"
+                  )
+
+                  .map((value) => (
+                    <div className="col-md-4 mb-4" key={value.data.id}>
+                      <CardKK
+                        key={value.data.id}
+                        title="Data Scientist"
+                        colorCircle="#61A2DC"
+                        config={value.config}
+                        data={value.data}
+                        onChangePage={onChangePage}
+                        onChangeStatus={handleSetStatus}
+                      />
+                    </div>
+                  ))}
+              </div>
+              <div
+                className="card-keterangan"
+                style={{
+                  background: "#A7AAAC",
+                  borderRadius: "5px",
+                  padding: "10px 20px",
+                  width: "40%",
+                  marginLeft: "20px",
+                  marginBottom: "20px",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                ↓ Menunggu PIC dari Prodi
+              </div>
+
+              <div className="row mt-0 gx-4">
               {currentData
-                .filter(
-                  (value) =>
-                    value.config.footer !== "Draft" &&
-                    value.config.footer !== "Menunggu"
-                )
-                .map((value) => (
-                  <div className="col-md-4 mb-4" key={value.data.id}>
-                    <CardKK
-                      key={value.data.id}
-                      title="Data Scientist"
-                      colorCircle="#61A2DC"
-                      config={value.config}
-                      data={value.data}
-                      onChangePage={onChangePage}
-                      onChangeStatus={handleSetStatus}
-                    />
+                  .filter((value) => value.config.footer === "Menunggu")
+                  .map((value) => (
+                    <div className="col-md-4 mb-4" key={value.data.id}>
+                      <CardKK
+                        key={value.data.id}
+                        config={value.config}
+                        data={value.data}
+                        onChangePage={onChangePage}
+                        onChangeStatus={handleSetStatus}
+                      />
+                    </div>
+                  ))}
                   </div>
-                ))}
-              {currentData
-                .filter((value) => value.config.footer === "Menunggu")
-                .map((value) => (
-                  <div className="col-md-4 mb-4" key={value.data.id}>
-                    <CardKK
-                      key={value.data.id}
-                      config={value.config}
-                      data={value.data}
-                      onChangePage={onChangePage}
-                    />
+
+                  <div
+                className="card-keterangan"
+                style={{
+                  background: "#A7AAAC",
+                  borderRadius: "5px",
+                  padding: "10px 20px",
+                  width: "60%",
+                  marginLeft: "20px",
+                  marginBottom: "20px",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                ↓ Data Draft / Belum dikirimkan ke Prodi / Belum dipublikasi
+              </div>
+              <div className="row mt-0 gx-4">
+                  {currentData
+                  .filter((value) => value.config.footer === "Draft")
+                  .map((value) => (
+                    <div className="col-md-4 mb-4" key={value.data.id}>
+                      <CardKK
+                        key={value.data.id}
+                        config={value.config}
+                        data={value.data}
+                        onChangePage={onChangePage}
+                        onDelete={handleDelete}
+                        onChangeStatus={handleSetStatus}
+                      />
+                    </div>
+                  ))}
                   </div>
-                ))}
-              {currentData
-                .filter((value) => value.config.footer === "Draft")
-                .map((value) => (
-                  <div className="col-md-4 mb-4" key={value.data.id}>
-                    <CardKK
-                      key={value.data.id}
-                      config={value.config}
-                      data={value.data}
-                      onChangePage={onChangePage}
-                      onDelete={handleDelete}
-                      onChangeStatus={handleSetStatus}
-                    />
-                  </div>
-                ))}
-            </div>
+
+              <div
+                className="card-keterangan"
+                style={{
+                  background: "red",
+                  borderRadius: "5px",
+                  padding: "10px 20px",
+                  width: "40%",
+                  marginLeft: "20px",
+                  marginBottom: "20px",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                ↓ Tidak Aktif/Dinonaktifkan
+              </div>
+              <div className="row mt-0 gx-4">
+                {currentData
+                  .filter(
+                    (value) =>
+                      value.config.footer === "Tidak Aktif"
+                  )
+
+                  .map((value) => (
+                    <div className="col-md-4 mb-4" key={value.data.id}>
+                      <CardKK
+                        key={value.data.id}
+                        title="Data Scientist"
+                        colorCircle="#61A2DC"
+                        config={value.config}
+                        data={value.data}
+                        onChangePage={onChangePage}
+                        onChangeStatus={handleSetStatus}
+                      />
+                    </div>
+                  ))}
+              </div>
+
+            </>
           )}
 
           <div className="col-md-4 mb-4">

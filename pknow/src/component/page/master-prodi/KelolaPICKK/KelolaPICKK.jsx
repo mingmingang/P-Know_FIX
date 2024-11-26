@@ -1,21 +1,98 @@
+import React from "react";
+import { useEffect, useRef, useState } from "react";
+import { API_LINK } from "../../../util/Constants";
+import SweetAlert from "../../../util/SweetAlert";
+import UseFetch from "../../../util/UseFetch";
+import Button from "../../../part/Button copy";
+import Input from "../../../part/Input";
+import DropDown from "../../../part/Dropdown";
+import Filter from "../../../part/Filter";
+import CardKK from "../../../part/CardKelompokKeahlian";
+import Icon from "../../../part/Icon";
+import Loading from "../../../part/Loading";
 import Search from "../../../part/Search";
 import "../../../../index.css"
-import KelompokKeahlian from "../../../part/KelompokKeahlian";
-import developerImage from "../../../../assets/developer.png";
 
-export default function KelolaPICKK({onChangePage}) {
+export default function PICIndex({ onChangePage }) {
+  const [isError, setIsError] = useState(false);
+  const [currentData, setCurrentData] = useState([]);
+  const [message, setMessage] = useState("");
+
+  const getListKK = async () => {
+    setIsError(false);
+
+    try {
+      while (true) {
+        let data = await UseFetch(API_LINK + "KK/GetDataKKbyProdi");
+
+        if (data === "ERROR") {
+          throw new Error(
+            "Terjadi kesalahan: Gagal mengambil daftar Kelompok Keahlian."
+          );
+        } else if (data.length === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        } else {
+          const formattedData = data.map((value) => {
+            let configValue;
+            if (value.Status != "Menunggu") configValue = { footer: "Aktif" };
+            else
+              configValue = {
+                footer: "Btn",
+                icon: "user",
+                className: "primary btn-sm",
+                label: "Tambah PIC",
+                page: "edit",
+              };
+
+            return {
+              ...value,
+              config: configValue,
+              data: {
+                id: value.Key,
+                title: value["Nama Kelompok Keahlian"],
+                prodi: { key: value["Kode Prodi"], nama: value.Prodi },
+                pic: { key: value["Kode Karyawan"], nama: value.PIC },
+                desc: value.Deskripsi,
+                status: value.Status,
+                members: value.Members || [],
+                memberCount: value.Count || 0,
+                gambar: value.Gambar,
+              },
+            };
+          });
+          setCurrentData(formattedData);
+          break;
+        }
+      }
+    } catch (e) {
+      console.log(e.message);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: e.message,
+      }));
+    }
+  };
+
+  useEffect(() => {
+    getListKK();
+  }, []);
+
+  function handleSetStatus(data, status) {
+    SweetAlert("Error", "Maaf, anda tidak memiliki akses!", "warning");
+  }
+
   return (
     <>
-      <div className="app-container">
-        <main>
-          <Search
-            title="Manajemen Informatika PIC Kelompok Keahlian"
-            description="PIC Kelompok Keahlian dapat memodifikasi kelompok keahlian yang telah dibuat sebelumnya. Segala aktifitas kegiatan yang dilakukan akan diperiksa oleh PIC Kelompok Keahlian."
-            placeholder="Cari Kelompok Keahlian"
-            showInput={false}
-          />
-
-          <div className="navigasi-layout-page">
+     <div className="">
+        <Search
+                    title="Menentukan PIC Kelompok Keahlian"
+                    description="PIC Kelompok Keahlian dapat memodifikasi kelompok keahlian yang telah dibuat sebelumnya. Segala aktifitas kegiatan yang dilakukan akan diperiksa oleh PIC Kelompok Keahlian."
+                    placeholder="Cari Kelompok Keahlian"
+                    showInput={false}
+                  />
+         </div>   
+         <div className="navigasi-layout-page">
             <p className="title-kk">Kelompok Keahlian</p>
             <div className="left-feature">
               <div className="status">
@@ -48,24 +125,79 @@ export default function KelolaPICKK({onChangePage}) {
               </div>
             </div>
           </div>
-          <div className="col-md-4" style={{ marginRight: "-40px" }}>
-            <KelompokKeahlian
-              image={developerImage}
-              title="Android Developer"
-              program="Informatics Management"
-              pic="Kevin Trikusuma Dewa"
-              description="Android developers create applications that can be used on smartphones or tablets, whether in the form of games or other forms of applications."
-              colorCircle="#61A2DC"
-              statusText="Aktif/Sudah Publikasi"
-              ketButton="Tambah PIC"
-              iconClass="fas fa-user-friends"
-              anggota="1 Anggota Aktif"
-              statusPersetujuan="0 Menunggu Persetujuan"
-              onClick={() => onChangePage("add")}
-            />
+
+        <div className="d-flex flex-column">
+          <div className="flex-fill">
+            <div className="container">
+              <div className="row mt-0 gx-4">
+                <div className="d-flex justify-content-between">
+                <div
+                className="card-keterangan"
+                style={{
+                  background: "#A7AAAC",
+                  borderRadius: "5px",
+                  padding: "10px 20px",
+                  width: "40%",
+                  marginLeft: "20px",
+                  marginBottom: "20px",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                ↓ Menunggu PIC dari Prodi
+              </div>
+
+                </div>
+                {currentData
+                  .filter((value) => {
+                    return value.data.status === "Menunggu";
+                  })
+                  .map((value) => (
+                    <CardKK
+                      key={value.data.id}
+                      config={value.config}
+                      data={value.data}
+                      onChangePage={onChangePage}
+                    />
+                  ))}
+                <div className="my-3">
+                <div
+                className="card-keterangan"
+                style={{
+                  background: "#61A2DC",
+                  borderRadius: "5px",
+                  padding: "10px 20px",
+                  width: "40%",
+                  marginLeft: "20px",
+                  marginBottom: "20px",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                ↓ Data Aktif / Sudah Dipublikasikan
+              </div>
+                </div>
+                {currentData
+                  .filter((value) => {
+                    return value.data.status != "Menunggu";
+                  })
+                  .map((value) => (
+                    <div className="col-md-4 mb-4" key={value.data.id}>
+                      <CardKK
+                        key={value.data.id}
+                        title="Data Scientist"
+                        colorCircle="#61A2DC"
+                        config={value.config}
+                        data={value.data}
+                        onChangePage={onChangePage}
+                        onChangeStatus={handleSetStatus}
+                      />
+                    </div>
+                  ))}
+              </div>
+            </div>
           </div>
-        </main>
-      </div>
-    </>
+        </div>
+        </>
   );
 }

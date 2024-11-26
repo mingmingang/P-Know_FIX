@@ -9,6 +9,8 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    /* Optional: fade-in effect */
+    animation: fadeIn 0.3s ease;
 }
 
 .konfirmasi-box {
@@ -17,6 +19,8 @@
     width: 400px;
     padding: 20px; /* Tambahkan padding agar konten dalam box tidak terlalu menempel ke tepi */
     text-align: center; /* Mengatur teks agar di-center */
+    /* Pop-up animation */
+    animation: popup 0.3s ease-out;
 }
 
 .konfirmasi-box img {
@@ -25,8 +29,7 @@
     display: block; /* Pastikan gambar mengikuti aturan margin */
 }
 
-
-.button-confirm .btn-yes{
+.button-confirm .btn-yes {
     background-color: #0A5EA8;
     color: white;
     border: none;
@@ -35,7 +38,7 @@
     margin-right: 15px;
 }
 
-.button-confirm .btn-no{
+.button-confirm .btn-no {
     background-color: red;
     color: white;
     border: none;
@@ -43,10 +46,36 @@
     padding: 8px 35px;
 }
 
-.button-confirm .btn-yes:hover{
+.button-confirm .btn-yes:hover {
     background-color: #0a5ea8a4;
 }
 
-.button-confirm .btn-no:hover{
+.button-confirm .btn-no:hover {
     background-color: rgba(255, 0, 0, 0.547);
+}
+
+/* Keyframes for pop-up effect */
+@keyframes popup {
+    0% {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+    80% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Optional fade-in animation for the overlay */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }

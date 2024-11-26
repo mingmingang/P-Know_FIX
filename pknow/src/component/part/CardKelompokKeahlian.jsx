@@ -25,7 +25,7 @@ function CardKelompokKeahlian({
     pic: { key: "", nama: "" },
     desc: "",
     status: "",
-    gambar,
+    gambar:"",
   },
   ketButton,
   colorCircle,
@@ -46,9 +46,9 @@ function CardKelompokKeahlian({
   const [isExpanded, setIsExpanded] = useState(false);
 
 
-  const handleStatusChange = (newStatus) => {
+  const handleStatusChange = (newStatus, status) => {
     if (onChangeStatus) {
-      onChangeStatus(data, newStatus);
+      onChangeStatus(newStatus, status);
     }
   };
 
@@ -94,9 +94,9 @@ function CardKelompokKeahlian({
           }}
         />Draft - Belum dipublikasi</p>
         );
-      } else if (data.status === "Menunggu" && !data.pic.key) {
+      } else if (data.status === "Menunggu") {
         footerStatus = (
-          <p className="mb-0 text-secondary"><i
+          <p className="mb-0 text-secondary" ><i
           className="fas fa-circle"
           icon="circle"
           style={{
@@ -116,7 +116,7 @@ function CardKelompokKeahlian({
             marginRight: "20px",
             width: "10px",
           }}
-        />Aktif</p>
+        /><span style={{marginRight:"50px"}}>Aktif</span></p>
         );
       } else if (data.status === "Tidak Aktif" && data.pic.key){
         footerStatus = (
@@ -140,7 +140,7 @@ function CardKelompokKeahlian({
         personInCharge = (
           <div className=" d-flex">
             <FontAwesomeIcon icon={showUserProdi ? faUser : faClock} className="icon-style" />
-            <p className="text-gray-700">{" "}
+            <p className="text-gray-700" style={{ fontSize:"15px"}}>{" "}
             PIC : Belum ada PIC KK
             </p>
           </div>
@@ -149,12 +149,12 @@ function CardKelompokKeahlian({
         personInCharge = (
           <div className="d-flex" >
            <FontAwesomeIcon icon={showUserProdi ? faUser : faClock} className="icon-style" />
-              <p className="text-gray-700">
+              <p className="text-gray-700" style={{ fontSize:"15px"}}>
               PIC :{" "}
               {data.pic.key ? (
                 data.pic.nama
               ) : (
-                <span className="text-danger-emphasis fw-bold">
+                <span className=" " style={{ fontSize:"15px",color:"black", fontWeight:"600"}}>
                   Menunggu PIC dari Prodi
                 </span>
               )}
@@ -167,12 +167,12 @@ function CardKelompokKeahlian({
       let cardContent;
       if (config.footer === "Btn") {
         cardContent = (
-          <div className="d-flex justify-content-between">
+          <div className="d-flex justify-content-end">
             <Button
               iconName={config.icon}
               classType={config.className}
               label={config.label}
-              onClick={() => onChangePage(config.page, data)}
+              onClick={() => onChangePage("add", data)}
               style={{border:"none"}}
             />
           </div>
@@ -182,7 +182,6 @@ function CardKelompokKeahlian({
           <div className="d-flex justify-content-between">
            {showStatusText ? (
                     <div className="">
-                      
                       <span style={{ fontSize: "14px" }}>{footerStatus}</span>
                     </div>
                   ) : (
@@ -190,7 +189,7 @@ function CardKelompokKeahlian({
                       Selengkapnya <FontAwesomeIcon icon={faArrowRight} />
                     </a>
                   )}
-            <div className="d-flex justify-content-end" style={{marginTop:"10px", marginLeft:"-20px"}}>
+            <div className="d-flex justify-content-end" style={{marginTop:"17px", marginLeft:"-20px"}}>
               <Icon
                 name="edit"
                 type="Bold"
@@ -221,7 +220,7 @@ function CardKelompokKeahlian({
                   type="Bold"
                   cssClass="btn px-1 py-0 text-primary"
                   title="Publikasi Kelompok Keahlian"
-                  onClick={() => handleStatusChange(data, "Aktif")}
+                  onClick={() => handleStatusChange(data, 'Aktif')}
                   style={{border:"none"}}
                 />
               ) : (
@@ -242,23 +241,14 @@ function CardKelompokKeahlian({
           <div className="d-flex justify-content-between">
             {showStatusText ? (
                     <div className="" style={{display:"flex"}}>
-                     
-                      <span style={{ fontSize: "14px" }}> <i
-                        className="fas fa-circle"
-                        icon="circle"
-                        style={{
-                          color: colorCircle,
-                          marginRight: "20px",
-                          width: "10px",
-                        }}
-                      />{footerStatus}</span>
+                   {footerStatus}
                     </div>
                   ) : (
                     <a href="#selengkapnya" className="text-blue-600" style={{ textDecoration: "none" }}>
                       Selengkapnya <FontAwesomeIcon icon={faArrowRight} />
                     </a>
                   )}
-            <div className="d-flex justify-content-end">
+            <div className="d-flex justify-content-end" style={{marginTop:"20px"}}>
               <Icon
                 name="edit"
                 type="Bold"
@@ -294,40 +284,16 @@ function CardKelompokKeahlian({
         );
       } else {
         cardContent = (
-          <div className="d-flex justify-content-between">
+          <div className="d-flex justify-content-between" style={{width:"100%"}}>
             {showStatusText ? (
-                    <div className="">
-                      <span style={{ fontSize: "14px" }}>{footerStatus}</span>
+                    <div className="" style={{width:"100%" }}>
+                      <span style={{ fontSize: "14px"}}>{footerStatus}</span>
                     </div>
                   ) : (
                     <a href="#selengkapnya" className="text-blue-600" style={{ textDecoration: "none" }}>
                       Selengkapnya <FontAwesomeIcon icon={faArrowRight} />
                     </a>
                   )}
-            {data.members ? (
-              <div className="img-container" style={{ width: "28%" }}>
-                {members.map((person, index) => (
-                  <div style={{ width: "55%", marginLeft: "-10px" }}>
-                    <p className="lh-sm mb-0">
-                      {members.map((person, index) => (
-                        <span key={index}>
-                          <a
-                            href={person.link}
-                            className="fw-bold text-dark text-decoration-none"
-                          >
-                            {person.name}
-                            {", "}
-                          </a>
-                        </span>
-                      ))}
-                      dan {data.memberCount} Lainnya sudah bergabung!
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              ""
-            )}
             <div className="d-flex" style={{ width: "10%", marginTop:"15px" }}>
             {showMenu ? (
     <>
@@ -368,14 +334,14 @@ function CardKelompokKeahlian({
       </div>
     </>
   ) : <div className=""> {ketButton && (
-    <div className="button-keterangan" style={{marginLeft:"-60px"}}>
+    <div className="button-keterangan" style={{marginLeft:"-65px", marginTop:"-10px"}}>
     <button
-      className="bg-blue-100 text-white px-6 rounded-full open"
+      className="bg-blue-100 text-white px-6 rounded-full open justify-content-end d-flex"
       aria-label={`Action for ${title}`}
-      onClick={onClick}
-      style={{width:"200px"}}
+      style={{width:"180px"}}
+      onClick={() => onChangePage("add", data)}
     >
-     <i className="fas fa-users" style={{marginRight:"10px"}}></i>
+     <i className="fas fa-users" style={{marginRight:"10px", marginTop:"2px"}}></i>
       {ketButton}
     </button>
     </div>
@@ -407,7 +373,7 @@ function CardKelompokKeahlian({
         <div className="pemilik ">
             <div className="prodi" style={{fontSize:"14px"}}>
               <FontAwesomeIcon icon={showProdi ? faGraduationCap : faPeopleGroup} className="icon-style" />
-              <p className="text-gray-700" style={{ marginLeft: "15px" }}>
+              <p className="text-gray-700" style={{ marginLeft: "15px", width:"100%", fontSize:"15px" }}>
                 {showProdi ? data.prodi.nama : anggota}
               </p>
             </div>
@@ -438,7 +404,7 @@ function CardKelompokKeahlian({
               </p>
         </div>
 
-        <div className="status-open">
+        <div className="card-footer status-open">
                     <div className="card-content" style={{alignItems:"center"}}>
                     {cardContent}
                     </div>

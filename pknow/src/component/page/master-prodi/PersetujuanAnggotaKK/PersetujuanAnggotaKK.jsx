@@ -3,14 +3,63 @@ import KelompokKeahlian from "../../../part/KelompokKeahlian";
 import developerImage from "../../../../assets/developer.png";
 import "../../../../index.css";
 
+import React, { useEffect, useState } from "react";
+import { API_LINK } from "../../../util/Constants";
+import SweetAlert from "../../../util/SweetAlert";
+import UseFetch from "../../../util/UseFetch";
+import Button from "../../../part/Button";
+import Input from "../../../part/Input";
+import DropDown from "../../../part/Dropdown";
+import Filter from "../../../part/Filter";
+import CardKonfirmasi from "../../../part/CardKonfirmasi";
+import Icon from "../../../part/Icon";
+import Loading from "../../../part/Loading";
+import Alert from "../../../part/Alert";
+import axios from "axios";
+
 export default function PersetujuanAnggotaKK({onChangePage}) {
+  const [isError, setIsError] = useState({ error: false, message: "" });
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentData, setCurrentData] = useState([]);
+  const [listAnggota, setListAnggota] = useState([]);
+  
+  const getListKK = async () => {
+    setIsError({ error: false, message: "" });
+    setIsLoading(true);
+
+    try {
+      while (true) {
+        let data = await UseFetch(API_LINK + "KK/GetDataKKbyProdi");
+
+        if (data === "ERROR") {
+          throw new Error(
+            "Terjadi kesalahan: Gagal mengambil daftar Kelompok Keahlian."
+          );
+        } else if (data.length === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        } else {
+          setCurrentData(data);
+          setIsLoading(false);
+          break;
+        }
+      }
+    } catch (e) {
+      setIsLoading(false);
+      console.log(e.message);
+      setIsError({ error: true, message: e.message });
+    }
+  };
+
+  useEffect(() => {
+    getListKK();
+  }, []);
 
   return (
     <>
       <div className="app-container">
         <main>
           <Search
-            title="Manajemen Informatika Persetujuan Anggota Keahlian"
+            title="Persetujuan Anggota Keahlian"
             description="Program Studi dapat menyetujui persetujuan pengajuan anggota keahlian yang diajukan oleh Tenaga Pendidik untuk menjadi anggota dalam Kelompok Keahlian. Program Studi dapat melihat lampiran pengajuan dari Tenaga Pendidik untuk menjadi bahan pertimbangan"
             placeholder="Cari Kelompok Keahlian"
             showInput={false}
@@ -50,25 +99,37 @@ export default function PersetujuanAnggotaKK({onChangePage}) {
             </div>
           </div>
 
-          <div className="col-md-4" style={{ marginRight: "-40px" }}>
-            <KelompokKeahlian
-              image={developerImage}
-              title="Android Developer"
-              program="Informatics Management"
-              pic="Kevin Trikusuma Dewa"
-              description="Android developers create applications that can be used on smartphones or tablets, whether in the form of games or other forms of applications."
-              colorCircle="#61A2DC"
-              statusText="Aktif/Sudah Publikasi"
-              ketButton="Lihat Semua"
-              iconClass="fas fa-user-friends"
-              showProdi={false}
-              showUserProdi={false}
-              showStatusText={false}
-              anggota="1 Anggota Aktif"
-              statusPersetujuan="0 Menunggu Persetujuan"
-              onClick={() => onChangePage("detail")}
-            />
+          <>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <div className="d-flex flex-column">
+          {isError.error && (
+            <div className="flex-fill">
+              <Alert type="danger" message={isError.message} />
+            </div>
+          )}
+          <div className="flex-fill">
+            <div className="container">
+              <div className="row mt-0 gx-4">
+                {currentData
+                  .filter((value) => {
+                    return value.Status === "Aktif";
+                  })
+                  .map((value) => (
+                    <CardKonfirmasi
+                      key={value.Key}
+                      data={value}
+                      onChangePage={onChangePage}
+                    />
+                  ))}
+              </div>
+            </div>
           </div>
+        </div>
+      )}
+    </>
+         
         </main>
       </div>
     </>

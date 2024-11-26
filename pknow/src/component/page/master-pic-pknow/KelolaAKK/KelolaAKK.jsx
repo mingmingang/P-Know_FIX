@@ -33,44 +33,6 @@ const dataFilterStatus = [
   { Value: "Tidak Aktif", Text: "Tidak Aktif" },
 ];
 
-const buttons = [
-  {
-    label: "Filter",
-    className: "filter-button",
-    icon: "fas fa-filter",
-  },
-];
-
-const filterOptions = [
-  { value: "name", label: "Name" },
-  { value: "date", label: "Date" },
-  { value: "popularity", label: "Popularity" },
-];
-
-const filterFields = [
-  {
-    id: "sortSelect",
-    label: "Sort By",
-    options: filterOptions,
-  },
-  {
-    id: "categorySelect",
-    label: "Category",
-    options: [
-      { value: "tech", label: "Technology" },
-      { value: "health", label: "Health" },
-      { value: "education", label: "Education" },
-    ],
-  },
-  {
-    id: "regionSelect",
-    label: "Region",
-    options: [
-      { value: "asia", label: "Asia" },
-      { value: "europe", label: "Europe" },
-    ],
-  },
-];
 
 export default function KelolaAKK({ onChangePage }) {
   const [isError, setIsError] = useState(false);
@@ -80,7 +42,7 @@ export default function KelolaAKK({ onChangePage }) {
     page: 1,
     query: "",
     sort: "[Nama Kelompok Keahlian] asc",
-    status: "",
+    status: "Aktif",
   });
 
   const searchQuery = useRef();
@@ -234,23 +196,27 @@ export default function KelolaAKK({ onChangePage }) {
                       <p>Aktif/Sudah Publikasi</p>
                     </td>
                   </tr>
-                  <tr>
-                    <td>
-                      <i
-                        className="fas fa-circle"
-                        style={{ color: "#b0b0b0" }}
-                      ></i>
-                    </td>
-                    <td>
-                      <p>Menunggu PIC dari Prodi</p>
-                    </td>
-                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       <div className="container">
+      <div
+                className="card-keterangan"
+                style={{
+                  background: "#61A2DC",
+                  borderRadius: "5px",
+                  padding: "10px 20px",
+                  width: "40%",
+                  marginLeft: "20px",
+                  marginBottom: "20px",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                ↓ Data Aktif / Sudah Dipublikasikan
+              </div>
         {currentData[0]?.Message ? (
           <Alert type="warning mt-3" message="Tidak ada data! Silahkan klik tombol tambah kelompok keahlian diatas.." />
         ) : (
@@ -285,7 +251,7 @@ export default function KelolaAKK({ onChangePage }) {
               <Paging
                 pageSize={PAGE_SIZE}
                 pageCurrent={currentFilter.page}
-                totalData="5"
+                totalData={currentData[0]?.Count || 0}
                 navigation={handleSetCurrentPage}
               />
             </div>

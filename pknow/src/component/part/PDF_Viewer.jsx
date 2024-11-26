@@ -4,6 +4,8 @@ import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import "../../style/PDF_Viewer.css";
+import Loading from "./Loading";
+import { API_LINK } from "../util/Constants";
 
 export default function PDF_Viewer({ pdfFileName }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,7 +16,7 @@ export default function PDF_Viewer({ pdfFileName }) {
     if (pdfFileName) {
       setIsLoading(true);
       // Menggunakan URL file PDF yang diberikan sebagai prop
-      const fileUrl = `/pdf-files/${pdfFileName}`; // Anda bisa mengubah URL ini sesuai kebutuhan
+      const fileUrl = `${API_LINK}Upload/GetFile/${pdfFileName}`; // Anda bisa mengubah URL ini sesuai kebutuhan
       setPdfUrl(fileUrl);
       setIsLoading(false);
     }

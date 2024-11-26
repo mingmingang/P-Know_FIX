@@ -52,8 +52,8 @@ export default function TambahKK({ onChangePage }) {
     nama: string().max(25, "maksimum 25 karakter").required("harus diisi"),
     programStudi: string().required("harus dipilih"),
     personInCharge: string(),
-    deskripsi: string()
-      .max(150, "maksimum 150 karakter")
+    deskripsi: string().min(100,"minimum 100 karaktter")
+      .max(130, "maksimum 130 karakter")
       .required("harus diisi"),
     gambar: string(),
   });
@@ -180,7 +180,7 @@ export default function TambahKK({ onChangePage }) {
       if (fileGambarRef.current.files.length > 0) {
         uploadPromises.push(
           UploadFile(fileGambarRef.current).then(
-            (data) => (formDataRef.current["gambar"] = data.Hasil) // Make sure 'data.Hasil' is correctly set
+            (data) => (formDataRef.current["gambar"] = data.Hasil)
           )
         );
       }

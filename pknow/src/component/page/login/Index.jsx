@@ -15,7 +15,7 @@ import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import { encryptId } from "../../util/Encryptor";
 import UseFetch from "../../util/UseFetch";
 import Loading from "../../part/Loading";
-import Alert from "../../part/Alert";
+import Alert from "../../part/AlertLogin";
 import Modal from "../../part/Modal";
 import Input from "../../part/Input";
 import { object, string } from "yup"; 
@@ -67,17 +67,15 @@ export default function Login() {
 
       try {
         const data = await UseFetch(API_LINK + "Utilities/Login", formDataRef.current);
-        console.log(data);  // Log the response to check its structure
-        
-
+        console.log(data);
         if (data === "ERROR") {
           throw new Error("Terjadi kesalahan: Gagal melakukan autentikasi.");
-        } else if (data.Status && data.Status === "LOGIN FAILED") {
+        } else if (data[0].Status === "LOGIN FAILED") {
           throw new Error("Nama akun atau kata sandi salah.");
         } else {
-          setListRole(data);
-          setShowModal(true);
-          modalRef.current.open();
+            setListRole(data);
+            setShowModal(true);
+            modalRef.current.open();
         }
       } catch (error) {
         window.scrollTo(0, 0);
@@ -97,12 +95,6 @@ export default function Login() {
   // Handle login with selected role
   async function handleLoginWithRole(role, nama, peran) {
     try {
-      // const ipAddress = await UseFetch(
-      //   "https://api.ipify.org/?format=json",
-      //   {},
-      //   "GET"
-      // );
-
       const ipAddress = await fetch("https://api.ipify.org/?format=json")
       .then(response => response.json())
       .then(data => data.ip)

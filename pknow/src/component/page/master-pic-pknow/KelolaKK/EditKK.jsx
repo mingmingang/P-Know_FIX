@@ -1,10 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import { object, string } from "yup";
 import { API_LINK } from "../../../util/Constants";
-import { validateInput } from "../../../util/ValidateForm";
+import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
 import UseFetch from "../../../util/UseFetch";
-import Button from "../../../part/Button copy";
-import DropDown from "../../../part/Dropdown";
 import Select2Dropdown from "../../../part/Select2Dropdown";
 import Input from "../../../part/Input";
 import Loading from "../../../part/Loading";
@@ -12,17 +10,17 @@ import Alert from "../../../part/Alert";
 import SweetAlert from "../../../util/SweetAlert";
 import Konfirmasi from "../../../part/Konfirmasi";
 import BackPage from "../../../../assets/backPage.png";
-
+import FileUpload from "../../../part/FileUpload";
+import UploadFile from "../../../util/UploadFile";
 
 export default function KKEdit({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
-  const [isLoadingProdi, setIsLoadingProdi] = useState(true);
-  const [isLoadingKaryawan, setIsLoadingKaryawan] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [listProdi, setListProdi] = useState([]);
   const [listKaryawan, setListKaryawan] = useState([]);
   const [isBackAction, setIsBackAction] = useState(false);  
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleGoBack = () => {
     setIsBackAction(true);  
@@ -39,13 +37,28 @@ export default function KKEdit({ onChangePage, withID }) {
     setShowConfirmation(false);  
   };
 
+  const resetForm = () => {
+    formDataRef.current = {
+      nama: "",
+      programStudi: "",
+      personInCharge: "",
+      deskripsi: "",
+      gambar: "",
+    };
+    setFilePreview(false);
+    setErrors({});
+    if (fileGambarRef.current) {
+      fileGambarRef.current.value = null;
+    }
+  };
+
   const formDataRef = useRef({
     key: "",
     nama: "",
     programStudi: "",
     personInCharge: "",
     deskripsi: "",
-    status: "",
+    gambar:""
   });
 
   const userSchema = object({
@@ -53,14 +66,15 @@ export default function KKEdit({ onChangePage, withID }) {
     nama: string().max(25, "maksimum 25 karakter").required("harus diisi"),
     programStudi: string().required("harus dipilih"),
     personInCharge: string(),
-    deskripsi: string()
-      .max(150, "maksimum 150 karakter")
+    deskripsi: string().min(100,"minimum 100 karakter")
+      .max(130, "maksimum 130 karakter")
       .required("harus diisi"),
     gambar: string(),
   });
 
+  const fileGambarRef = useRef(null);
 
-  const [filePreview, setFilePreview] = useState(false); // state to store file preview
+  const [filePreview, setFilePreview] = useState(false);
 
   const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;
@@ -77,11 +91,10 @@ export default function KKEdit({ onChangePage, withID }) {
 
     if (error) ref.current.value = "";
     else {
-      // Show preview if the file is an image
       if (file && file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setFilePreview(reader.result); // Set the preview
+          setFilePreview(reader.result);
         };
         reader.readAsDataURL(file);
       }
@@ -110,7 +123,6 @@ export default function KKEdit({ onChangePage, withID }) {
     formDataRef.current[name] = value;
     if (name === "programStudi") {
       console.log(value);
-      fetchDataKaryawan(value);
     }
   };
 
@@ -137,30 +149,16 @@ export default function KKEdit({ onChangePage, withID }) {
       }));
     }
   };
-
+  
   const getListKaryawan = async () => {
     try {
-      while (true) {
-        let data = await UseFetch(API_LINK + "KK/GetListKaryawan", {
-          idProdi: formDataRef.current.programStudi,
-        });
-
-        if (data === "ERROR") {
-          throw new Error(
-            "Terjadi kesalahan: Gagal mengambil daftar karyawan."
-          );
-        } else if (data.length === 0) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        } else {
-          setListKaryawan(data);
-          if (withID.pic.key) {
-            setListKaryawan((prevList) => [
-              ...prevList,
-              { Text: withID.pic.nama, Value: withID.pic.key },
-            ]);
-          }
-          break;
-        }
+      let data = await UseFetch(API_LINK + "KK/GetListKaryawan", {
+        idProdi: formDataRef.current.programStudi,
+      });
+      if (data === "ERROR") {
+        throw new Error("Terjadi kesalahan: Gagal mengambil daftar karyawan.");
+      } else {
+        setListKaryawan(data);
       }
     } catch (e) {
       console.log(e.message);
@@ -179,7 +177,7 @@ export default function KKEdit({ onChangePage, withID }) {
       programStudi: withID.prodi.key,
       personInCharge: withID.pic.key ? withID.pic.key : "",
       deskripsi: withID.desc,
-      status: withID.status,
+      gambar: withID.gambar,
     };
   }, []);
 
@@ -197,53 +195,57 @@ export default function KKEdit({ onChangePage, withID }) {
   const handleAdd = async (e) => {
     e.preventDefault();
 
-    const validationErrors = await validateInput(
+    const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
       setErrors
     );
 
+    console.log(validationErrors);
+
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
-
-      setIsError((prevError) => {
-        return { ...prevError, error: false };
-      });
-
+      setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
 
-      const dataToSend = { ...formDataRef.current };
-      if (!dataToSend.personInCharge) {
-        dataToSend.personInCharge = "";
-      } else if (
-        dataToSend.status === "Menunggu" &&
-        dataToSend.personInCharge
-      ) {
-        dataToSend.status = "Aktif";
-      }
+      const uploadPromises = [];
 
-      UseFetch(API_LINK + "KK/EditKK", dataToSend)
-        .then((data) => {
-          if (data === "ERROR") {
-            setIsError((prevError) => {
-              return {
-                ...prevError,
-                error: true,
-                message:
-                  "Terjadi kesalahan: Gagal mengubah data kelompok keahlian.",
-              };
-            });
-          } else {
-            SweetAlert(
-              "Sukses",
-              "Data kelompok keahlian berhasil diubah",
-              "success"
-            );
-            onChangePage("index");
-          }
-        })
-        .then(() => setIsLoading(false));
+      if (fileGambarRef.current.files.length > 0) {
+        uploadPromises.push(
+          UploadFile(fileGambarRef.current).then(
+            (data) => (formDataRef.current["gambar"] = data.Hasil)
+          )
+        );
+      }
+    try {
+      await Promise.all(uploadPromises);
+
+      const data = await UseFetch(
+        API_LINK + "KK/EditKK",
+        formDataRef.current
+      );
+
+      if (data === "ERROR") {
+        throw new Error("Terjadi kesalahan: Gagal mengedit data program.");
+      } else {
+        SweetAlert(
+          "Sukses",
+          "Data kelompok keahlian berhasil diedit",
+          "success"
+        );
+        onChangePage("index");
+      }
+    } catch (error) {
+      window.scrollTo(0, 0);
+      setIsError((prevError) => ({
+        ...prevError,
+        error: true,
+        message: error.message,
+      }));
+    } finally {
+      setIsLoading(false);
     }
+  } else window.scrollTo(0, 0);
   };
 
   if (isLoading) return <Loading />;
@@ -299,7 +301,7 @@ export default function KKEdit({ onChangePage, withID }) {
                           }}
                         >
                           <img
-                            src={NoImage} // Use fallback image if no preview available
+                            src={`${API_LINK}Upload/GetFile/${formDataRef.current.gambar}`} // Use fallback image if no preview available
                             alt="No Preview Available"
                             style={{
                               width: "200px",
@@ -312,13 +314,13 @@ export default function KKEdit({ onChangePage, withID }) {
                     </div>
                     <div className="file-upload">
                       <FileUpload
-                        forInput="gambarAlatMesin"
+                        forInput="gambarKelompokKeahlian"
                         label="Gambar Kelompok Keahlian (.png)"
                         formatFile=".png"
                         ref={fileGambarRef}
                         onChange={() => handleFileChange(fileGambarRef, "png")}
                         errorMessage={errors.gambar}
-                        isRequired={true}
+                        isRequired={false}
                       />
                     </div>
                   </div>
@@ -339,18 +341,21 @@ export default function KKEdit({ onChangePage, withID }) {
                     Deskripsi/Ringkasan Mengenai Kelompok Keahlian{" "}
                     <span style={{ color: "red" }}> *</span>
                   </label>
-                  <textarea
-                    className="form-control mb-3"
-                    style={{
-                      height: "200px",
-                    }}
-                    id="deskripsi"
-                    name="deskripsi"
-                    value={formDataRef.current.deskripsi}
-                    onChange={handleInputChange}
-                    placeholder="Deskripsi"
-                    required
-                  />
+                  <Input
+                      className="form-control mb-3"
+                      style={{
+                        height: "200px",
+                      }}
+                      type="textarea"
+                      id="deskripsi"
+                      name="deskripsi"
+                      forInput="deskripsi"
+                      value={formDataRef.current.deskripsi}
+                      onChange={handleInputChange}
+                      placeholder="Deskripsi/Ringkasan Mengenai Kelompok Keahlian"
+                      isRequired
+                      errorMessage={errors.deskripsi}
+                    />
                 </div>
                 <div className="col-lg-6">
                   <Select2Dropdown
@@ -368,27 +373,58 @@ export default function KKEdit({ onChangePage, withID }) {
                     forInput="personInCharge"
                     label="PIC Kelompok Keahlian"
                     arrData={listKaryawan}
-                    value={formDataRef.current.personInCharge || ""}
+                    value={formDataRef.current.personInCharge}
                     onChange={handleInputChange}
                     errorMessage={errors.personInCharge}
                   />
                 </div>
               </div>
             </div>
+            <div
+                className="d-flex justify-content-end"
+                style={{
+                  marginRight: "20px",
+                  marginTop: "-10px",
+                  marginBottom: "20px",
+                }}
+              >
+                <button
+                  className="btn btn-secondary btn-sm"
+                  type="button"
+                  onClick={resetForm}
+                  style={{
+                    marginRight: "10px",
+                    padding: "5px 15px",
+                    fontWeight: "bold",
+                    borderRadius: "10px",
+                  }}
+                >
+                  Batalkan
+                </button>
+                <button
+                  className="btn btn-primary btn-sm"
+                  type="submit"
+                  style={{
+                    marginRight: "10px",
+                    padding: "5px 20px",
+                    fontWeight: "bold",
+                    borderRadius: "10px",
+                  }}
+                >
+                  Edit
+                </button>
+              </div>
           </div>
-          <div className="float-end my-4 mx-1">
-            <Button
-              classType="secondary me-2 px-4 py-2"
-              label="Batal"
-              onClick={() => onChangePage("index")}
-            />
-            <Button
-              classType="primary ms-2 px-4 py-2"
-              type="submit"
-              label="Simpan"
-            />
-          </div>
+         
         </form>
+        {showConfirmation && (
+        <Konfirmasi
+          title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
+          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYes}
+          onNo={handleConfirmNo}
+        />
+        )}
         </div>
         </>
       )}

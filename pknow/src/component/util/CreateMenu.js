@@ -46,9 +46,6 @@ const CreateMenu = async (role) => {
         }
       }
     });
-
-    //  console.log("menu",transformedMenu);
-
     return transformedMenu;
   } catch {
     return [];

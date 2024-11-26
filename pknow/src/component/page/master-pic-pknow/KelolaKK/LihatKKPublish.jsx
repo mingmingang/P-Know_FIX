@@ -8,6 +8,18 @@ import Filter from "../../../part/Filter";
 import Icon from "../../../part/Icon";
 import { API_LINK } from "../../../util/Constants";
 import UseFetch from "../../../util/UseFetch";
+import NoImage from "../../../../assets/NoImage.png";
+import BackPage from "../../../../assets/backPage.png";
+import Konfirmasi from "../../../part/Konfirmasi";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faGraduationCap,
+  faUser,
+  faArrowRight,
+  faPeopleGroup,
+  faClock,
+  faUsers,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function KKDetailPublish({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
@@ -15,6 +27,24 @@ export default function KKDetailPublish({ onChangePage, withID }) {
   const [isLoading, setIsLoading] = useState(false);
   const [listAnggota, setListAnggota] = useState([]);
   const [listProgram, setListProgram] = useState([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isBackAction, setIsBackAction] = useState(false);  
+
+  const handleGoBack = () => {
+    setIsBackAction(true);  
+    setShowConfirmation(true);  
+  };
+
+  const handleConfirmYes = () => {
+    setShowConfirmation(false); 
+    onChangePage("index");
+  };
+
+
+  const handleConfirmNo = () => {
+    setShowConfirmation(false);  
+  };
+
 
   const [formData, setFormData] = useState({
     key: "",
@@ -25,6 +55,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
     status: "",
     members: [],
     memberCount: "",
+    gambar:""
   });
 
   const getListAnggota = async () => {
@@ -42,6 +73,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
           kke_id: withID.id,
         });
 
+        console.log(data);
         if (data === "ERROR") {
           throw new Error("Terjadi kesalahan: Gagal mengambil daftar anggota.");
         } else if (data === "data kosong") {
@@ -149,6 +181,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
         status: withID.status,
         members: withID.members,
         memberCount: withID.memberCount,
+        gambar: withID.gambar,
       });
       getListAnggota();
       getListProgram();
@@ -164,35 +197,42 @@ export default function KKDetailPublish({ onChangePage, withID }) {
           <Alert type="danger" message={isError.message} />
         </div>
       )}
-      <div className="card">
-        <div className="card-header bg-primary fw-medium text-white">
-          Detail Kelompok Keahlian
-        </div>
+        <div className="back-and-title" style={{display:"flex", marginLeft:"80px", marginTop:"40px"}}>
+      <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Kelompok Keahlian</h4>
+              </div>
+                <div className="ket-draft">
+                </div>
+      <div className="card" style={{margin:"10px 140px", border:"none"}}>
         <div className="card-body">
           <div className="row pt-2">
             <div className="col-lg-7 px-4">
-              <h3 className="mb-3 fw-semibold">{formData.nama}</h3>
-              <h6 className="fw-semibold">
-                <span
-                  className="bg-primary me-2"
-                  style={{ padding: "2px" }}
-                ></span>
+              <h3 className="mb-3 fw-semibold" style={{fontSize:"50px", color:"#0A5EA8"}}>{formData.nama}</h3>
+              <h5 className="fw-semibold">
+              <FontAwesomeIcon icon={faGraduationCap} className="icon-style" style={{marginRight:"10px"}}/>    
                 {formData.programStudi}
-              </h6>
-              <div className="pt-2 ps-2">
-                <Icon
-                  name="user"
-                  cssClass="p-0 ps-1 text-dark"
-                  title="PIC Kelompok Keahlian"
-                />{" "}
-                <span>PIC : {formData.personInCharge}</span>
-              </div>
-              <hr className="mb-0" style={{ opacity: "0.2" }} />
-              <p className="py-3" style={{ textAlign: "justify" }}>
+              </h5>
+              <h4 className="fw-semibold" style={{marginTop:"30px"}}>Tentang Kelompok Keahlian</h4>
+              <p className="py-2" style={{ textAlign: "justify", width:"500px" }}>
                 {formData.deskripsi}
               </p>
+              <div className="">
+                <i className="fas fa-user"></i>
+                <span style={{marginLeft:"10px", fontWeight:"bold"}}>PIC : {formData.personInCharge}</span>
+              </div>
             </div>
             <div className="col-lg-5">
+            <img
+          alt={`image`}
+          className="cover-daftar-kk"
+          height="200"
+          src={`${API_LINK}Upload/GetFile/${formData.gambar}`}
+          width="300"
+          style={{width:500,height:300, borderRadius:"20px", objectFit:"cover"}}
+        />
+            </div>
+           
+            <div className="" style={{marginTop:"40px"}}>
               {listAnggota.length > 0 ? (
                 listAnggota[0].Message ? (
                   <p>Tidak Ada Anggota Aktif</p>
@@ -432,6 +472,14 @@ export default function KKDetailPublish({ onChangePage, withID }) {
           </div>
         </div>
       </div>
+      {showConfirmation && (
+        <Konfirmasi
+          title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
+          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYes}
+          onNo={handleConfirmNo}
+        />
+        )}
     </>
   );
 }
