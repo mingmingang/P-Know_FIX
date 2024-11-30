@@ -68,6 +68,35 @@ export default function KelolaKK({ onChangePage }) {
     sort: "[Nama Kelompok Keahlian] asc",
     status: "",
   });
+  const [currentDataAktif, setCurrentDataAktif] = useState(inisialisasiData);
+  const [currentFilterAktif, setCurrentFilterAktif] = useState({
+    page: 1,
+    query: "",
+    sort: "[Nama Kelompok Keahlian] asc",
+    status: "Aktif",
+  });
+  const [currentDataMenunggu, setCurrentDataMenunggu] = useState(inisialisasiData);
+  const [currentFilterMenunggu, setCurrentFilterMenunggu] = useState({
+    page: 1,
+    query: "",
+    sort: "[Nama Kelompok Keahlian] asc",
+    status: "Menunggu",
+  });
+  const [currentDataNonAktif, setCurrentDataNonAktif] = useState(inisialisasiData);
+  const [currentFilterNonAktif, setCurrentFilterNonAktif] = useState({
+    page: 1,
+    query: "",
+    sort: "[Nama Kelompok Keahlian] asc",
+    status: "Tidak Aktif",
+  });
+  const [currentDataDraft, setCurrentDataDraft] = useState(inisialisasiData);
+  const [currentFilterDraft, setCurrentFilterDraft] = useState({
+    page: 1,
+    query: "",
+    sort: "[Nama Kelompok Keahlian] asc",
+    status: "Draft",
+  });
+  
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
@@ -75,6 +104,38 @@ export default function KelolaKK({ onChangePage }) {
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
     setCurrentFilter((prevFilter) => ({
+      ...prevFilter,
+      page: newCurrentPage,
+    }));
+  }
+
+  function handleSetCurrentPageAktif(newCurrentPage) {
+    setIsLoading(true);
+    setCurrentFilterAktif((prevFilter) => ({
+      ...prevFilter,
+      page: newCurrentPage,
+    }));
+  }
+
+  function handleSetCurrentPageMenunggu(newCurrentPage) {
+    setIsLoading(true);
+    setCurrentFilterMenunggu((prevFilter) => ({
+      ...prevFilter,
+      page: newCurrentPage,
+    }));
+  }
+
+  function handleSetCurrentPageNonAktif(newCurrentPage) {
+    setIsLoading(true);
+    setCurrentFilterNonAktif((prevFilter) => ({
+      ...prevFilter,
+      page: newCurrentPage,
+    }));
+  }
+
+  function handleSetCurrentPageDraft(newCurrentPage) {
+    setIsLoading(true);
+    setCurrentFilterDraft((prevFilter) => ({
       ...prevFilter,
       page: newCurrentPage,
     }));
@@ -129,6 +190,158 @@ export default function KelolaKK({ onChangePage }) {
     }
   };
 
+  const getListKKAktif = async () => {
+    setIsEmpty(true);
+    setIsError(false);
+    try {
+      let data = await UseFetch(API_LINK + "KK/GetDataKK", currentFilterAktif);
+      if (data === "ERROR") {
+        throw new Error(
+          "Terjadi kesalahan: Gagal mengambil daftar Kelompok Keahlian."
+        );
+      } else if (data.length === 0) {
+        setCurrentDataAktif(data);
+      } else {
+        setIsEmpty(false);
+        const formattedData = data.map((value) => {
+          return {
+            ...value,
+            config: { footer: value.Status },
+            data: {
+              id: value.Key,
+              title: value["Nama Kelompok Keahlian"],
+              prodi: { key: value["Kode Prodi"] || "N/A", nama: value.Prodi },
+              pic: { key: value["Kode Karyawan"], nama: value.PIC },
+              desc: value.Deskripsi,
+              status: value.Status,
+              members: value.Members || [],
+              memberCount: value.Count || 0,
+              gambar: value.Gambar,
+            },
+          };
+        });
+        setCurrentDataAktif(formattedData);
+      }
+    } catch (e) {
+      setIsError(true);
+      console.log(e.message);
+    }
+  };
+
+  const getListKKNonAktif = async () => {
+    setIsEmpty(true);
+    setIsError(false);
+    try {
+      let data = await UseFetch(API_LINK + "KK/GetDataKK", currentFilterNonAktif);
+      if (data === "ERROR") {
+        throw new Error(
+          "Terjadi kesalahan: Gagal mengambil daftar Kelompok Keahlian."
+        );
+      } else if (data.length === 0) {
+        setCurrentDataNonAktif(data);
+      } else {
+        setIsEmpty(false);
+        const formattedData = data.map((value) => {
+          return {
+            ...value,
+            config: { footer: value.Status },
+            data: {
+              id: value.Key,
+              title: value["Nama Kelompok Keahlian"],
+              prodi: { key: value["Kode Prodi"] || "N/A", nama: value.Prodi },
+              pic: { key: value["Kode Karyawan"], nama: value.PIC },
+              desc: value.Deskripsi,
+              status: value.Status,
+              members: value.Members || [],
+              memberCount: value.Count || 0,
+              gambar: value.Gambar,
+            },
+          };
+        });
+        setCurrentDataNonAktif(formattedData);
+      }
+    } catch (e) {
+      setIsError(true);
+      console.log(e.message);
+    }
+  };
+
+  const getListKKMenunggu = async () => {
+    setIsEmpty(true);
+    setIsError(false);
+    try {
+      let data = await UseFetch(API_LINK + "KK/GetDataKK", currentFilterMenunggu);
+      if (data === "ERROR") {
+        throw new Error(
+          "Terjadi kesalahan: Gagal mengambil daftar Kelompok Keahlian."
+        );
+      } else if (data.length === 0) {
+        setCurrentDataMenunggu(data);
+      } else {
+        setIsEmpty(false);
+        const formattedData = data.map((value) => {
+          return {
+            ...value,
+            config: { footer: value.Status },
+            data: {
+              id: value.Key,
+              title: value["Nama Kelompok Keahlian"],
+              prodi: { key: value["Kode Prodi"] || "N/A", nama: value.Prodi },
+              pic: { key: value["Kode Karyawan"], nama: value.PIC },
+              desc: value.Deskripsi,
+              status: value.Status,
+              members: value.Members || [],
+              memberCount: value.Count || 0,
+              gambar: value.Gambar,
+            },
+          };
+        });
+        setCurrentDataMenunggu(formattedData);
+      }
+    } catch (e) {
+      setIsError(true);
+      console.log(e.message);
+    }
+  };
+
+  const getListKKDraft = async () => {
+    setIsEmpty(true);
+    setIsError(false);
+    try {
+      let data = await UseFetch(API_LINK + "KK/GetDataKK", currentFilterDraft);
+      if (data === "ERROR") {
+        throw new Error(
+          "Terjadi kesalahan: Gagal mengambil daftar Kelompok Keahlian."
+        );
+      } else if (data.length === 0) {
+        setCurrentDataDraft(data);
+      } else {
+        setIsEmpty(false);
+        const formattedData = data.map((value) => {
+          return {
+            ...value,
+            config: { footer: value.Status },
+            data: {
+              id: value.Key,
+              title: value["Nama Kelompok Keahlian"],
+              prodi: { key: value["Kode Prodi"] || "N/A", nama: value.Prodi },
+              pic: { key: value["Kode Karyawan"], nama: value.PIC },
+              desc: value.Deskripsi,
+              status: value.Status,
+              members: value.Members || [],
+              memberCount: value.Count || 0,
+              gambar: value.Gambar,
+            },
+          };
+        });
+        setCurrentDataDraft(formattedData);
+      }
+    } catch (e) {
+      setIsError(true);
+      console.log(e.message);
+    }
+  };
+
   function handleSetStatus(data, status) {
     console.log(status);
     console.log(data.status);
@@ -164,7 +377,7 @@ export default function KelolaKK({ onChangePage }) {
                 "Sukses! Data berhasil dipublikasi. PIC Kelompok Keahlian dapat menentukan kerangka Program Belajar..";
             }
             SweetAlert("Sukses", messageResponse, "success");
-            handleSetCurrentPage(currentFilter.page);
+            window.location.reload();
           }
         });
       }
@@ -173,7 +386,11 @@ export default function KelolaKK({ onChangePage }) {
 
   useEffect(() => {
     getListKK();
-  }, [currentFilter]);
+    getListKKAktif();
+    getListKKNonAktif();
+    getListKKMenunggu();
+    getListKKDraft();
+  }, [currentFilterAktif], [currentFilterNonAktif], [currentFilterMenunggu], [currentFilterDraft] );
 
   async function handleDelete(id) {
     setIsError(false);
@@ -189,7 +406,7 @@ export default function KelolaKK({ onChangePage }) {
         setIsError(true);
       } else {
         SweetAlert("Sukses", "Data berhasil dihapus.", "success");
-        handleSetCurrentPage(currentFilter.page);
+        window.location.reload();
       }
     }
   }
@@ -335,7 +552,7 @@ export default function KelolaKK({ onChangePage }) {
                 ↓ Data Aktif / Sudah Dipublikasikan
               </div>
               <div className="row mt-0 gx-4">
-                {currentData
+                {currentDataAktif
                   .filter(
                     (value) =>
                       value.config.footer !== "Draft" &&
@@ -356,6 +573,17 @@ export default function KelolaKK({ onChangePage }) {
                     </div>
                   ))}
               </div>
+              <div className="mb-4 d-flex justify-content-center">
+            <div className="d-flex flex-column ">
+              <Paging
+                pageSize={PAGE_SIZE}
+                pageCurrent={currentFilterAktif.page}
+                totalData={currentDataAktif[0]?.Count || 0}
+                navigation={handleSetCurrentPageAktif}
+              />
+            </div>
+          </div>
+
               <div
                 className="card-keterangan"
                 style={{
@@ -373,7 +601,7 @@ export default function KelolaKK({ onChangePage }) {
               </div>
 
               <div className="row mt-0 gx-4">
-              {currentData
+              {currentDataMenunggu
                   .filter((value) => value.config.footer === "Menunggu")
                   .map((value) => (
                     <div className="col-md-4 mb-4" key={value.data.id}>
@@ -387,6 +615,16 @@ export default function KelolaKK({ onChangePage }) {
                     </div>
                   ))}
                   </div>
+                  <div className="mb-4 d-flex justify-content-center">
+            <div className="d-flex flex-column ">
+              <Paging
+                pageSize={PAGE_SIZE}
+                pageCurrent={currentFilterMenunggu.page}
+                totalData={currentDataMenunggu[0]?.Count || 0}
+                navigation={handleSetCurrentPageMenunggu}
+              />
+            </div>
+          </div>
 
                   <div
                 className="card-keterangan"
@@ -404,7 +642,7 @@ export default function KelolaKK({ onChangePage }) {
                 ↓ Data Draft / Belum dikirimkan ke Prodi / Belum dipublikasi
               </div>
               <div className="row mt-0 gx-4">
-                  {currentData
+                  {currentDataDraft
                   .filter((value) => value.config.footer === "Draft")
                   .map((value) => (
                     <div className="col-md-4 mb-4" key={value.data.id}>
@@ -419,6 +657,17 @@ export default function KelolaKK({ onChangePage }) {
                     </div>
                   ))}
                   </div>
+                  <div className="mb-4 d-flex justify-content-center">
+            <div className="d-flex flex-column ">
+              <Paging
+                pageSize={PAGE_SIZE}
+                pageCurrent={currentFilterDraft.page}
+                totalData={currentDataDraft[0]?.Count || 0}
+                navigation={handleSetCurrentPageDraft}
+              />
+            </div>
+          </div>
+                
 
               <div
                 className="card-keterangan"
@@ -436,7 +685,7 @@ export default function KelolaKK({ onChangePage }) {
                 ↓ Tidak Aktif/Dinonaktifkan
               </div>
               <div className="row mt-0 gx-4">
-                {currentData
+                {currentDataNonAktif
                   .filter(
                     (value) =>
                       value.config.footer === "Tidak Aktif"
@@ -456,12 +705,21 @@ export default function KelolaKK({ onChangePage }) {
                     </div>
                   ))}
               </div>
+              <div className="mb-4 d-flex justify-content-center">
+            <div className="d-flex flex-column ">
+              <Paging
+                pageSize={PAGE_SIZE}
+                pageCurrent={currentFilterNonAktif.page}
+                totalData={currentDataNonAktif[0]?.Count || 0}
+                navigation={handleSetCurrentPageNonAktif}
+              />
+            </div>
+          </div>
 
             </>
           )}
-
-          <div className="col-md-4 mb-4">
-            <div className="d-flex flex-column">
+           {/* <div className="mb-4 d-flex justify-content-center">
+            <div className="d-flex flex-column ">
               <Paging
                 pageSize={PAGE_SIZE}
                 pageCurrent={currentFilter.page}
@@ -470,7 +728,9 @@ export default function KelolaKK({ onChangePage }) {
               />
             </div>
           </div>
+           */}
         </div>
+       
       </main>
     </div>
   );

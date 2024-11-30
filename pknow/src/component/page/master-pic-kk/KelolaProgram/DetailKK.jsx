@@ -9,6 +9,9 @@ import Icon from "../../../part/Icon";
 import { API_LINK } from "../../../util/Constants";
 import UseFetch from "../../../util/UseFetch";
 import { data } from "jquery";
+import BackPage from "../../../../assets/backPage.png";
+import Konfirmasi from "../../../part/Konfirmasi";
+import pknowMaskot from "../../../../assets/pknowmaskot.png";
 
 export default function KKDetailProgram({ onChangePage, withID }) {
   console.log("SDA", JSON.stringify(withID));
@@ -17,6 +20,8 @@ export default function KKDetailProgram({ onChangePage, withID }) {
   const [isLoading, setIsLoading] = useState(false);
   const [listAnggota, setListAnggota] = useState([]);
   const [listProgram, setListProgram] = useState([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isBackAction, setIsBackAction] = useState(false);  
 
   const [formData, setFormData] = useState({
     key: "",
@@ -28,6 +33,21 @@ export default function KKDetailProgram({ onChangePage, withID }) {
     members: [],
     memberCount: "",
   });
+
+  const handleGoBack = () => {
+    setIsBackAction(true);  
+    setShowConfirmation(true);  
+  };
+
+  const handleConfirmYes = () => {
+    setShowConfirmation(false); 
+    onChangePage("index");
+  };
+
+
+  const handleConfirmNo = () => {
+    setShowConfirmation(false);  
+  };
 
   const getListAnggota = async () => {
     console.log("heree");
@@ -165,10 +185,13 @@ export default function KKDetailProgram({ onChangePage, withID }) {
           <Alert type="danger" message={isError.message} />
         </div>
       )}
-      <div className="card">
-        <div className="card-header bg-primary fw-medium text-white">
-          Detail Kelompok Keahlian
-        </div>
+      <div className=""  style={{margin:"100px 80px", marginBottom:"20px"}}>
+      <div className="back-and-title" style={{display:"flex"}}>
+            <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
+              <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Detail Kelompok Keahlian</h4>
+            </div>
+      </div>
+      <div className="card" style={{margin:"20px 80px"}}>
         <div className="card-body">
           <div className="row pt-2">
             <div className="col-lg-7 px-4">
@@ -193,6 +216,9 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                 {formData.deskripsi}
               </p>
             </div>
+            {/* <div className="image">
+            <img src={`${API_LINK}Upload/GetFile/${withID["Gambar"]}`} alt="" style={{width:"390px", height:"180px", objectFit:"cover", margin:"10px", borderRadius:"10px"}}/>
+            </div> */}
             <div className="col-lg-5">
               {listAnggota.length > 0 ? (
                 listAnggota[0].Message ? (
@@ -214,7 +240,7 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                           ></div>
                           <div className="p-1 ps-2 d-flex">
                             <img
-                              src="https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"
+                              src={pknowMaskot}
                               alt={ag["Nama Anggota"]}
                               className="img-fluid rounded-circle"
                               width="45"
@@ -314,13 +340,6 @@ export default function KKDetailProgram({ onChangePage, withID }) {
           )}
         </div>
       </div>
-      <div className="float-end my-4 mx-1">
-        <Button
-          classType="secondary me-2 px-4 py-2"
-          label="Kembali"
-          onClick={() => onChangePage("index")}
-        />
-      </div>
       <div
         class="modal fade"
         id="modalAnggota"
@@ -331,7 +350,7 @@ export default function KKDetailProgram({ onChangePage, withID }) {
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="modalAnggotaKK">
+              <h1 class="modal-title fs-5" id="modalAnggotaKK" style={{color:"#0A5EA8"}}>
                 Anggota Kelompok Keahlian
               </h1>
               <button
@@ -400,7 +419,7 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                         ></div>
                         <div className="p-1 ps-2 d-flex">
                           <img
-                            src="https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"
+                            src={pknowMaskot}
                             alt={ag["Nama Anggota"]}
                             className="img-fluid rounded-circle"
                             width="45"
@@ -423,6 +442,14 @@ export default function KKDetailProgram({ onChangePage, withID }) {
           </div>
         </div>
       </div>
+      {showConfirmation && (
+        <Konfirmasi
+          title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
+          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYes}
+          onNo={handleConfirmNo}
+        />
+        )}
     </>
   );
 }

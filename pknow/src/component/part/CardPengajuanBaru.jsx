@@ -2,6 +2,8 @@ import React from "react";
 import { useState } from "react";
 import Icon from "./Icon";
 import Button from "./Button copy";
+import "../../style/KelompokKeahlian.css";
+import { API_LINK } from "../util/Constants";
 
 function CardPengajuanBaru({ data, onChangePage, isShow }) {
   const [showAllText, setShowAllText] = useState(isShow);
@@ -104,30 +106,35 @@ function CardPengajuanBaru({ data, onChangePage, isShow }) {
 
   return (
     <>
-      <div className="col-lg-4 mb-3">
+      <div className="bg-white-kk" style={{marginRight:"25px"}}>
+      <img
+          alt="gambar"
+          className="cover-daftar-kk"
+          height="200"
+          src={`${API_LINK}Upload/GetFile/${data.Gambar}`}
+          width="300"
+          style={{marginLeft:"-12px"}}
+        />
         <div
-          className="card p-0 h-100"
-          style={{
-            border: "",
-            borderRadius: "0",
-          }}
+          className=""
         >
-          <div className="card-body p-0">
+          <div className="">
             <h5
-              className="card-title text-white px-3 pt-2 pb-2 mb-0"
-              style={{
-                backgroundColor:
-                  data.Status === "Ditolak"
-                    ? "#DC3545"
-                    : data.Status === "Menunggu Acc"
-                    ? "#FFC107"
-                    : "#6C757D",
-              }}
+              className="fw-bold mt-3"
+              style={{color:"#0A5EA8"}}
+              // style={{
+              //   backgroundColor:
+              //     data.Status === "Ditolak"
+              //       ? "#DC3545"
+              //       : data.Status === "Menunggu Acc"
+              //       ? "#FFC107"
+              //       : "#6C757D",
+              // }}
             >
               {data["Nama Kelompok Keahlian"]}
             </h5>
-            <div className="card-body p-3">
-              {status}
+            <div className="card-body">
+              <div className="" style={{marginLeft:"-10px"}}>{status}</div>
               <h6 className="card-subtitle mt-1 mb-3">
                 <span
                   className="bg-primary me-2"
@@ -136,18 +143,19 @@ function CardPengajuanBaru({ data, onChangePage, isShow }) {
                 {data.Prodi}
               </h6>
               <p
-                className="lh-sm"
+                className=""
                 style={{
                   display: showAllText ? "block" : "-webkit-box",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
                   textAlign: "justify",
+                  margin:"0px"
                 }}
               >
                 {data.Deskripsi}
               </p>
-              <div className="d-flex justify-content-between align-items-center">
+              <div className="d-flex justify-content-between align-items-center" style={{marginTop:"30px"}}>
                 <a
                   href="#"
                   className="text-decoration-none"

@@ -109,7 +109,7 @@ export default function PersetujuanAnggotaKK({onChangePage}) {
               <Alert type="danger" message={isError.message} />
             </div>
           )}
-          <div className="flex-fill">
+
             <div className="container">
               <div className="row mt-0 gx-4">
                 {currentData
@@ -126,7 +126,6 @@ export default function PersetujuanAnggotaKK({onChangePage}) {
               </div>
             </div>
           </div>
-        </div>
       )}
     </>
          

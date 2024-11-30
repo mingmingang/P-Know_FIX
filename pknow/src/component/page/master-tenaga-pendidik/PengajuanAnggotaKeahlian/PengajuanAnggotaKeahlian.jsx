@@ -13,6 +13,7 @@ import CardPengajuanBaru from "../../../part/CardPengajuanBaru";
 import Alert from "../../../part/Alert";
 import "../../../../index.css";
 import Search from "../../../part/Search";
+import Button2 from "../../../part/Button copy";
 
 const inisialisasiData = [
   {
@@ -70,6 +71,7 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
   const [listKK, setListKK] = useState(inisialisasiKK);
   const [detail, setDetail] = useState(inisialisasiData);
   const [listNamaFile, setListNamaFile] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [userData, setUserData] = useState({
     Role: "",
@@ -186,78 +188,66 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
     }
   }, [dataAktif]);
 
+  const decodeHtmlEntities = (str) => {
+    const parser = new DOMParser();
+    const decodedString = parser.parseFromString(str, "text/html").body.textContent;
+    return decodedString || str; // Jika decoding gagal, gunakan string asli
+  };
+
+  
   const getLampiran = async () => {
     setIsError((prevError) => ({ ...prevError, error: false }));
-
-    if (!dataAktif.Key) return;
-
+    setIsLoading(true);
+  
     try {
-      while (true) {
-        let data = await UseFetch(API_LINK + "PengajuanKK/GetDetailLampiran", {
-          page: 1,
-          sort: "[ID Lampiran] ASC",
-          akk_id: dataAktif.Key,
-        });
+      let data = await UseFetch(API_LINK + "PengajuanKK/GetDetailLampiran", {
+        page: 1,
+        sort: "[ID Lampiran] ASC",
+        akk_id: dataAktif.Key,
+      });
 
-        if (data === "ERROR") {
-          throw new Error(
-            "Terjadi kesalahan: Gagal mengambil Detail Lampiran."
-          );
-        } else {
-          setListNamaFile(data);
-          const formattedData = data.map((item) => ({
-            ...item,
-          }));
-          const promises = formattedData.map((value) => {
-            const filePromises = [];
-
-            if (value["Lampiran"]) {
-              const filePromise = fetch(
-                API_LINK +
-                  `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
-                    value["Lampiran"]
-                  )}`
-              )
-                .then((response) => response.blob())
-                .then((blob) => {
-                  const url = URL.createObjectURL(blob);
-                  value.Lampiran = url;
-                  return value;
-                })
-                .catch((error) => {
-                  console.error("Error fetching file:", error);
-                  return value;
-                });
-              filePromises.push(filePromise);
+      console.log("tes",data)
+  
+      if (data === "ERROR") {
+        throw new Error("Terjadi kesalahan: Gagal mengambil Detail Lampiran.");
+      } else if (data.length === 0) {
+        setListNamaFile([]);
+      } else {
+        const updatedData = data.map((item) => {
+          if (item.Lampiran) {
+            try {
+              // Decode HTML entities sebelum parsing JSON
+              const cleanedLampiran = decodeHtmlEntities(item.Lampiran);
+  
+              // Parse JSON string
+              const parsedLampiran = JSON.parse(cleanedLampiran);
+  
+              // Proses setiap file di dalam parsedLampiran
+              const fileUrls = parsedLampiran.map((file) => {
+                return `${API_LINK}Upload/GetFile/${file.pus_file}`;
+              });
+  
+              // Tambahkan fileUrls ke objek item
+              return { ...item, Lampiran: fileUrls };
+            } catch (err) {
+              console.error("Gagal mem-parse JSON Lampiran:", err);
+              return { ...item, Lampiran: [] }; 
             }
-
-            return Promise.all(filePromises).then((results) => {
-              const updatedValue = results.reduce(
-                (acc, curr) => ({ ...acc, ...curr }),
-                value
-              );
-              return updatedValue;
-            });
-          });
-
-          Promise.all(promises)
-            .then((updatedData) => {
-              console.log("Updated data with blobs:", updatedData);
-              setDetail(updatedData);
-            })
-            .catch((error) => {
-              console.error("Error updating currentData:", error);
-            });
-          break;
-        }
+          }
+          return item; 
+        });
+        setDetail(updatedData); 
       }
     } catch (error) {
+      console.error("Error fetching detail lampiran:", error);
+      setDetail(null);
       setIsError((prevError) => ({
         ...prevError,
         error: true,
         message: error.message,
       }));
-      setDetail(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -271,49 +261,80 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
         <>
         <div className="app-container">
         <main>
-        <Search
-          title="Pengajuan Anggota Keahlian"
-          description="ASTRAtech memiliki banyak program studi, di dalam program studi terdapat kelompok keahlian yang biasa disebut dengan Kelompok Keahlian"
-          placeholder="Cari Kelompok Keahlian"
-        />
+        <div className="backSearch">
+          <h1>Pengajuan Anggota Keahlian</h1>
+          <p>
+            ASTRAtech memiliki banyak program studi, di dalam program studi
+            terdapat kelompok keahlian yang biasa disebut dengan Kelompok
+            Keahlian
+          </p>
+          <div className="input-wrapper">
+            <div
+              className=""
+              style={{
+                width: "700px",
+                display: "flex",
+                backgroundColor: "white",
+                borderRadius: "20px",
+                height: "40px",
+              }}
+            >
+              <Input
+                ref={searchQuery}
+                forInput="pencarianKK"
+                placeholder="Cari Kelompok Keahlian"
+                style={{
+                  border: "none",
+                  width: "680px",
+                  height: "40px",
+                  borderRadius: "20px",
+                }}
+              />
+              <Button2
+                iconName="search"
+                classType="primary px-4"
+                title="Cari"
+                onClick={handleSearch}
+                style={{ backgroundColor: "transparent", color: "#08549F" }}
+              />
+            </div>
+          </div>
+        </div>
+
           <div className="navigasi-layout-page">
           <p className="title-kk">Kelompok Keahlian</p>
           <div className="left-feature">
-            <div className="status">
+            <div className="status" style={{display:"flex"}}>
                     <table>
                         <tbody>
                         <tr>
                             <td>
                             <i
                                 className="fas fa-circle"
-                                style={{ color: "yellow" }}
+                                style={{ color: "#FFC107" }}
                             ></i>
                             </td>
                             <td>
                             <p>Menunggu Persetujuan Prodi</p>
                             </td>
                         </tr>
-                        <tr>
-                            <td>
-                            <i
-                                className="fas fa-circle"
-                                style={{ color: "grey" }}
-                            ></i>
-                            </td>
-                            <td>
-                            <p>Tidak Terdaftar</p>
-                            </td>
-                        </tr>
+                       
                         </tbody>
                     </table>
+                    <div className="" style={{marginLeft:"20px"}}>
+                    <Filter>
+                  <DropDown
+                    ref={searchFilterSort}
+                    forInput="ddUrut"
+                    label="Urut Berdasarkan"
+                    type="none"
+                    arrData={dataFilterSort}
+                    defaultValue="[Nama Kelompok Keahlian] asc"
+                  />
+                </Filter>
+                </div>
                     </div>
-                <div className="buttonadd_filter">
-                {/* <Button
-                buttons={buttons}
-                filterOptions={filterOptions}
-                filterFields={filterFields}
-            /> */}
-        </div>
+               
 
           </div>
         </div>
@@ -322,7 +343,7 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
         <div className="d-flex flex-column">
           {dataAktif ? (
             <div className="flex-fill">
-              <div className="card">
+              <div className="card" style={{margin:"10px 65px"}}>
                 <div className="card-header bg-primary text-white fw-medium">
                   Terdaftar sebagai anggota keahlian
                 </div>
@@ -350,37 +371,47 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
                     </div>
                     <div className="col-lg-5 ps-4 border-start">
                       <h5 className="fw-semibold mt-1">Lampiran pendukung</h5>
-                      {detail?.map((item, index) => (
-                        <Label
-                          key={index}
-                          title={`Lampiran ${index + 1}`}
-                          data={
-                            item.Lampiran ? (
-                              <a
-                                href={item.Lampiran}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {/* {listNamaFile[index]?.Lampiran} */}
-                                Lampiran {index + 1}{" "}
-                                {dataAktif["Nama Kelompok Keahlian"]}
-                              </a>
-                            ) : (
-                              "Tidak ada lampiran"
-                            )
-                          }
-                        />
-                      ))}
+                      <div className="card-body p-4">
+                  {detail?.map((item, index) => (
+                    <div key={index}>
+                      {item.Lampiran ? (
+                        // Check if Lampiran is a string before splitting
+                        Array.isArray(item.Lampiran)
+                          ? item.Lampiran.map((link, linkIndex) => (
+                            
+                              <div key={linkIndex}>
+                                <h5 className="mb-3" style={{marginTop:"15px"}}>{`Lampiran ${linkIndex + 1}`}</h5>
+                                <a href={link.trim()} target="_blank" rel="noopener noreferrer">
+                                  {`Lampiran ${linkIndex + 1} ${dataAktif["Nama Kelompok Keahlian"]}`}
+                                </a>
+                              </div>
+                            ))
+                          : typeof item.Lampiran === "string" 
+                            ? item.Lampiran.split(",").map((link, linkIndex) => (
+                                <div key={linkIndex}>
+                                  <h5 className="mb-3">{`Lampiran ${index + 1}`}</h5>
+                                  <a href={link.trim()} target="_blank" rel="noopener noreferrer">
+                                    {`Lampiran ${linkIndex + 1} ${dataAktif["Nama Kelompok Keahlian"]}`}
+                                  </a>
+                                </div>
+                              ))
+                            : <p>Invalid Lampiran format</p> // Handle non-string cases
+                      ) : (
+                        <p>Tidak ada lampiran</p>
+                      )}
+                    </div>
+                  ))}
+                  </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="card mt-4">
+              <div className="card" style={{margin:"20px 65px"}}>
                 <div className="card-header fw-medium">
                   Kelompok Keahlian lainnya
                 </div>
                 <div className="card-body p-3">
-                  <div className="row gx-4">
+                  <div className="row mt-0 gx-4">
                     {listKK
                       ?.filter((value) => {
                         return value.Status !== "Aktif";
@@ -390,6 +421,7 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
                           key={index}
                           data={value}
                           onChangePage={onChangePage}
+                          style={{marginRight:"-20px"}}
                         />
                       ))}
                   </div>
@@ -397,39 +429,33 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
               </div>
             </div>
           ) : (
+            <>
             <div className="flex-fill">
-              <div className="input-group">
-                <Input
-                  ref={searchQuery}
-                  forInput="pencarianProduk"
-                  placeholder="Cari"
-                />
-                <Button
-                  iconName="search"
-                  classType="primary px-4"
-                  title="Cari"
-                  onClick={handleSearch}
-                />
-                <Filter>
-                  <DropDown
-                    ref={searchFilterSort}
-                    forInput="ddUrut"
-                    label="Urut Berdasarkan"
-                    type="none"
-                    arrData={dataFilterSort}
-                    defaultValue="[Nama Kelompok Keahlian] asc"
-                  />
-                </Filter>
-              </div>
               <div className="container">
                 {listKK.filter((value) => value.Status === "Menunggu Acc")
                   .length == 2 && (
                   <Alert
-                    type="info mt-3"
+                    type="info mt-2"
                     message="Anda hanya bisa mendaftar pada 2 Kelompok Keahlian. Tunggu konfirmasi dari prodi.."
                   />
                 )}
-                <div className="row mt-3 gx-4">
+                 <div
+                className="card-keterangan"
+                style={{
+                  background: "#FFC107",
+                  borderRadius: "5px",
+                  padding: "10px 20px",
+                  width: "40%",
+                  marginLeft: "20px",
+                  marginBottom: "20px",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                ↓ Menunggu Persetujuan Prodi
+
+              </div>
+                <div className="row mt-3 gx-4" style={{marginLeft:"5px"}}>
                   {listKK
                     ?.filter((value) => {
                       return value.Status === "Menunggu Acc";
@@ -441,6 +467,23 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
                         onChangePage={onChangePage}
                       />
                     ))}
+                     </div>
+                     <div
+                className="card-keterangan"
+                style={{
+                  background: "#61A2DC",
+                  borderRadius: "5px",
+                  padding: "10px 20px",
+                  width: "40%",
+                  marginLeft: "20px",
+                  marginBottom: "20px",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                ↓ Kelompok Keahlian Lainnya
+              </div>
+                     <div className="row mt-3 gx-4" style={{marginLeft:"5px"}}>
                   {listKK
                     ?.filter((value) => {
                       return value.Status != "Menunggu Acc";
@@ -452,12 +495,15 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
                         onChangePage={onChangePage}
                       />
                     ))}
+                    </div>
+
                 </div>
-              </div>
+             
             </div>
+            </>
           )}
         </div>
-    </>
+       </>
 
         </main>
         </div>

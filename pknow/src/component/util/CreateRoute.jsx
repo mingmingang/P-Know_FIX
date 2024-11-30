@@ -14,7 +14,6 @@ const RiwayatPengajuan = lazy(() => import("../page/master-tenaga-pendidik/Riway
 const Notifikasi = lazy(() => import("../page/notifikasi/Root"));
 const KelolaProgram = lazy(()=> import("../page/master-pic-kk/KelolaProgram/Root"));
 
-
 const routeList = [
   { path: "/", element: <Login /> },
   { path: "/beranda_utama", element: <Beranda /> },

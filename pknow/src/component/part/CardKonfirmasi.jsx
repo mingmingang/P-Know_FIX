@@ -2,6 +2,7 @@ import React from "react";
 import { useState } from "react";
 import Icon from "./Icon";
 import Button from "./Button copy";
+import { API_LINK } from "../util/Constants";
 
 function CardKonfirmasi({ data, onChangePage, isShow }) {
   const [showAllText, setShowAllText] = useState(isShow);
@@ -14,22 +15,21 @@ function CardKonfirmasi({ data, onChangePage, isShow }) {
     <>
       <div className="col-lg-4 mb-3">
         <div
-          className="card p-0 h-100"
+          className="card p-0 " 
           style={{
             border: "",
-            borderRadius: "0",
+            borderRadius: "10px",
+              borderColor: data.MenungguCount > 0 ? "#ffcc00" : "#67ACE9",
           }}
         >
           <div className="card-body p-0">
+            <img src={`${API_LINK}Upload/GetFile/${data["Gambar"]}`} alt="" style={{width:"390px", height:"180px", objectFit:"cover", margin:"10px", borderRadius:"10px"}}/>
             <h5
-              className="card-title text-white px-3 pt-2 pb-3 mb-0"
-              style={{
-                backgroundColor: data.MenungguCount > 0 ? "#ffcc00" : "#67ACE9",
-              }}
+              className="card-title px-3 pt-2 pb-3" style={{color:"#0A5EA8", fontWeight:"bold", marginBottom:"0"}}
             >
               {data["Nama Kelompok Keahlian"]}
             </h5>
-            <div className="card-body p-3">
+            <div className="card-body p-3" style={{marginTop:"-20px"}}>
               <div>
                 <Icon
                   name="users"

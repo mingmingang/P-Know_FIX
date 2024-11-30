@@ -52,7 +52,7 @@ export default function TambahKK({ onChangePage }) {
     nama: string().max(25, "maksimum 25 karakter").required("harus diisi"),
     programStudi: string().required("harus dipilih"),
     personInCharge: string(),
-    deskripsi: string().min(100,"minimum 100 karaktter")
+    deskripsi: string().min(100,"minimum 100 karakter")
       .max(130, "maksimum 130 karakter")
       .required("harus diisi"),
     gambar: string(),
@@ -112,6 +112,7 @@ export default function TambahKK({ onChangePage }) {
     try {
       while (true) {
         let data = await UseFetch(API_LINK + "KK/GetListProdi", {});
+        console.log("data prodi", data);
         if (data === "ERROR") {
           throw new Error("Terjadi kesalahan: Gagal mengambil daftar prodi.");
         } else if (data.length === 0) {
@@ -136,7 +137,6 @@ export default function TambahKK({ onChangePage }) {
       let data = await UseFetch(API_LINK + "KK/GetListKaryawan", {
         idProdi: formDataRef.current.programStudi,
       });
-
       console.log("karyawan", data);
       if (data === "ERROR") {
         throw new Error("Terjadi kesalahan: Gagal mengambil daftar karyawan.");

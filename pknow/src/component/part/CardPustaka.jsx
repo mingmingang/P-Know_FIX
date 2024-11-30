@@ -133,7 +133,7 @@ function CardPustaka({
                 </div>
                 <div className="d-flex ">
 
-                <p className="mb-0 text-secondary" style={{marginRight:"110px"}}><i
+                <p className="mb-0 text-secondary" style={{marginRight:"80px"}}><i
                   className="fas fa-circle"
                   icon="circle"
                   style={{
@@ -169,6 +169,13 @@ function CardPustaka({
                     title="Hapus pustaka"
                     onClick={() => handleDeleteClick(book)}
                   />
+                  <Icon
+                  name="list"
+                  type="Bold"
+                  cssClass="btn px-2 py-0 text-primary"
+                  title="Lihat detail Kelompok Keahlian"
+                  onClick={() => onDetail("detail", book)}
+                />
                   <div
                     className="form-check form-switch py-0 ms-2"
                     style={{ width: "fit-content" }}
@@ -189,7 +196,7 @@ function CardPustaka({
               )}
 
             {uploader !== book.Uploader && (
-                <div className="card-footer p-1 d-flex align-items-center justify-content-end">
+                <div className="card-footer p-1 d-flex align-items-center justify-content-end" style={{marginLeft:"20px", marginTop:"-10px"}}>
                   <button
                     onClick={() => onDetail("detail", book)}
                     style={{width:"100px", border:"none", padding:"10px 20px", color:"white", background:"#0E6EFE", borderRadius:"10px", fontWeight:"bold"}}

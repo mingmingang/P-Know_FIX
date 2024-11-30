@@ -256,12 +256,12 @@ function CardKelompokKeahlian({
                 title="Ubah data"
                 onClick={() => onChangePage("edit", data)}
               />
-              <Icon
+              {/* <Icon
                 name="trash"
                 type="Bold"
                 cssClass="btn px-2 py-0 text-primary"
                 title="Hapus data permanen"
-              />
+              /> */}
               <Icon
                 name="list"
                 type="Bold"
@@ -354,7 +354,6 @@ function CardKelompokKeahlian({
   return (
     <div className="kelompokKeahlian">
       <div className="bg-white-kk">
-
         <img
           alt={`${title} image`}
           className="cover-daftar-kk"

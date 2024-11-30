@@ -9,8 +9,6 @@ export default function MasterPICPKNOW() {
   const [pageMode, setPageMode] = useState("index");
   const [dataID, setDataID] = useState();
 
- // MasterPICPKNOW component
-// In MasterPICPKNOW component
 function getPageMode() {
     switch (pageMode) {
       case "index":

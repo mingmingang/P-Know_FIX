@@ -16,7 +16,7 @@ export default function KMS_VideoViewer({ videoFileName }) {
 
       const fetchData = async () => {
         try {
-          const response = await axios.get(`${API_LINK}Utilities/Upload/PreviewFile`, {
+          const response = await axios.get(`${API_LINK}Upload/GetFile`, {
             params: {
               namaFile: AppContext_test.urlMateri 
             },

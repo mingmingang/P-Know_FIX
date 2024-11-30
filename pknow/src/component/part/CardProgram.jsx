@@ -29,7 +29,7 @@ const CardProgram = ({
     >
       {data.Status === "Draft" ? (
         <span
-          className="text-danger bg-white px-2 ms-2 mb-0"
+          className="text-danger bg-white px-2 ms-2 mb-0 fw-bold"
           style={{
             marginTop: "-12px",
             width: "fit-content",
@@ -47,8 +47,8 @@ const CardProgram = ({
         }`}
       >
         <p
-          className="fw-medium mb-0"
-          style={{ width: "20%", borderRight: "solid grey 1px" }}
+          className="fw-medium"
+          style={{ width: "20%", borderRight: "solid grey 1px", backgroundColor:"#ABCCFF", borderRadius:"10px", padding:"5px 5px" }}
         >
           {index}
           {". "}

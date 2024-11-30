@@ -410,9 +410,8 @@ export default function ProgramIndex({ onChangePage }) {
   return (
     <div className="app-container">
           <Search
-                    title="Riwayat Pengajuan"
-                    description="Riwayat Pengajuan akan menampilkan pengajuan anggota keahlia yang anda ajukan, hanya terdapat satu kelompok keahlian yang pengajuannya akan diterima oleh Program Studi."
-                    placeholder="Cari Riwayat Pengajuan"
+                    title="Kelola Program"
+                    description="ASTRAtech memiliki banyak program studi, di dalam program studi terdapat kelompok keahlian yang biasa disebut dengan Kelompok Keahlian."
                     showInput={false}
                 />
     <>
@@ -424,10 +423,17 @@ export default function ProgramIndex({ onChangePage }) {
       {isLoading ? (
         <Loading />
       ) : (
+        
         <div className="d-flex flex-column">
+           <h5
+                        className="px-3 py-2 fw-bold"
+                        style={{color:"#0A5EA8", margin:"5px 50px", fontSize:"30px"}}
+                      >
+                        {currentData["Nama Kelompok Keahlian"]}
+                      </h5>
           <div className="flex-fill">
             <div className="container">
-              <div className="row mt-3 gx-4">
+              <div className="row gx-4">
                 <div className="col-md-12">
                   <div
                     className="card p-0 mb-3"
@@ -437,18 +443,8 @@ export default function ProgramIndex({ onChangePage }) {
                     }}
                   >
                     <div className="card-body p-0">
-                      <h5
-                        className="card-title text-white px-3 py-2"
-                        style={{
-                          borderTopRightRadius: "10px",
-                          borderTopLeftRadius: "10px",
-                          backgroundColor: "#67ACE9",
-                        }}
-                      >
-                        {currentData["Nama Kelompok Keahlian"]}
-                      </h5>
                       <div className="card-body px-3">
-                        <div className="d-flex justify-content-between align-items-center">
+                        <div className="d-flex justify-content-between align-items-center" >
                           <h6 className="card-programtitle mb-0">
                             <Icon
                               name="align-left"
@@ -459,7 +455,7 @@ export default function ProgramIndex({ onChangePage }) {
                             <span>
                               <a
                                 href=""
-                                className="text-decoration-underline text-dark"
+                                className="text-decoration-none text-dark"
                               >
                                 {listProgram[0]?.Message
                                   ? "0"
@@ -478,7 +474,7 @@ export default function ProgramIndex({ onChangePage }) {
                                 href="#modalAnggota"
                                 data-bs-toggle="modal"
                                 data-bs-target="#modalAnggota"
-                                className="text-decoration-underline text-dark"
+                                className="text-decoration-none text-dark"
                               >
                                 {listAnggota[0]?.Message
                                   ? "0"
@@ -491,6 +487,7 @@ export default function ProgramIndex({ onChangePage }) {
                             <Button
                               iconName="add"
                               classType="primary  me-2"
+                              style={{marginRight:"10px"}}
                               label="Tambah Program"
                               onClick={() => onChangePage("add", currentData)}
                             />

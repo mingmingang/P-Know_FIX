@@ -79,6 +79,12 @@ export default function DetailPersetujuan({onChangePage, withID}) {
     }
   }, [formData]);
 
+  const decodeHtmlEntities = (str) => {
+    const parser = new DOMParser();
+    const decodedString = parser.parseFromString(str, "text/html").body.textContent;
+    return decodedString || str; // Jika decoding gagal, gunakan string asli
+  };
+
   const getListLampiran = async (idAKK) => {
     setIsError((prevError) => ({ ...prevError, error: false }));
 
@@ -88,55 +94,82 @@ export default function DetailPersetujuan({onChangePage, withID}) {
         p2: "[ID Lampiran] ASC",
         p3: idAKK,
       });
+      console.log(idAKK);
+
+      // if (data === "ERROR") {
+      //   throw new Error("Terjadi kesalahan: Gagal mengambil Detail Lampiran.");
+      // } else {
+      //   setListNamaFile(data);
+      //   const formattedData = data.map((item) => ({
+      //     ...item,
+      //   }));
+      //   // console.log("for: " + JSON.stringify(formattedData));
+      //   const promises = formattedData.map((value) => {
+      //     const filePromises = [];
+
+      //     if (value["Lampiran"]) {
+      //       const filePromise = fetch(
+      //         API_LINK +
+      //         `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
+      //           value["Lampiran"]
+      //         )}`
+      //       )
+      //         .then((response) => response.blob())
+      //         .then((blob) => {
+      //           const url = URL.createObjectURL(blob);
+      //           value.Lampiran = url;
+      //           return value;
+      //         })
+      //         .catch((error) => {
+      //           console.error("Error fetching file:", error);
+      //           return value;
+      //         });
+      //       filePromises.push(filePromise);
+      //     }
+
+      //     return Promise.all(filePromises).then((results) => {
+      //       const updatedValue = results.reduce(
+      //         (acc, curr) => ({ ...acc, ...curr }),
+      //         value
+      //       );
+      //       return updatedValue;
+      //     });
+      //   });
+
+      //   Promise.all(promises)
+      //     .then((updatedData) => {
+      //       console.log("Updated data with blobs:", updatedData);
+      //       setDetail(updatedData);
+      //     })
+      //     .catch((error) => {
+      //       console.error("Error updating currentData:", error);
+      //     });
+      // }
 
       if (data === "ERROR") {
         throw new Error("Terjadi kesalahan: Gagal mengambil Detail Lampiran.");
+      } else if (data.length === 0) {
+        setListNamaFile([]);
       } else {
-        setListNamaFile(data);
-        const formattedData = data.map((item) => ({
-          ...item,
-        }));
-        // console.log("for: " + JSON.stringify(formattedData));
-        const promises = formattedData.map((value) => {
-          const filePromises = [];
+        const updatedData = data.map((item) => {
+          if (item.Lampiran) {
+            try {
+              const cleanedLampiran = decodeHtmlEntities(item.Lampiran);
 
-          if (value["Lampiran"]) {
-            const filePromise = fetch(
-              API_LINK +
-              `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
-                value["Lampiran"]
-              )}`
-            )
-              .then((response) => response.blob())
-              .then((blob) => {
-                const url = URL.createObjectURL(blob);
-                value.Lampiran = url;
-                return value;
-              })
-              .catch((error) => {
-                console.error("Error fetching file:", error);
-                return value;
+              const parsedLampiran = JSON.parse(cleanedLampiran);
+
+              const fileUrls = parsedLampiran.map((file) => {
+                return `${API_LINK}Upload/GetFile/${file.pus_file}`;
               });
-            filePromises.push(filePromise);
+              return { ...item, Lampiran: fileUrls };
+            } catch (err) {
+              console.error("Gagal mem-parse JSON Lampiran:", err);
+              return { ...item, Lampiran: [] };
+            }
           }
-
-          return Promise.all(filePromises).then((results) => {
-            const updatedValue = results.reduce(
-              (acc, curr) => ({ ...acc, ...curr }),
-              value
-            );
-            return updatedValue;
-          });
+          return item; 
         });
-
-        Promise.all(promises)
-          .then((updatedData) => {
-            console.log("Updated data with blobs:", updatedData);
-            setDetail(updatedData);
-          })
-          .catch((error) => {
-            console.error("Error updating currentData:", error);
-          });
+        setDetail(updatedData); 
       }
     } catch (error) {
       setIsError((prevError) => ({
@@ -158,7 +191,6 @@ export default function DetailPersetujuan({onChangePage, withID}) {
     setDetail([]);
   }
 
-  // MENGUBAH STATUS
   function handleSetStatus(data, status) {
     setIsError(false);
 
@@ -178,10 +210,10 @@ export default function DetailPersetujuan({onChangePage, withID}) {
             if (data === "ERROR" || data.length === 0) setIsError(true);
             else {
               let message;
-              if (data === "Aktif") {
+              if (status === "Aktif") {
                 message =
                   "Sukses! Karyawan berhasil menjadi anggota keahlian..";
-              } else if (data === "Ditolak") {
+              } else if (status === "Ditolak") {
                 message = "Berhasil. Karyawan telah ditolak..";
               }
               SweetAlert("Sukses", message, "success");
@@ -216,11 +248,11 @@ export default function DetailPersetujuan({onChangePage, withID}) {
       {isLoading ? (
         <Loading />
       ) : (
-        <div>
+        <div style={{marginLeft:"100px", marginRight:"100px", marginBottom:"100px", marginTop:"30px"}}>
           <div className="card mb-3">
-            <div className="card-header bg-primary fw-medium text-white">
-              Detail Kelompok Keahlian
-            </div>
+          <div className="fw-bold ml-3 mt-4" style={{fontSize:"22px", color:"#0A5EA8"}}>
+                      Detail Kelompok Keahlian
+                    </div>
             <div className="card-body">
               <div className="row pt-2">
                 <div className="col-lg-7 px-4">
@@ -289,13 +321,11 @@ export default function DetailPersetujuan({onChangePage, withID}) {
             </div>
           </div>
           <div className="card">
-            <div className="card-header bg-primary fw-medium text-white">
-              Menunggu Persetujuan
-            </div>
-            <div className="card-body">
-              <div className="row pt-2">
-                <div className="col-lg-6">
-                  <h6 className="mb-3 fw-semibold">
+          <div className="fw-bold ml-3 mt-4 d-flex" style={{justifyContent:"space-between", marginRight:"20px"}} >
+                     <span style={{fontSize:"22px", color:"#0A5EA8"}}>
+                     Menunggu Persetujuan
+                      </span> 
+                      <h6 className="mb-3 fw-semibold">
                     {
                       listAnggota?.filter((value) => {
                         return value.Status === "Menunggu Acc";
@@ -303,6 +333,11 @@ export default function DetailPersetujuan({onChangePage, withID}) {
                     }{" "}
                     Tenaga Pendidik menunggu persetujuan untuk menjadi Anggota
                   </h6>
+                    </div>
+            <div className="card-body">
+              <div className="row pt-2">
+                <div className="col-lg-6">
+                  
                   {listAnggota
                     ?.filter((value) => {
                       return value.Status === "Menunggu Acc";
@@ -382,26 +417,40 @@ export default function DetailPersetujuan({onChangePage, withID}) {
                     <div className="mt-2">
                       {karyawan.Key ? (
                         detail?.map((item, index) => (
-                          <Label
-                            key={index}
-                            title={`Lampiran ${index + 1}`}
-                            data={
-                              item.Lampiran ? (
-                                <a
-                                  href={item.Lampiran}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  {/* {listNamaFile[index].Lampiran} */}
-                                  Lampiran {index + 1} {withID["Nama Kelompok Keahlian"]}
-                                </a>
+                          <div key={index}>
+                            {item.Lampiran ? (
+                              Array.isArray(item.Lampiran) ? (
+                                // Jika Lampiran adalah array
+                                item.Lampiran.map((link, linkIndex) => (
+                                  <div key={linkIndex} style={{ marginTop: "15px" }}>
+                                    <h5 className="mb-3">{`Lampiran ${linkIndex + 1}`}</h5>
+                                    <a href={link.trim()} target="_blank" rel="noopener noreferrer">
+                                      {`Lampiran ${linkIndex + 1} ${withID["Nama Kelompok Keahlian"]}`}
+                                    </a>
+                                  </div>
+                                ))
+                              ) : typeof item.Lampiran === "string" ? (
+                                // Jika Lampiran adalah string
+                                item.Lampiran.split(",").map((link, linkIndex) => (
+                                  <div key={linkIndex} style={{ marginTop: "15px" }}>
+                                    <h5 className="mb-3">{`Lampiran ${index + 1}`}</h5>
+                                    <a href={link.trim()} target="_blank" rel="noopener noreferrer">
+                                      {`Lampiran ${linkIndex + 1} ${withID["Nama Kelompok Keahlian"]}`}
+                                    </a>
+                                  </div>
+                                ))
                               ) : (
-                                "-"
+                                // Jika Lampiran bukan string atau array
+                                <p>Invalid Lampiran format</p>
                               )
-                            }
-                          />
+                            ) : (
+                              // Jika tidak ada Lampiran
+                              <p>Tidak ada lampiran</p>
+                            )}
+                          </div>
                         ))
                       ) : (
+                        // Jika karyawan.Key tidak ada
                         <Label title="Lampiran Pendukung" data="-" />
                       )}
                     </div>
@@ -433,14 +482,15 @@ export default function DetailPersetujuan({onChangePage, withID}) {
               </div>
             </div>
           </div>
-
-          <div className="float-end my-4 mx-1">
+          <div className="float-end" >
             <Button
+            style={{marginBottom:"80px", marginTop:"20px", backgroundColor:"grey"}}
               classType="secondary me-2 px-4 py-2"
               label="Kembali"
               onClick={() => onChangePage("index")}
             />
           </div>
+          
         </div>
       )}
 

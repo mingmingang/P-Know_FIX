@@ -87,7 +87,7 @@ export default function DaftarPustaka({ onChangePage }) {
     setCurrentFilter((prevFilter) => {
       return {
         ...prevFilter,
-        page: 1,
+        page: 2,
         query: searchQuery.current.value,
         status: searchFilterStatus.current.value,
         sort: searchFilterSort.current.value,

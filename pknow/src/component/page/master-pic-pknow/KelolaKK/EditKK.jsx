@@ -39,11 +39,12 @@ export default function KKEdit({ onChangePage, withID }) {
 
   const resetForm = () => {
     formDataRef.current = {
-      nama: "",
-      programStudi: "",
-      personInCharge: "",
-      deskripsi: "",
-      gambar: "",
+      key: withID.id,
+      nama: withID.title,
+      programStudi: withID.prodi.key,
+      personInCharge: withID.pic.key ? withID.pic.key : "",
+      deskripsi: withID.desc,
+      gambar: withID.gambar,
     };
     setFilePreview(false);
     setErrors({});

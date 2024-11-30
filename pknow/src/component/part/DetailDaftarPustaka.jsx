@@ -6,6 +6,7 @@ import backPage from "../../assets/backPage.png";
 import Konfirmasi from "./Konfirmasi";
 import { API_LINK } from "../util/Constants";
 import Video_Viewer from "../part/VideoPlayer";
+import ReactPlayer from 'react-player';
 
 export default function DetailDaftarPustaka({ onChangePage, withID }) {
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -103,7 +104,30 @@ export default function DetailDaftarPustaka({ onChangePage, withID }) {
             <PDF_Viewer pdfFileName={fileData.file} />
           )}
           {fileExtension === "mp4" && (
-            <Video_Viewer videoFileName={fileData.file} />
+        //   <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden", maxWidth: "100%" }}>
+        //   <iframe
+        //     src={`${API_LINK}Upload/GetFile/${fileData.file}`}
+        //     style={{
+        //       position: "absolute",
+        //       top: 0,
+        //       left: 0,
+        //       width: "100%",
+        //       height: "100%",
+        //       objectFit: "contain",
+        //       borderRadius:"20px"
+        //     }}
+        //     title="Video Frame"
+        //   ></iframe>
+        // </div> 
+       
+            <ReactPlayer 
+            url={`${API_LINK}Upload/GetFile/${fileData.file}`}
+            playing={true} 
+            controls={true}
+            width="100%"
+            height="100%"
+            style={{borderRadius:"80px"}}
+          />   
           )}
           {/* Anda bisa menambahkan lebih banyak kondisi untuk file lain seperti .docx atau .xlsx */}
           {fileExtension === "docx" && (

@@ -92,7 +92,6 @@ export default function Login() {
     }
   };
 
-  // Handle login with selected role
   async function handleLoginWithRole(role, nama, peran) {
     try {
       const ipAddress = await fetch("https://api.ipify.org/?format=json")

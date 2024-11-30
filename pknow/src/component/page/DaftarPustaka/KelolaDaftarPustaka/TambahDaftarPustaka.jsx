@@ -260,7 +260,7 @@ export default function MasterDaftarPustakaAdd({ onChangePage, withID }) {
           <Alert type="danger" message={isError.message} />
         </div>
       )}
-         <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"50px", marginLeft:"70px", marginRight:"70px"}}>
+         <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
             <div className="back-and-title" style={{display:"flex"}}>
               <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
                 <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Daftar Pustaka</h4>

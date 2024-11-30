@@ -21,18 +21,20 @@ import { decryptId } from "../../../util/Encryptor";
 import Label from "../../../part/Label";
 import CardPengajuanBaru from "../../../part/CardPengajuanBaru";
 import { faL } from "@fortawesome/free-solid-svg-icons";
+import Button2 from "../../../part/Button copy";
+import "../../../../../src/index.css";
 
 const inisialisasiKK = [
-    {
-      Key: null,
-      No: null,
-      Nama: null,
-      PIC: null,
-      Deskripsi: null,
-      Status: "Aktif",
-      Count: 0,
-    },
-  ];
+  {
+    Key: null,
+    No: null,
+    Nama: null,
+    PIC: null,
+    Deskripsi: null,
+    Status: "Aktif",
+    Count: 0,
+  },
+];
 
 
   const inisialisasiData = [
@@ -47,6 +49,13 @@ const inisialisasiKK = [
     },
   ];
 
+  const dataFilterSort = [
+    { Value: "[Nama Kelompok Keahlian] asc", Text: "Nama Kelompok Keahlian [↑]" },
+    {
+      Value: "[Nama Kelompok Keahlian] desc",
+      Text: "Nama Kelompok Keahlian  [↓]",
+    },
+  ];
   
 
 export default function RiwayatPengajuan({onChangePage}) {
@@ -58,7 +67,7 @@ export default function RiwayatPengajuan({onChangePage}) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [dataAktif, setDataAktif] = useState(false);
-  const [listKK, setListKK] = useState(inisialisasiKK);
+  const [listKK, setListKK] = useState([]);
   const [detail, setDetail] = useState(inisialisasiData);
 
   const [userData, setUserData] = useState({
@@ -73,6 +82,21 @@ export default function RiwayatPengajuan({onChangePage}) {
     sort: "[Tanggal] DESC",
     kry_id: "",
   });
+
+  const searchQuery = useRef();
+  const searchFilterSort = useRef();
+  const searchFilterKry = useRef(); 
+
+  function handleSearch() {
+    setIsLoading(true);
+    setCurrentFilter((prevFilter) => ({
+      ...prevFilter,
+      page: 1,
+      query: searchQuery.current.value,
+      sort: searchFilterSort.current.value,
+      kry_id: searchFilterKry.current.value,
+    }));
+  }
 
   const getUserKryID = async () => {
     setIsLoading(true);
@@ -117,6 +141,7 @@ export default function RiwayatPengajuan({onChangePage}) {
     setIsLoading(true);
 
     if (currentFilter.kry_id === "") return;
+    console.log("yuhuu",currentFilter);
 
     try {
       while (true) {
@@ -124,6 +149,7 @@ export default function RiwayatPengajuan({onChangePage}) {
           API_LINK + "PengajuanKK/GetRiwayat",
           currentFilter
         );
+        console.log("data riwayat", data)
 
         if (data === "ERROR") {
           throw new Error("Terjadi kesalahan: Gagal mengambil daftar prodi.");
@@ -132,6 +158,7 @@ export default function RiwayatPengajuan({onChangePage}) {
           setIsLoading(false);
           break;
         } else {
+         
           setListKK(data);
           setIsLoading(false);
           break;
@@ -155,75 +182,121 @@ export default function RiwayatPengajuan({onChangePage}) {
         <div className="app-container">
             {/* Render Header */}
             <main>
-                <Search
-                    title="Riwayat Pengajuan"
-                    description="Riwayat Pengajuan akan menampilkan pengajuan anggota keahlia yang anda ajukan, hanya terdapat satu kelompok keahlian yang pengajuannya akan diterima oleh Program Studi."
-                    placeholder="Cari Riwayat Pengajuan"
-                />
-                 <>
-      <div className="d-flex flex-column">
-        <div className="flex-fill">
-          <div className="input-group">
-            <Input
-              // ref={searchQuery}
-              forInput="pencarianProduk"
-              placeholder="Cari"
-            />
-            <Button
-              iconName="search"
-              classType="primary px-4"
-              title="Cari"
-              //   onClick={handleSearch}
-            />
-            <Filter>
-              <DropDown
-                // ref={searchFilterSort}
-                forInput="ddUrut"
-                label="Urut Berdasarkan"
-                type="none"
-                // arrData={dataFilterSort}
-                defaultValue="[Kode Produk] asc"
+            <div className="backSearch">
+          <h1>Riwayat Pengajuan</h1>
+          <p>
+          Riwayat Pengajuan akan menampilkan pengajuan anggota keahlia yang anda ajukan, hanya terdapat satu kelompok keahlian yang pengajuannya akan diterima oleh Program Studi.
+          </p>
+          <div className="input-wrapper">
+            <div
+              className=""
+              style={{
+                width: "700px",
+                display: "flex",
+                backgroundColor: "white",
+                borderRadius: "20px",
+                height: "40px",
+              }}
+            >
+              <Input
+                ref={searchQuery}
+                forInput="pencarianKK"
+                placeholder="Cari"
+                style={{
+                  border: "none",
+                  width: "680px",
+                  height: "40px",
+                  borderRadius: "20px",
+                }}
               />
-              <DropDown
-                // ref={searchFilterJenis}
-                forInput="ddJenis"
-                label="Jenis Produk"
-                type="semua"
-                // arrData={dataFilterJenis}
-                defaultValue=""
+              <Button2
+                iconName="search"
+                classType="primary px-4"
+                title="Cari"
+                onClick={handleSearch}
+                style={{ backgroundColor: "transparent", color: "#08549F" }}
               />
-              <DropDown
-                // ref={searchFilterStatus}
-                forInput="ddStatus"
-                label="Status"
-                type="none"
-                // arrData={dataFilterStatus}
-                defaultValue="Aktif"
-              />
-            </Filter>
-          </div>
-          <div className="container">
-            <div className="row mt-3 gx-4">
-              {listKK[0]?.Message ? (
-                <Alert type="warning" message="Tidak ada riwayat.." />
-              ) : (
-                listKK?.map((value) => (
-                  <CardPengajuanBaru
-                    key={value.Key}
-                    data={value}
-                    onChangePage={onChangePage}
-                  />
-                ))
-              )}
             </div>
           </div>
         </div>
-      </div>
+                 <>
+      <div className="d-flex flex-column">
+      <div className="navigasi-layout-page">
+          <p className="title-kk">Kelompok Keahlian</p>
+          <div className="left-feature">
+            <div className="status">
+              <table>
+                <tbody>
+                  <tr>
+                    <td>
+                      <i
+                        className="fas fa-circle"
+                        style={{ color: "#4a90e2" }}
+                      ></i>
+                    </td>
+                    <td>
+                      <p>Aktif/Sudah Publikasi</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <i
+                        className="fas fa-circle"
+                        style={{ color: "grey" }}
+                      ></i>
+                    </td>
+                    <td>
+                      <p>Dibatalkan</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <i className="fas fa-circle" style={{ color: "#DC3545" }}></i>
+                    </td>
+                    <td>
+                      <p>Ditolak</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="tes" style={{ display: "flex" }}>
+              <div className="">
+                <Filter handleSearch={handleSearch}>
+                  <DropDown
+                    ref={searchFilterSort}
+                    forInput="ddUrut"
+                    label="Urut Berdasarkan"
+                    type="none"
+                    arrData={dataFilterSort}
+                    defaultValue="[Nama Kelompok Keahlian] asc"
+                  />
+                </Filter>
+              </div>
+              </div>
+              </div>
+              </div>
+          
+          <div className="container">
+            <div className="row mt-3 gx-4">
+            {Array.isArray(listKK) && listKK.length > 0 && listKK[0]?.Message ? (
+  <Alert type="warning" message="Tidak ada riwayat.." />
+) : (
+  listKK?.map((value) => (
+    <CardPengajuanBaru
+      key={value.Key}
+      data={value}
+      onChangePage={onChangePage}
+    />
+  ))
+)}
+            </div>
+          </div>
+        </div>
     </>
 
             </main>
-
-            {/* Render Footer */}
         </div>
     );
 }
