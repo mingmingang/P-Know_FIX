@@ -192,6 +192,7 @@ export default function TambahKK({ onChangePage }) {
           API_LINK + "KK/CreateKK",
           formDataRef.current
         );
+        console.log("isian form",formDataRef.current);
 
         if (data === "ERROR") {
           throw new Error("Terjadi kesalahan: Gagal menyimpan data program.");

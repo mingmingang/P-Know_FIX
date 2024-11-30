@@ -343,8 +343,7 @@ export default function KelolaKK({ onChangePage }) {
   };
 
   function handleSetStatus(data, status) {
-    console.log(status);
-    console.log(data.status);
+    console.log("pic id", data.pic.key);
     setIsError(false);
     let message;
     if (data.status === "Draft" && !data.pic.key)
@@ -353,7 +352,7 @@ export default function KelolaKK({ onChangePage }) {
       message = "Apakah anda yakin ingin mempublikasikan data ini?";
     else if (data.status === "Aktif")
       message =
-        "Apakah anda yakin ingin menonaktifkan data ini? Semua anggota keahlian akan dikeluarkan secara otomatis< jika data ini dinonaktifkan";
+        "Apakah anda yakin ingin menonaktifkan data ini? Semua anggota keahlian akan dikeluarkan secara otomatis jika data ini dinonaktifkan";
     else if (data.status === "Tidak Aktif")
       message = "Apakah anda yakin ingin mengaktifkan data ini?";
 
@@ -362,6 +361,7 @@ export default function KelolaKK({ onChangePage }) {
         UseFetch(API_LINK + "KK/SetStatusKK", {
           idKK: data.id,
           status: status,
+          pic: data.pic.key
         }).then((data) => {
           if (data === "ERROR" || data.length === 0) setIsError(true);
           else {
@@ -374,7 +374,7 @@ export default function KelolaKK({ onChangePage }) {
                 "Sukses! Data berhasil dipublikasi. PIC Kelompok Keahlian dapat menentukan kerangka Program Belajar..";
             } else if (status === "Tidak Aktif") {
               messageResponse =
-                "Sukses! Data berhasil dipublikasi. PIC Kelompok Keahlian dapat menentukan kerangka Program Belajar..";
+                "Sukses! Data berhasil dinonaktifkan. PIC Kelompok Keahlian kembali menjadi Tenaga Pendidik saja";
             }
             SweetAlert("Sukses", messageResponse, "success");
             window.location.reload();

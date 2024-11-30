@@ -214,6 +214,7 @@ export default function TambahPIC({ onChangePage, withID }) {
         const statusData = await UseFetch(API_LINK + "KK/SetStatusKK", {
           idKK: formDataRef.current.key,
           status: "Aktif",
+          pic: formDataRef.current.personInCharge,
         });
 
         if (statusData === "ERROR" || statusData.length === 0) {
