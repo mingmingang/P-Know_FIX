@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { object, string } from "yup";
-import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
-import SweetAlert from "../../../util/SweetAlert";
-import Button from "../../../part/Button";
-import Input from "../../../part/Input";
-import Loading from "../../../part/Loading";
-import Alert from "../../../part/Alert";
-import UseFetch from "../../../util/UseFetch";
-import { API_LINK } from "../../../util/Constants";
+import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
+import SweetAlert from "../../../../util/SweetAlert";
+import Button from "../../../../part/Button copy";
+import Input from "../../../../part/Input";
+import Loading from "../../../../part/Loading";
+import Alert from "../../../../part/Alert";
+import UseFetch from "../../../../util/UseFetch";
+import { API_LINK } from "../../../../util/Constants";
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 import { Editor } from '@tinymce/tinymce-react';
@@ -156,7 +156,7 @@ export default function MasterForumAdd({ onChangePage }) {
           <Alert type="danger" message={isError.message} />
         </div>
       )}
-      <form onSubmit={handleAdd}>
+      <form onSubmit={handleAdd} style={{margin:"100px"}}>
         <div>
           <Stepper activeStep={activeStep}>
             {steps.map((label, index) => (

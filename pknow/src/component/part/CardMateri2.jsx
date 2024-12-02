@@ -1,10 +1,10 @@
 import { useState } from "react";
 import Icon from "./Icon.jsx";
 import Button from "./Button.jsx";
-import AppContext_master from "../page/master-proses/MasterContext.jsx";
+import AppContext_master from "../page/Materi/master-proses/MasterContext.jsx";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
-import AppContext_test from "../page/master-test/TestContext.jsx";
+import AppContext_test from "../page/Materi/master-test/TestContext.jsx";
 function CardMateri({ 
   materis, 
   onStatus,

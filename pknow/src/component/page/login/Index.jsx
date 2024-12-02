@@ -67,7 +67,6 @@ export default function Login() {
 
       try {
         const data = await UseFetch(API_LINK + "Utilities/Login", formDataRef.current);
-        console.log(data);
         if (data === "ERROR") {
           throw new Error("Terjadi kesalahan: Gagal melakukan autentikasi.");
         } else if (data[0].Status === "LOGIN FAILED") {
@@ -116,8 +115,6 @@ export default function Login() {
       }
   
       localStorage.setItem("jwtToken", token.Token);
-  
-      // Construct userInfo object safely
       const userInfo = {
         username: formDataRef.current.username,
         role: role,
@@ -143,7 +140,6 @@ export default function Login() {
       }
       
     } catch (error) {
-      // Scroll to the top of the page and show error
       window.scrollTo(0, 0);
       modalRef.current.close();
       setIsError((prevError) => ({

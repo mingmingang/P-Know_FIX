@@ -224,9 +224,32 @@ export default function PengajuanDetail({ onChangePage, withID }) {
                             
                               <div key={linkIndex}>
                                 <h5 className="mb-3" style={{marginTop:"15px"}}>{`Lampiran ${linkIndex + 1}`}</h5>
-                                <a href={link.trim()} target="_blank" rel="noopener noreferrer">
-                                  {`Lampiran ${linkIndex + 1} ${withID["Nama Kelompok Keahlian"]}`}
-                                </a>
+                                <a
+                                href={link.trim()}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-decoration-none fw-bold mb-4"
+                                style={{
+                                  background: "white",
+                                  color: "#0A5EA8",
+                                  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
+                                  fontSize: "18px",
+                                  padding: "8px 10px",
+                                  borderRadius: "10px",
+                                  transition: "all 0.3s ease",
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.target.style.background = "#0A5EA8";
+                                  e.target.style.color = "white";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.target.style.background = "white";
+                                  e.target.style.color = "#0A5EA8";
+                                }}
+                              >
+                                {`Lampiran ${linkIndex + 1} ${withID["Nama Kelompok Keahlian"]}`}
+                              </a>
+
                               </div>
                             ))
                           : typeof item.Lampiran === "string" 

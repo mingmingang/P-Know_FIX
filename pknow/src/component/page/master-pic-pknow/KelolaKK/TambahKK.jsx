@@ -13,6 +13,7 @@ import UploadFile from "../../../util/UploadFile";
 import NoImage from "../../../../assets/NoImage.png";
 import BackPage from "../../../../assets/backPage.png";
 import Konfirmasi from "../../../part/Konfirmasi";
+import { Editor } from "@tinymce/tinymce-react";
 
 export default function TambahKK({ onChangePage }) {
   const [errors, setErrors] = useState({});
@@ -22,6 +23,7 @@ export default function TambahKK({ onChangePage }) {
   const [listKaryawan, setListKaryawan] = useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isBackAction, setIsBackAction] = useState(false);  
+  const [isFormDisabled, setIsFormDisabled] = useState(false);
 
   const handleGoBack = () => {
     setIsBackAction(true);  
@@ -322,6 +324,7 @@ export default function TambahKK({ onChangePage }) {
                     />
                   </div>
                   <div className="col-lg-12">
+            
                     <label style={{ paddingBottom: "5px", fontWeight: "bold" }}>
                       Deskripsi/Ringkasan Mengenai Kelompok Keahlian{" "}
                       <span style={{ color: "red" }}> *</span>
@@ -342,6 +345,7 @@ export default function TambahKK({ onChangePage }) {
                       errorMessage={errors.deskripsi}
                     />
                   </div>
+                
                   <div className="col-lg-6">
                     <Select2Dropdown
                       forInput="programStudi"

@@ -1,15 +1,15 @@
 import { useRef, useState, useEffect } from "react";
 import { object, string } from "yup";
-import { API_LINK } from "../../../util/Constants";
-import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
-import SweetAlert from "../../../util/SweetAlert";
-import UseFetch from "../../../util/UseFetch";
-import Button from "../../../part/Button";
-import FileUpload from "../../../part/FileUpload";
-import Loading from "../../../part/Loading";
-import Alert from "../../../part/Alert";
+import { API_LINK } from "../../../../util/Constants";
+import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
+import SweetAlert from "../../../../util/SweetAlert";
+import UseFetch from "../../../../util/UseFetch";
+import Button from "../../../../part/Button copy";
+import FileUpload from "../../../../part/FileUpload";
+import Loading from "../../../../part/Loading";
+import Alert from "../../../../part/Alert";
 import AppContext_test from "../MasterContext";
-import uploadFile from "../../../util/UploadFile";
+import uploadFile from "../../../../util/UploadFile";
 import AppContext_master from "../MasterContext";
 import axios from "axios";
 
@@ -196,7 +196,7 @@ export default function MasterSharingAdd({ onChangePage}) {
           <Alert type="danger" message={isError.message} />
         </div>
       )}
-      <form onSubmit={handleAdd}>
+      <form onSubmit={handleAdd} style={{margin:"100px"}}>
         <div>
           <Stepper activeStep={activeStep}>
             {steps.map((label, index) => (

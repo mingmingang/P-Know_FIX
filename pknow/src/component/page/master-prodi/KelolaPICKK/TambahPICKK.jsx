@@ -217,6 +217,8 @@ export default function TambahPIC({ onChangePage, withID }) {
           pic: formDataRef.current.personInCharge,
         });
 
+        console.log("status", statusData);
+
         if (statusData === "ERROR" || statusData.length === 0) {
           setIsError((prevError) => ({
             ...prevError,

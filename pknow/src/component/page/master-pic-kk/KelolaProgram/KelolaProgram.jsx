@@ -316,9 +316,9 @@ export default function ProgramIndex({ onChangePage }) {
               });
             } else {
               let message;
-              if (data === "Tidak Aktif") {
+              if (status === "Tidak Aktif") {
                 message = "Data berhasil dinonaktifkan.";
-              } else if (data === "Aktif") {
+              } else if (status === "Aktif") {
                 message = "Sukses! Data berhasil dipublikasi.";
               }
               SweetAlert("Sukses", message, "success");
@@ -392,9 +392,9 @@ export default function ProgramIndex({ onChangePage }) {
               });
             } else {
               let message;
-              if (data === "Tidak Aktif") {
+              if (status === "Tidak Aktif") {
                 message = "Data berhasil dinonaktifkan.";
-              } else if (data === "Aktif") {
+              } else if (status === "Aktif") {
                 message = "Sukses! Data berhasil dipublikasi.";
               }
               SweetAlert("Sukses", message, "success");
@@ -449,8 +449,9 @@ export default function ProgramIndex({ onChangePage }) {
                             <Icon
                               name="align-left"
                               type="Bold"
-                              cssClass="btn px-2 py-0 text-primary"
+                              cssClass="btn px-2 py-0"
                               title="Program"
+                              style={{color:"#0A5EA8"}}
                             />
                             <span>
                               <a
@@ -466,8 +467,9 @@ export default function ProgramIndex({ onChangePage }) {
                             <Icon
                               name="users"
                               type="Bold"
-                              cssClass="btn px-2 py-0 text-primary ms-3"
+                              cssClass="btn px-2 py-0 ms-3"
                               title="Anggota Kelompok Keahlian"
+                              style={{color:"#0A5EA8"}}
                             />
                             <span>
                               <a
@@ -499,9 +501,9 @@ export default function ProgramIndex({ onChangePage }) {
                             />
                           </div>
                         </div>
-                        <hr style={{ opacity: "0.1" }} />
-                        <p className="lh-sm">{currentData.Deskripsi}</p>
-                        <h5 className="text-primary py-2">
+                        
+                        <p className="lh-sm mt-4">{currentData.Deskripsi}</p>
+                        <h5 className="py-2"  style={{color:"#0A5EA8"}}>
                           Daftar Program dalam Kelompok Keahlian{" "}
                           <strong>
                             {currentData["Nama Kelompok Keahlian"]}

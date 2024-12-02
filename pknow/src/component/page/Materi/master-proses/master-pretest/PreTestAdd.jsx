@@ -1,16 +1,16 @@
 import React, { useRef, useState, useEffect } from "react";
-import Button from "../../../part/Button";
+import Button from "../../../../part/Button copy";
 import { object, string } from "yup";
-import Input from "../../../part/Input";
-import Loading from "../../../part/Loading";
+import Input from "../../../../part/Input";
+import Loading from "../../../../part/Loading";
 import { Stepper, Step, StepLabel } from '@mui/material';
 
 import * as XLSX from 'xlsx';
 import axios from 'axios';
-import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
-import { API_LINK } from "../../../util/Constants";
-import FileUpload from "../../../part/FileUpload";
-import uploadFile from "../../../util/UploadImageQuiz";
+import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
+import { API_LINK } from "../../../../util/Constants";
+import FileUpload from "../../../../part/FileUpload";
+import uploadFile from "../../../../util/UploadImageQuiz";
 import Swal from 'sweetalert2';
 import { Editor } from '@tinymce/tinymce-react';
 import AppContext_master from "../MasterContext";
@@ -676,7 +676,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
           }
         `}
       </style>
-      <form id="myForm" onSubmit={handleAdd}>
+      <form id="myForm" onSubmit={handleAdd} style={{margin:"100px"}}>
         <div>
           <Stepper activeStep={activeStep}>
             {steps.map((label, index) => (

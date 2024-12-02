@@ -1,20 +1,24 @@
 import { useEffect, useRef, useState } from "react";
-import SweetAlert from "../../util/SweetAlert";
-import Button from "../../part/Button";
-import Input from "../../part/Input";
-import Paging from "../../part/Paging";
-import Filter from "../../part/Filter";
-import DropDown from "../../part/Dropdown";
-import Alert from "../../part/Alert";
-import Loading from "../../part/Loading";
-import CardMateri from "../../part/CardMateri2";
-import UseFetch from "../../util/UseFetch";
-import { API_LINK } from "../../util/Constants";
+import SweetAlert from "../../../util/SweetAlert";
+import Button from "../../../part/Button copy";
+import Input from "../../../part/Input";
+import Paging from "../../../part/Paging";
+import Filter from "../../../part/Filter";
+import DropDown from "../../../part/Dropdown";
+import Alert from "../../../part/Alert";
+import Loading from "../../../part/Loading";
+import CardMateri from "../../../part/CardMateri2";
+import UseFetch from "../../../util/UseFetch";
+import { API_LINK } from "../../../util/Constants";
 import '@fortawesome/fontawesome-free/css/all.css';
-import "../../../index.css";
+import "../../../../style/Materi.css";
+import "../../../../index.css";
 // Definisikan beberapa data contoh untuk tabel
 import AppContext_test from "./MasterContext";
 import AppContext_test2 from "../master-test/TestContext";
+import Search from "../../../part/Search";
+import BackPage from "../../../../assets/backPage.png";
+import Konfirmasi from "../../../part/Konfirmasi";
 
 const inisialisasiData = [
   {
@@ -49,6 +53,9 @@ export default function MasterProsesIndex({ onChangePage }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [listKategori, setListKategori] = useState([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isBackAction, setIsBackAction] = useState(false);  
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     status: "Semua",
@@ -57,6 +64,22 @@ export default function MasterProsesIndex({ onChangePage }) {
     order: "asc",
     kategori:AppContext_test.KategoriIdByKK,
   });
+
+  const handleGoBack = () => {
+    setIsBackAction(true);  
+    setShowConfirmation(true);  
+  };
+
+  const handleConfirmYes = () => {
+    setShowConfirmation(false); 
+    onChangePage("kk");
+  };
+
+
+  const handleConfirmNo = () => {
+    setShowConfirmation(false);  
+  };
+
   // AppContext'_test.kategoriId = withID;
   // const kategori = withID;
   const searchQuery = useRef(null);
@@ -73,7 +96,7 @@ export default function MasterProsesIndex({ onChangePage }) {
       "Ya",
     ).then((confirmed) => {
       if (confirmed) {
-        UseFetch(API_LINK + "Materis/setStatusMateri", {
+        UseFetch(API_LINK + "Materi/setStatusMateri", {
           mat_id: id,
         })
           .then((data) => {
@@ -92,6 +115,62 @@ export default function MasterProsesIndex({ onChangePage }) {
       }
     });
   }
+
+  const kategori = AppContext_test.KategoriIdByKK;
+
+
+  const fetchDataKategori = async (retries = 3, delay = 1000) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const data = await UseFetch(API_LINK + "Program/GetKategoriKKById", { kategori });
+        const mappedData = data.map(item => ({
+          value: item.Key,
+          label: item["Nama Kategori"],
+          deskripsi: item.Deskripsi,
+          idKK: item.idKK,
+          namaKK: item.namaKK
+        }));
+        return mappedData;
+      } catch (error) {
+        console.error("Error fetching kategori data:", error);
+        if (i < retries - 1) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+          throw error;
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchData = async () => {
+      setIsError({ error: false, message: '' });
+      setIsLoading(true);
+      try {
+        const data = await fetchDataKategori();
+        if (isMounted) {
+          setListKategori(data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setIsError({ error: true, message: error.message });
+          setListKategori([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [kategori]);
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -140,9 +219,13 @@ export default function MasterProsesIndex({ onChangePage }) {
 
         try {
             const data = await UseFetch(
-                API_LINK + "Materis/GetDataMateriByKategori",
+                API_LINK + "Materi/GetDataMateriByKategori",
                 currentFilter
             );
+
+            console.log("tes",currentData.length)
+            
+            console.log("materi",data);
 
             if (data === "ERROR") {
                 setIsError(true);
@@ -302,7 +385,7 @@ export default function MasterProsesIndex({ onChangePage }) {
     AppContext_test2.materiVideo = '';
     AppContext_test2.materiPdf = '';
     AppContext_test2.materiGambar = ''; 
-    onChangePage("materiAdd"); 
+    onChangePage("pengenalanAdd"); 
   };
 
   if (isLoading) return <Loading />;
@@ -311,9 +394,9 @@ export default function MasterProsesIndex({ onChangePage }) {
     isLoading ? (
       <Loading />
     ) : (
-      <div className="container">
-        <div className="row">
-          <div className="col-lg-12">
+      <>
+        <div className="">
+          <div className="">
             {isError && (
               <div className="flex-fill">
                 <Alert
@@ -322,27 +405,53 @@ export default function MasterProsesIndex({ onChangePage }) {
                 />
               </div>
             )}
-            <div className="flex-fill">
-              <div className="input-group">
-                <Button
-                  iconName="add"
-                  classType="success"
-                  title="Tambah Materi"
-                  label="Tambah Materi"
-                  onClick={handleButtonClick}
-                />
-                <Input
-                  ref={searchQuery}
-                  forInput="pencarianMateri"
-                  placeholder="Search"
-                />
-                <Button
-                  iconName="search"
-                  classType="primary px-4"
-                  title="Cari"
-                  onClick={handleSearch}
-                />
-                <Filter>
+             <div className="backSearch">
+          <h1>{listKategori.find((item) => item.value === AppContext_test.KategoriIdByKK)?.label || ""}</h1>
+          <p>
+          {listKategori.find((item) => item.value === AppContext_test.KategoriIdByKK)?.deskripsi || ""}
+          </p>
+          <div className="input-wrapper">
+            <div
+              className=""
+              style={{
+                width: "700px",
+                display: "flex",
+                backgroundColor: "white",
+                borderRadius: "20px",
+                height: "40px",
+              }}
+            >
+              <Input
+                ref={searchQuery}
+                forInput="pencarianKK"
+                placeholder="Cari Materi"
+                style={{
+                  border: "none",
+                  width: "680px",
+                  height: "40px",
+                  borderRadius: "20px",
+                }}
+              />
+              <Button
+                iconName="search"
+                classType="primary px-4"
+                title="Cari"
+                onClick={handleSearch}
+                style={{ backgroundColor: "transparent", color: "#08549F" }}
+              />
+            </div>
+          </div>
+        </div>  
+
+
+        <div className="navigasi-layout-page">
+          <p className="title-kk" style={{fontSize:"20px"}}> <button style={{backgroundColor:"transparent", border:"none", marginRight:"10px"}} onClick={handleGoBack}><img src={BackPage} width="50px" alt="" /></button>Kelola Materi / Program / Kategori <span style={{fontWeight:"bold"}}>{listKategori.find((item) => item.value === AppContext_test.KategoriIdByKK)?.label || ""}</span></p>
+          <div className="left-feature">
+           
+
+            <div className="tes" style={{ display: "flex" }}>
+              <div className="mr-2">
+              <Filter>
                   <DropDown
                     ref={searchFilterSort}
                     forInput="ddUrut"
@@ -363,31 +472,74 @@ export default function MasterProsesIndex({ onChangePage }) {
                   />
                 </Filter>
               </div>
-            </div>
-            <div className="mt-3">
-              <div className="row">
-                <CardMateri
-                  materis={currentFilter.status === "Semua"
-                    ? currentData
-                    : currentData.filter(materi => materi.Status === currentFilter.status)}
-                  onDetail={onChangePage}
-                  onEdit={onChangePage}
-                  onStatus={handleSetStatus}
-                  isNonEdit={false}
-                  onReviewJawaban={onChangePage}
+              <div className="">
+              <Button
+                  iconName="add"
+                  classType="success" 
+                  title="Tambah Materi"
+                  label="Tambah Materi"
+                  onClick={handleButtonClick}
                 />
               </div>
             </div>
           </div>
         </div>
-        <div className="float my-4 mx-1">
-          <Button
-            classType="outline-secondary me-2 px-4 py-2"
-            label="Kembali"
-            onClick={() => onChangePage("kk")}
-          />
+             {/* <Search
+                    title={listKategori.find((item) => item.value === AppContext_test.KategoriIdByKK)?.label || ""}
+                    description={listKategori.find((item) => item.value === AppContext_test.KategoriIdByKK)?.deskripsi || ""}
+                    showInput={false}
+                /> */}
+            <div className="mt-1">
+              <div className="row">
+                {currentFilter.status === "Semua"
+                  ? currentData.length > 1
+                    ? (
+                      <CardMateri
+                        materis={currentData}
+                        onDetail={onChangePage}
+                        onEdit={onChangePage}
+                        onStatus={handleSetStatus}
+                        isNonEdit={false}
+                        onReviewJawaban={onChangePage}
+                      />
+                    ) : (
+                      <div className="" style={{margin:"0px 85px", width:"90%"}}>
+                      <Alert
+                        type="warning"
+                        message="Tidak ada materi pada kategori ini. Klik Tambah Materi."
+                      />
+                      </div>
+                    )
+                  : currentData.filter(materi => materi.Status === currentFilter.status).length > 1
+                    ? (
+                      <CardMateri
+                        materis={currentData.filter(materi => materi.Status === currentFilter.status)}
+                        onDetail={onChangePage}
+                        onEdit={onChangePage}
+                        onStatus={handleSetStatus}
+                        isNonEdit={false}
+                        onReviewJawaban={onChangePage}
+                      />
+                    ) : (
+                      <Alert
+                        type="warning"
+                        message="Tidak ada materi pada kategori ini. Klik Tambah Materi."
+                      />
+                    )}
+              </div>
+            </div>
+
+          </div>
         </div>
-      </div>
+        {showConfirmation && (
+        <Konfirmasi
+          title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
+          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYes}
+          onNo={handleConfirmNo}
+        />
+        )}
+        </>
     )
   );
 }

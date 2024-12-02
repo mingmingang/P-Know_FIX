@@ -1,14 +1,14 @@
 import React, { useRef, useState, useEffect } from "react";
-import Button from "../../../part/Button";
+import Button from "../../../../part/Button copy";
 import { object, string } from "yup";
-import Input from "../../../part/Input";
-import Loading from "../../../part/Loading";
+import Input from "../../../../part/Input";
+import Loading from "../../../../part/Loading";
 import * as XLSX from 'xlsx';
 import axios from 'axios';
-import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
-import { API_LINK } from "../../../util/Constants";
-import FileUpload from "../../../part/FileUpload";
-import uploadFile from "../../../util/UploadImageQuiz";
+import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
+import { API_LINK } from "../../../../util/Constants";
+import FileUpload from "../../../../part/FileUpload";
+import uploadFile from "../../../../util/UploadImageQuiz";
 import Swal from 'sweetalert2';
 import { Editor } from '@tinymce/tinymce-react';
 import AppContext_master from "../MasterContext";
@@ -698,7 +698,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
           }
         `}
       </style>
-      <form id="myForm" onSubmit={handleAdd}>
+      <form id="myForm" onSubmit={handleAdd} style={{margin:"100px"}}>
         <div>
           <Stepper activeStep={activeStep}>
             {steps.map((label, index) => (
@@ -710,7 +710,12 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
           <div>
             {activeStep === steps.length ? (
               <div>
-                <Button onClick={handleReset}>Reset</Button>
+                <Button onClick={handleReset} label="Reset"/>
+                <Button
+            classType="outline-secondary me-2 px-4 py-2"
+            label="Reset"
+            onClick={() => onChangePage("forumAdd")}
+          />
               </div>
             ) : (
               <div>
@@ -897,7 +902,6 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                                 id={`option_${index}_${optionIndex}`}
                                 name={`option_${index}`}
                                 value={option.value}
-                                // Checked hanya jika value di selectedOptions sama dengan value dari option
                                 checked={selectedOptions[index] === option.value}
                                 onChange={(e) => handleOptionChange(e, index)}
                                 style={{ marginRight: '5px' }}

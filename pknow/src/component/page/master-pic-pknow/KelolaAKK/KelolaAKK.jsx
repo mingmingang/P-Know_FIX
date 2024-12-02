@@ -68,7 +68,6 @@ export default function KelolaAKK({ onChangePage }) {
 
   const getListKK = async () => {
     setIsError(false);
-
     try {
       let data = await UseFetch(API_LINK + "KK/GetDataKK", currentFilter);
       if (data === "ERROR") {
@@ -108,7 +107,6 @@ export default function KelolaAKK({ onChangePage }) {
 
   function handleDelete(id) {
     setIsError(false);
-
     SweetAlert("Konfirmasi Hapus", "Anda yakin ingin <b>menghapus permanen</b> data ini?", "warning", "Hapus").then((confirm) => {
       if (confirm) {
         UseFetch(API_LINK + "KK/DeleteKK", { idKK: id }).then((data) => {
@@ -134,7 +132,6 @@ export default function KelolaAKK({ onChangePage }) {
         "Apakah anda yakin ingin <b>menonaktifkan</b> data ini? <b>Semua anggota keahlian akan dikeluarkan secara otomatis</b> jika data ini dinonaktifkan";
     else if (data.status === "Tidak Aktif")
       message = "Apakah anda yakin ingin mengaktifkan data ini?";
-
     SweetAlert("Konfirmasi", message, "info", "Ya").then((confirm) => {
       if (confirm) {
         UseFetch(API_LINK + "KK/SetStatusKK", { idKK: data.id, status: status }).then((data) => {
@@ -217,8 +214,10 @@ export default function KelolaAKK({ onChangePage }) {
               >
                 ↓ Data Aktif / Sudah Dipublikasikan
               </div>
-        {currentData[0]?.Message ? (
-          <Alert type="warning mt-3" message="Tidak ada data! Silahkan klik tombol tambah kelompok keahlian diatas.." />
+        {currentData.length === 0 ? (
+          <div className="ml-3">
+          <Alert type="warning" message="Tidak ada data! Silahkan klik tombol tambah kelompok keahlian diatas.." />
+          </div>
         ) : (
           <div className="row mt-0 gx-4">
           {currentData

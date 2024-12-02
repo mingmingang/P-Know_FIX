@@ -381,9 +381,7 @@ export default function DaftarPustaka({ onChangePage }) {
           ) : (
             <>
           <div style={{ margin: "10px 50px" }}>
-            <div className="row" style={{
-                  maxWidth: "100%",
-                }}>
+           
                   <CardPustaka
                     pustakas={currentData}
                     onDetail={onChangePage}
@@ -393,10 +391,6 @@ export default function DaftarPustaka({ onChangePage }) {
                     onStatus={handleSetStatus}
                   />
                 
-            </div>
-
-
-
             </div>
             </>
           )}

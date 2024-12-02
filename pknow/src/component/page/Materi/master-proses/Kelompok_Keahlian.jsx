@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
-import SweetAlert from "../../util/SweetAlert";
-import UseFetch from "../../util/UseFetch";
-import Button from "../../part/Button";
-import Input from "../../part/Input";
-import Filter from "../../part/Filter";
-import DropDown from "../../part/Dropdown";
-import Alert from "../../part/Alert";
-import Loading from "../../part/Loading";
-import Icon from "../../part/Icon";
-import CardKK from "../../part/CardKelompokKeahlian2";
-import { API_LINK } from "../../util/Constants";
+import SweetAlert from "../../../util/SweetAlert";
+import UseFetch from "../../../util/UseFetch";
+import Button from "../../../part/Button copy";
+import Input from "../../../part/Input";
+import Filter from "../../../part/Filter";
+import DropDown from "../../../part/Dropdown";
+import Alert from "../../../part/Alert";
+import Loading from "../../../part/Loading";
+import Icon from "../../../part/Icon";
+import CardKK from "../../../part/CardKelompokKeahlian2";
+import { API_LINK } from "../../../util/Constants";
 import AppContext_test from "../master-test/TestContext";
+import Search from "../../../part/Search";
 
 export default function SubKKIndex({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +31,7 @@ export default function SubKKIndex({ onChangePage }) {
         let kkData = await UseFetch(API_LINK + "Program/GetDataKKByAKK", {
           p1: AppContext_test.activeUser,
         });
-
+  
         if (kkData === "ERROR") {
           throw new Error(
             "Terjadi kesalahan: Gagal mengambil data Kelompok Keahlian."
@@ -169,17 +170,11 @@ export default function SubKKIndex({ onChangePage }) {
       {isLoading && <Loading />}
       {isError.error && <Alert type="danger" message={isError.message} />}
       <div className="d-flex flex-column">
-        {/* <div className="flex-fill">
-          <div className="input-group">
-            <Input forInput="pencarianProduk" placeholder="Cari" />
-            <Button iconName="search" classType="primary px-4" title="Search" />
-          </div>
-        </div> */}
-        <div className="flex-fill d-flex flex-wrap justify-content-center align-items-center">
+        
           {listKK.map((kk, index) => (
             <CardKK key={index} kk={kk} onChangePage={onChangePage} />
           ))}
-        </div>
+       
       </div>
     </>
   );

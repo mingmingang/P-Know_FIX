@@ -19,6 +19,9 @@
   color: var(--primary-color);
 }
 
+.text-primary{
+  color: #0A5EA8;
+}
 main{background-color: white;}
 
 .left-feature {

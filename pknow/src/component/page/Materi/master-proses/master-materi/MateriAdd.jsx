@@ -1,25 +1,27 @@
 import { useRef, useState, useEffect, lazy } from "react";
 import { object, string } from "yup";
-import { API_LINK } from "../../../util/Constants";
-import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
-import SweetAlert from "../../../util/SweetAlert";
-import UseFetch from "../../../util/UseFetch";
-import Button from "../../../part/Button";
-import DropDown from "../../../part/Dropdown";
-import Input from "../../../part/Input";
-import FileUpload from "../../../part/FileUpload";
-import uploadFile from "../../../util/UploadFile";
-import Loading from "../../../part/Loading";
-import Alert from "../../../part/Alert";
+import { API_LINK } from "../../../../util/Constants";
+import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
+import SweetAlert from "../../../../util/SweetAlert";
+import UseFetch from "../../../../util/UseFetch";
+import Button from "../../../../part/Button copy";
+import DropDown from "../../../../part/Dropdown";
+import Input from "../../../../part/Input";
+import FileUpload from "../../../../part/FileUpload";
+import uploadFile from "../../../../util/UploadFile";
+import Loading from "../../../../part/Loading";
+import Alert from "../../../../part/Alert";
 // import { Stepper } from 'react-form-stepper';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 import axios from "axios";
-import { Editor } from '@tinymce/tinymce-react';
+import { Editor } from "@tinymce/tinymce-react";
+import { Stepper, Step, StepLabel } from "@mui/material";
+import BackPage from "../../../../../assets/backPage.png";
+import Konfirmasi from "../../../../part/Konfirmasi";
 
-import { Stepper, Step, StepLabel } from '@mui/material';
-
-const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+// Define the steps
+const steps = ["Pengenalan", "Materi", "Forum"];
 
 function getStepContent(stepIndex) {
   switch (stepIndex) {
@@ -49,6 +51,23 @@ export default function MastermateriAdd({ onChangePage }) {
   const gambarInputRef = useRef(null);
   const vidioInputRef = useRef(null);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [isBackAction, setIsBackAction] = useState(false); 
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const handleGoBack = () => {
+    setIsBackAction(true);  
+    setShowConfirmation(true);  
+  };
+
+  const handleConfirmYes = () => {
+    setShowConfirmation(false); 
+    onChangePage("index");
+  };
+
+
+  const handleConfirmNo = () => {
+    setShowConfirmation(false);  
+  };
 
   const previewFile = async (namaFile) => {
     try {
@@ -330,7 +349,16 @@ export default function MastermateriAdd({ onChangePage }) {
           }
         `}
       </style>
-      <form onSubmit={handleAdd}>
+      <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
+            <div className="back-and-title" style={{display:"flex"}}>
+              <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Materi Baru</h4>
+              </div>
+                <div className="ket-draft">
+                <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
+                </div>
+              </div>
+      <form onSubmit={handleAdd} style={{margin:"20px 100px"}}>
         <div>
           <Stepper activeStep={activeStep}>
             {steps.map((label, index) => (
@@ -358,9 +386,9 @@ export default function MastermateriAdd({ onChangePage }) {
         </div>
 
         <div className="card">
-          <div className="card-header bg-outline-primary fw-medium text-black">
+          {/* <div className="card-header bg-outline-primary fw-medium text-black">
             Tambah Materi Baru
-          </div>
+          </div> */}
           <div className="card-body p-4">
             <div className="row">
               <div className="col-lg-6">
@@ -536,9 +564,7 @@ export default function MastermateriAdd({ onChangePage }) {
 
             </div>
           </div>
-        </div>
-
-        <div className="float my-4 mx-1">
+          <div className="float my-4 mx-1">
           <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Kembali"
@@ -557,7 +583,16 @@ export default function MastermateriAdd({ onChangePage }) {
             // isDisabled={!isFormSubmitted}
           />
         </div>
+        </div>
       </form>
+      {showConfirmation && (
+        <Konfirmasi
+          title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
+          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYes}
+          onNo={handleConfirmNo}
+        />
+        )}
     </>
   );
 }

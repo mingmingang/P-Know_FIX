@@ -20,6 +20,7 @@ import {
   faClock,
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
+import maskotPknow from "../../../../assets/pknowmaskot.png";
 
 export default function KKDetailPublish({ onChangePage, withID }) {
   const [errors, setErrors] = useState({});
@@ -229,8 +230,11 @@ export default function KKDetailPublish({ onChangePage, withID }) {
           style={{width:500,height:300, borderRadius:"20px", objectFit:"cover"}}
         />
             </div>
-           
             <div className="" style={{marginTop:"40px"}}>
+            <h5 className="text-primary pt-2">
+           Daftar Anggota Kelompok Keahlian{" "}
+            <strong>{formData.nama}</strong>
+          </h5>
               {listAnggota.length > 0 ? (
                 listAnggota[0].Message ? (
                   <p>Tidak Ada Anggota Aktif</p>
@@ -238,7 +242,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                   <div>
                     {listAnggota.map((ag, index) => (
                       <div
-                        className="card-profile mb-3 d-flex justify-content-between shadow-sm"
+                        className="card-profile mb-3 mt-3 d-flex justify-content-between shadow-sm"
                         key={ag.Key}
                       >
                         <div className="d-flex w-100">
@@ -251,7 +255,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                           ></div>
                           <div className="p-1 ps-2 d-flex">
                             <img
-                              src="https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"
+                              src={maskotPknow}
                               alt={ag["Nama Anggota"]}
                               className="img-fluid rounded-circle"
                               width="45"

@@ -134,7 +134,6 @@ export default function KelolaKK({ onChangePage }) {
   }
 
   function handleSetCurrentPageDraft(newCurrentPage) {
-    setIsLoading(true);
     setCurrentFilterDraft((prevFilter) => ({
       ...prevFilter,
       page: newCurrentPage,
@@ -385,12 +384,12 @@ export default function KelolaKK({ onChangePage }) {
   }
 
   useEffect(() => {
-    getListKK();
     getListKKAktif();
-    getListKKNonAktif();
+  //   getListKKNonAktif();
     getListKKMenunggu();
     getListKKDraft();
   }, [currentFilterAktif], [currentFilterNonAktif], [currentFilterMenunggu], [currentFilterDraft] );
+  
 
   async function handleDelete(id) {
     setIsError(false);
@@ -615,7 +614,7 @@ export default function KelolaKK({ onChangePage }) {
                     </div>
                   ))}
                   </div>
-                  <div className="mb-4 d-flex justify-content-center">
+            <div className="mb-4 d-flex justify-content-center">
             <div className="d-flex flex-column ">
               <Paging
                 pageSize={PAGE_SIZE}
@@ -625,7 +624,6 @@ export default function KelolaKK({ onChangePage }) {
               />
             </div>
           </div>
-
                   <div
                 className="card-keterangan"
                 style={{
@@ -657,7 +655,7 @@ export default function KelolaKK({ onChangePage }) {
                     </div>
                   ))}
                   </div>
-                  <div className="mb-4 d-flex justify-content-center">
+                  {/* <div className="mb-4 d-flex justify-content-center">
             <div className="d-flex flex-column ">
               <Paging
                 pageSize={PAGE_SIZE}
@@ -666,7 +664,7 @@ export default function KelolaKK({ onChangePage }) {
                 navigation={handleSetCurrentPageDraft}
               />
             </div>
-          </div>
+          </div> */}
                 
 
               <div

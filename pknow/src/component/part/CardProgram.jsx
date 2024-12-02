@@ -2,6 +2,7 @@ import React, { forwardRef } from "react";
 import Button from "./Button copy";
 import Icon from "./Icon";
 import Input from "./Input";
+import { colors } from "@mui/material";
 
 const CardProgram = ({
   id,
@@ -46,9 +47,10 @@ const CardProgram = ({
           isActive ? "align-items-center border-bottom border-primary" : ""
         }`}
       >
+        <div className="">
         <p
           className="fw-medium"
-          style={{ width: "20%", borderRight: "solid grey 1px", backgroundColor:"#ABCCFF", borderRadius:"10px", padding:"5px 5px" }}
+          style={{ width: "50%", borderRight: "solid grey 1px", backgroundColor:"#ABCCFF", borderRadius:"10px", padding:"5px 5px" }}
         >
           {index}
           {". "}
@@ -57,7 +59,7 @@ const CardProgram = ({
         <p
           className="mb-0 pe-3"
           style={{
-            width: "60%",
+            width: "80%",
             display: isActive ? "block" : "-webkit-box",
             WebkitLineClamp: 1,
             WebkitBoxOrient: "vertical",
@@ -67,27 +69,31 @@ const CardProgram = ({
         >
           {data.Deskripsi}
         </p>
+        </div>
         {data.Status === "Draft" ? (
           <div
-            className="d-flex justify-content-between align-items-center px-3"
+            className="d-flex justify-content-between align-items-center mt-1"
             style={{
               width: "10%",
-              borderLeft: "solid grey 1px",
+              background:"white", color:"#0A5EA8",  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", fontSize:"25px", padding:"2px 10px", borderRadius:"10px", height:"50px" 
             }}
+
           >
             <Icon
               name="edit"
               type="Bold"
-              cssClass="btn px-2 py-0 text-primary"
+              cssClass="btn px-2  py-0 text-primary"
               title="Ubah data"
               onClick={() => onChangePage("edit", data)}
+              style={{borderRight:"1px solid grey", borderRadius:"0px"}}
             />
             <Icon
               name="trash"
               type="Bold"
-              cssClass="btn px-2 py-0 text-primary"
+              cssClass="btn px-2 py-0"
               title="Hapus data permanen"
               onClick={() => handleDeleteClick(data)}
+              style={{borderRight:"1px solid grey", borderRadius:"0px", color:"red"}}
             />
             <Icon
               name="paper-plane"
@@ -102,7 +108,6 @@ const CardProgram = ({
             className="d-flex justify-content-between align-items-center px-3"
             style={{
               width: "10%",
-              borderLeft: "solid grey 1px",
             }}
           >
             <Icon
@@ -138,15 +143,14 @@ const CardProgram = ({
         )}
         <div
           className="ps-3"
-          style={{
-            borderLeft: "solid grey 1px",
-          }}
+
         >
           <Button
             iconName={isActive ? "caret-up" : "caret-down"}
             classType="outline-primary btn-sm px-3"
             onClick={onClick}
             title="Detail Kelompok Keahlian"
+            style={{background:"white", color:"#0A5EA8",  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", fontSize:"25px", padding:"5px 10px" }}
           />
         </div>
       </div>
