@@ -48,7 +48,7 @@ const CardKK = ({ kk, onChangePage }) => {
                   <a href="#" className="text-decoration-none text-dark">{kk.AnggotaCount} Anggota</a>
                 </span>
               </h6>
-              <div className="ps-3" style={{ borderLeft: "solid grey 1px" }}>
+              <div className="ps-3">
                 <Button
                   iconName={isContentVisible ? "caret-up" : "caret-down"}
                   classType="outline-primary btn-sm"
@@ -67,7 +67,8 @@ const CardKK = ({ kk, onChangePage }) => {
                 fontSize: "15px",
                 maxHeight: expandDeskripsi ? "none" : "75px",
                 overflow: "hidden",
-                textAlign:'justify'
+                textAlign:'justify',
+                lineHeight:"10px"
               }}  
             >
               {kk.Deskripsi.length > MAX_DESCRIPTION_LENGTH && !expandDeskripsi[kk.Key] ? (

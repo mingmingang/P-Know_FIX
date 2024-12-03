@@ -16,24 +16,64 @@ import { Editor } from '@tinymce/tinymce-react';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 
-const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+const steps = ['Sharing Expert', 'Pretest', 'Post Test'];
 
 function getStepContent(stepIndex) {
   switch (stepIndex) {
+    // case 0:
+    //   return 'materiAdd';
     case 0:
-      return 'materiAdd';
+      return 'sharingAdd';
     case 1:
       return 'pretestAdd';
     case 2:
-      return 'sharingAdd';
-    case 3:
-      return 'forumAdd';
-    case 4:
       return 'posttestAdd';
     default:
       return 'Unknown stepIndex';
   }
 }
+
+function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
+  return (
+    <Box sx={{ width: "100%", mt: 2 }}>
+      <Stepper activeStep={activeStep} alternativeLabel>
+        {steps.map((label, index) => (
+          <Step
+            key={label}
+            onClick={() => onChangePage(getStepContent(index))} // Tambahkan onClick di sini
+            sx={{
+              cursor: "pointer", // Menambahkan pointer untuk memberikan indikasi klik
+              "& .MuiStepIcon-root": {
+                fontSize: "2rem",
+                color: index <= activeStep ? "primary.main" : "grey.300",
+                "&.Mui-active": {
+                  color: "primary.main",
+                },
+                "& .MuiStepIcon-text": {
+                  fill: "#fff",
+                  fontSize: "1rem",
+                },
+              },
+            }}
+          >
+            <StepLabel
+              sx={{
+                "& .MuiStepLabel-label": {
+                  typography: "body1",
+                  color: index <= activeStep ? "primary.main" : "grey.500",
+                },
+              }}
+            >
+              {label}
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
+  );
+}
+
+
 export default function MasterPreTestAdd({ onChangePage }) {
   const [formContent, setFormContent] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -450,7 +490,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
     const updatedSelectedOptions = [...selectedOptions];
     updatedSelectedOptions.splice(index, 1);
     setSelectedOptions(updatedSelectedOptions);
-    // Hapus correctAnswer dari state saat pertanyaan dihapus
     const updatedCorrectAnswers = { ...correctAnswers };
     delete updatedCorrectAnswers[index];
     setCorrectAnswers(updatedCorrectAnswers);
@@ -458,20 +497,16 @@ export default function MasterPreTestAdd({ onChangePage }) {
 
   const parseExcelData = (data) => {
     const questions = data.map((row, index) => {
-      // Skip header row (index 0) and the row below it (index 1)
       if (index < 2) return null;
-
       const options = row[3] ? row[3].split(',') : [];
       const points = typeof row[4] === 'string' ? row[4].split(',') : [];
-      
       return {
         text: row[1],
         type: row[2].toLowerCase() === 'essay' ? 'Essay' : (row[2].toLowerCase() === 'praktikum' ? 'Praktikum' : 'Pilgan'),
         options: options.map((option, idx) => ({ label: option, value: String.fromCharCode(65 + idx), point: points[idx] ? points[idx].trim() : null })),
-        point: row[5],
-       
+        point: row[5], 
       };
-    }).filter(Boolean); // Filter out null values
+    }).filter(Boolean);
 
     const initialSelectedOptions = questions.map((question, index) => {
       if (question.type === 'Pilgan') {
@@ -496,13 +531,11 @@ export default function MasterPreTestAdd({ onChangePage }) {
     const file = e.target.files[0];
     const updatedFormContent = [...formContent];
     updatedFormContent[index].selectedFile = file;
-  
-    // Buat objek FileReader
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const image = new Image();
       image.onload = () => {
-        // Perbarui ukuran gambar dalam state
         updatedFormContent[index].imageWidth = image.width;
         updatedFormContent[index].imageHeight = image.height;
         setFormContent(updatedFormContent);
@@ -561,7 +594,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
 
   const handleDownloadTemplate = () => {
     const link = document.createElement('a');
-    link.href = '/template.xlsx'; // Path to your template file in the public directory
+    link.href = '/template.xlsx';
     link.download = 'template.xlsx';
     link.click();
   };
@@ -576,10 +609,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const handleOptionPointChange = (e, questionIndex, optionIndex) => {
     const { value } = e.target;
     
-    // Clone the formContent state
     const updatedFormContent = [...formContent];
 
-    // Update the specific option's point value
     updatedFormContent[questionIndex].options[optionIndex].point = parseInt(value);
 
     // Update the formContent state
@@ -639,6 +670,11 @@ export default function MasterPreTestAdd({ onChangePage }) {
     setActiveStep(0);
   };
 
+  const handlePageChange = (content) => {
+    onChangePage(content);
+  };
+
+
   if (isLoading) return <Loading />;
 
   return (
@@ -678,13 +714,12 @@ export default function MasterPreTestAdd({ onChangePage }) {
       </style>
       <form id="myForm" onSubmit={handleAdd} style={{margin:"100px"}}>
         <div>
-          <Stepper activeStep={activeStep}>
-            {steps.map((label, index) => (
-              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
+        <CustomStepper
+      activeStep={1}
+      steps={steps}
+      onChangePage={handlePageChange}
+      getStepContent={getStepContent}
+    />
           <div>
             {activeStep === steps.length ? (
               <div>

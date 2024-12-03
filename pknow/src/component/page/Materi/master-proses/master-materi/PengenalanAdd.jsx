@@ -8,7 +8,7 @@ import Button from "../../../../part/Button copy";
 import DropDown from "../../../../part/Dropdown";
 import Input from "../../../../part/Input";
 import FileUpload from "../../../../part/FileUpload";
-import uploadFile from "../../../../util/UploadFile";
+import UploadFile from "../../../../util/UploadFile";
 import Loading from "../../../../part/Loading";
 import Alert from "../../../../part/Alert";
 // import { Stepper } from 'react-form-stepper';
@@ -16,9 +16,11 @@ import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 import axios from "axios";
 import { Editor } from "@tinymce/tinymce-react";
-import { Stepper, Step, StepLabel } from "@mui/material";
+import { Stepper, Step, StepLabel , Box } from "@mui/material";
 import BackPage from "../../../../../assets/backPage.png";
 import Konfirmasi from "../../../../part/Konfirmasi";
+import NoImage from "../../../../../assets/NoImage.png";
+import DOMPurify from "dompurify";
 
 // Define the steps
 const steps = ["Pengenalan", "Materi", "Forum"];
@@ -28,17 +30,58 @@ function getStepContent(stepIndex) {
     case 0:
       return 'pengenalanAdd';
     case 1:
-      return 'pretestAdd';
+      return 'materiAdd';
     case 2:
-      return 'sharingAdd';
-    case 3:
       return 'forumAdd';
-    case 4:
-      return 'posttestAdd';
+    // case 3:
+    //   return 'forumAdd';
+    // case 4:
+    //   return 'posttestAdd';
     default:
       return 'Unknown stepIndex';
   }
 }
+
+function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
+  return (
+    <Box sx={{ width: "100%", mt: 2 }}>
+      <Stepper activeStep={activeStep} alternativeLabel>
+        {steps.map((label, index) => (
+          <Step
+            key={label}
+            onClick={() => onChangePage(getStepContent(index))} // Tambahkan onClick di sini
+            sx={{
+              cursor: "pointer", // Menambahkan pointer untuk memberikan indikasi klik
+              "& .MuiStepIcon-root": {
+                fontSize: "2rem",
+                color: index <= activeStep ? "primary.main" : "grey.300",
+                "&.Mui-active": {
+                  color: "primary.main",
+                },
+                "& .MuiStepIcon-text": {
+                  fill: "#fff",
+                  fontSize: "1rem",
+                },
+              },
+            }}
+          >
+            <StepLabel
+              sx={{
+                "& .MuiStepLabel-label": {
+                  typography: "body1",
+                  color: index <= activeStep ? "primary.main" : "grey.500",
+                },
+              }}
+            >
+              {label}
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
+  );
+}
+
 
 export default function Pengenalan({ onChangePage }) {
   const [errors, setErrors] = useState({});
@@ -53,6 +96,7 @@ export default function Pengenalan({ onChangePage }) {
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [isBackAction, setIsBackAction] = useState(false); 
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const fileGambarRef = useRef(null);
 
   const handleGoBack = () => {
     setIsBackAction(true);  
@@ -97,10 +141,9 @@ export default function Pengenalan({ onChangePage }) {
     mat_file_video: "",
     mat_pengenalan: "",
     mat_keterangan: "",
-    kry_id: AppContext_test.activeUser,
+    kry_id: AppContext_test.karyawanId,
     mat_kata_kunci: "",
-    mat_gambar: "",
-    createBy: AppContext_test.displayName,
+    mat_gambar: ""
   });
 
   // Validasi skema menggunakan Yup
@@ -114,42 +157,56 @@ export default function Pengenalan({ onChangePage }) {
     kry_id: string(),
     mat_kata_kunci: string().required('Kata kunci materi harus diisi'),
     mat_gambar: string(),
-    createBy: string(),
   });
 
   // Handle input change
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
-    const validationError = await validateInput(name, value, userSchema);
+
+    try {
+      if (name === "personInCharge" && value === "") {
+        setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
+      } else {
+        await userSchema.validateAt(name, { [name]: value });
+        setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
+      }
+    } catch (error) {
+      setErrors((prevErrors) => ({ ...prevErrors, [name]: error.message }));
+    }
+
     formDataRef.current[name] = value;
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [validationError.name]: validationError.error,
-    }));
   };
+
 
   const handleGambarChange = () => handleFileChange(gambarInputRef, "jpg,png", 5);
   const handlePdfChange = () => handleFileChange(fileInputRef, "pdf", 5);
   const handleVideoChange = () => handleFileChange(vidioInputRef, "mp4,mov", 100);
+  const [filePreview, setFilePreview] = useState(false);
 
-  const handleFileChange = async (ref, extAllowed, maxFileSize) => {
+  const handleFileChange = (ref, extAllowed) => {
     const { name, value } = ref.current;
     const file = ref.current.files[0];
-    const fileName = file.name;
-    const fileSize = file.size;
-    const fileExt = fileName.split(".").pop();
-    const validationError = await validateInput(name, value, userSchema);
+    const fileName = file ? file.name : "";
+    const fileSize = file ? file.size : 0;
+    const fileExt = fileName.split(".").pop().toLowerCase();
+    const validationError = validateInput(name, value, userSchema);
     let error = "";
 
-    if (fileSize / 1024 / 1024 > maxFileSize) {
-      error = `Berkas terlalu besar, maksimal ${maxFileSize}MB`;
-      SweetAlert("Error", error, "error");
-    } else if (!extAllowed.split(",").includes(fileExt)) {
-      error = "Format berkas tidak valid";
-      SweetAlert("Error", error, "error");
-    }
+    if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
+    else if (!extAllowed.split(",").includes(fileExt))
+      error = "format berkas tidak valid";
 
     if (error) ref.current.value = "";
+    else {
+      // Show preview if the file is an image
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFilePreview(reader.result); // Set the preview
+        };
+        reader.readAsDataURL(file);
+      }
+    }
 
     setErrors((prevErrors) => ({
       ...prevErrors,
@@ -160,7 +217,7 @@ export default function Pengenalan({ onChangePage }) {
   
   const fetchDataMateriById = async (id) => {
     try {
-      const response = await axios.post(API_LINK + "Materis/GetDataMateriById", id);
+      const response = await axios.post(API_LINK + "Materi/GetDataMateriById", id);
       return response.data;
     } catch (error) {
       console.error('Terjadi kesalahan saat mengambil data materi:', error);
@@ -171,7 +228,7 @@ export default function Pengenalan({ onChangePage }) {
   // Handle form submit
   const handleAdd = async (e) => {
     e.preventDefault();
-
+    
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
@@ -179,81 +236,69 @@ export default function Pengenalan({ onChangePage }) {
     );
 
     if (Object.values(validationErrors).every((error) => !error)) {
-      setIsFormSubmitted(true);
       setIsLoading(true);
-      setIsError((prevError) => {
-        return { ...prevError, error: false };
-      });
+      setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
 
       const uploadPromises = [];
 
-      let hasPdfFile = false;
-      let hasVideoFile = false;
-
-      if (fileInputRef.current && fileInputRef.current.files.length > 0) {
+      if (fileGambarRef.current.files.length > 0) {
         uploadPromises.push(
-          uploadFile(fileInputRef.current).then((data) => {
-            formDataRef.current["mat_file_pdf"] = data.newFileName;
-            AppContext_test.materiPdf = data.newFileName;
-            hasPdfFile = true;
-          })
+          UploadFile(fileGambarRef.current).then(
+            (data) => (formDataRef.current["mat_gambar"] = data.Hasil)
+          )
         );
       }
 
-      if (gambarInputRef.current && gambarInputRef.current.files.length > 0) {
-        uploadPromises.push(
-          uploadFile(gambarInputRef.current).then((data) => {
-            formDataRef.current["mat_gambar"] = data.newFileName;
-            AppContext_test.materiGambar = data.newFileName;
-          })
-        );
-      }
-
-      if (vidioInputRef.current && vidioInputRef.current.files.length > 0) {
-        uploadPromises.push(
-          uploadFile(vidioInputRef.current).then((data) => {
-            formDataRef.current["mat_file_video"] = data.newFileName;
-            AppContext_test.materiVideo = data.newFileName;
-            hasVideoFile = true;
-          })
-        );
-      }
-
-      Promise.all(uploadPromises).then(() => {
-        if (!hasPdfFile && !hasVideoFile) {
-          setIsLoading(false);
-          SweetAlert("Terjadi Kesalahan!", "Harus memilih salah satu file PDF atau file video, tidak boleh keduanya kosong.", "error");
-          return;
-        }
-        axios.post(API_LINK + "Materis/SaveDataMateri", formDataRef.current)
-          .then(response => {
-            const data = response.data;
-            if (data[0].hasil === "OK") {
-              AppContext_master.dataIDMateri = data[0].newID;
-              SweetAlert("Sukses", "Data Materi berhasil disimpan", "success");
-              setIsFormDisabled(true);
-              AppContext_master.formSavedMateri = true;
-            } else {
-              setIsError(prevError => ({
-                ...prevError,
-                error: true,
-                message: "Terjadi kesalahan: Gagal menyimpan data Materi."
-              }));
-            }
-          })
-          .catch(error => {
-            console.error('Terjadi kesalahan:', error);
+      try {
+        await Promise.all(uploadPromises);
+        axios.post(API_LINK + "Materi/SaveDataMateri", formDataRef.current)
+        .then(response => {
+          const data = response.data;
+          if (data[0].hasil === "OK") {
+            AppContext_master.dataIDMateri = data[0].newID;
+            console.log("id materi", AppContext_master.dataIDMateri);
+            SweetAlert("Sukses", "Data Materi berhasil disimpan", "success");
+            setIsFormDisabled(true);
+            AppContext_master.formSavedMateri = true;
+            SweetAlert(
+              "Sukses",
+              "Data materi berhasil disimpan",
+              "success"
+            );
+            onChangePage("materiAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1);
+          } else {
             setIsError(prevError => ({
               ...prevError,
               error: true,
-              message: "Terjadi kesalahan: " + error.message
+              message: "Terjadi kesalahan: Gagal menyimpan data Materi."
             }));
-          })
-          .finally(() => setIsLoading(false));
-      });
-    }
+          }
+        })
+        .catch(error => {
+          console.error('Terjadi kesalahan:', error);
+          setIsError(prevError => ({
+            ...prevError,
+            error: true,
+            message: "Terjadi kesalahan: " + error.message
+          }));
+        })
+        .finally(() => setIsLoading(false));
+
+        console.log("isian form",formDataRef.current);
+      } catch (error) {
+        window.scrollTo(0, 0);
+        setIsError((prevError) => ({
+          ...prevError,
+          error: true,
+          message: error.message,
+        }));
+      } finally {
+        setIsLoading(false);
+      }
+    } else window.scrollTo(0, 0);
   };
+  
 
   const fetchDataKategori = async (retries = 3, delay = 1000) => {
     for (let i = 0; i < retries; i++) {
@@ -279,7 +324,6 @@ export default function Pengenalan({ onChangePage }) {
 
   useEffect(() => {
     let isMounted = true;
-
     const fetchData = async () => {
       setIsError({ error: false, message: '' });
       setIsLoading(true);
@@ -332,7 +376,12 @@ export default function Pengenalan({ onChangePage }) {
     setActiveStep(0);
   };
 
-  if (isLoading) return <Loading />;
+  const handlePageChange = (content) => {
+    onChangePage(content);
+  };
+
+
+  // if (isLoading) return <Loading />;
 
 
   return (
@@ -359,15 +408,21 @@ export default function Pengenalan({ onChangePage }) {
                 </div>
               </div>
       <form onSubmit={handleAdd} style={{margin:"20px 100px"}}>
-        <div>
-          <Stepper activeStep={activeStep}>
+        <div className="mb-4">
+          {/* <Stepper activeStep={activeStep}>
             {steps.map((label, index) => (
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
               </Step>
             ))}
-          </Stepper>
-          <div>
+          </Stepper> */}
+         <CustomStepper
+      activeStep={0}
+      steps={steps}
+      onChangePage={handlePageChange}
+      getStepContent={getStepContent}
+    />
+          {/* <div>
             {activeStep === steps.length ? (
               <div>
                 <Button onClick={handleReset}>Reset</Button>
@@ -382,14 +437,64 @@ export default function Pengenalan({ onChangePage }) {
                 </Button>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
 
-        <div className="card">
+        <div className="card mb-4">
           {/* <div className="card-header bg-outline-primary fw-medium text-black">
             Tambah Materi Baru
           </div> */}
-          <div className="card-body p-4">
+          <div className="col-lg-4 mt-4" style={{ display: "flex" }}>
+                    <div className="preview-img">
+                      {filePreview ? (
+                        <div
+                          style={{
+                            marginTop: "10px",
+                            marginRight: "30px"
+                          }}
+                        >
+                          <img
+                            src={filePreview}
+                            alt="Preview"
+                            style={{
+                              width: "200px",
+                              height: "auto",
+                              borderRadius: "20px",
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            marginTop: "10px",
+                            marginRight: "30px"
+                          }}
+                        >
+                          <img
+                            src={NoImage} // Use fallback image if no preview available
+                            alt="No Preview Available"
+                            style={{
+                              width: "200px",
+                              height: "auto",
+                              borderRadius: "20px",
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className="file-upload">
+                      <FileUpload
+                        forInput="gambarMateri"
+                        label="Gambar Materi (.png)"
+                        formatFile=".png"
+                        ref={fileGambarRef}
+                        onChange={() => handleFileChange(fileGambarRef, "png")}
+                        errorMessage={errors.gambar}
+                        isRequired={true}
+                      />
+                    </div>
+                  </div>
+          <div className="card-body pl-4 pr-4">
             <div className="row">
               <div className="col-lg-6">
                 <Input
@@ -449,7 +554,7 @@ export default function Pengenalan({ onChangePage }) {
                   disabled={isFormDisabled || dataSaved}
                 />
               </div>
-              <div className="col-lg-12 pb-4" >
+              <div className="col-lg-12" >
                 <div className="form-group">
                   <label htmlFor="pengenalanMateri" className="form-label fw-bold">
                     Pengenalan Materi <span style={{ color: 'Red' }}> *</span>
@@ -477,6 +582,11 @@ export default function Pengenalan({ onChangePage }) {
                   {errors.mat_pengenalan && (
                     <div className="invalid-feedback">{errors.mat_pengenalan}</div>
                   )}
+                   <div
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(formDataRef.mat_pengenalan),
+        }}
+      ></div>
                 </div>
               </div>
               {/* <div className="col-lg-4">
@@ -564,24 +674,30 @@ export default function Pengenalan({ onChangePage }) {
 
             </div>
           </div>
-          <div className="float my-4 mx-1">
-          <Button
+          <div className="d-flex justify-content-between my-4 mx-1 mt-0">
+            <div className="ml-4">
+          {/* <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Kembali"
             onClick={() => onChangePage("index")}
-          />
+          /> */}
+          </div>
+          <div className="d-flex mr-4" >
           <Button
             classType="primary ms-2 px-4 py-2"
             type="submit"
             label="Simpan"
             isDisabled={isFormDisabled || dataSaved}
+            style={{marginRight:"10px"}}
+            // onClick={() => onChangePage("materiAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
           />
           <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("pretestAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
+            onClick={() => onChangePage("materiAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
             // isDisabled={!isFormSubmitted}
           />
+          </div>
         </div>
         </div>
       </form>

@@ -12,27 +12,63 @@ import AppContext_test from "../MasterContext";
 import uploadFile from "../../../../util/UploadFile";
 import AppContext_master from "../MasterContext";
 import axios from "axios";
-
 import { Stepper, Step, StepLabel } from '@mui/material';
 
-const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+const steps = ['Sharing Expert', 'Pretest', 'Post Test'];
 
 function getStepContent(stepIndex) {
   switch (stepIndex) {
     case 0:
-      return 'materiAdd';
+      return 'sharingAdd';
     case 1:
       return 'pretestAdd';
     case 2:
-      return 'sharingAdd';
-    case 3:
-      return 'forumAdd';
-    case 4:
       return 'posttestAdd';
     default:
       return 'Unknown stepIndex';
   }
 }
+
+function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
+  return (
+    <Box sx={{ width: "100%", mt: 2 }}>
+      <Stepper activeStep={activeStep} alternativeLabel>
+        {steps.map((label, index) => (
+          <Step
+            key={label}
+            onClick={() => onChangePage(getStepContent(index))} // Tambahkan onClick di sini
+            sx={{
+              cursor: "pointer", // Menambahkan pointer untuk memberikan indikasi klik
+              "& .MuiStepIcon-root": {
+                fontSize: "2rem",
+                color: index <= activeStep ? "primary.main" : "grey.300",
+                "&.Mui-active": {
+                  color: "primary.main",
+                },
+                "& .MuiStepIcon-text": {
+                  fill: "#fff",
+                  fontSize: "1rem",
+                },
+              },
+            }}
+          >
+            <StepLabel
+              sx={{
+                "& .MuiStepLabel-label": {
+                  typography: "body1",
+                  color: index <= activeStep ? "primary.main" : "grey.500",
+                },
+              }}
+            >
+              {label}
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
+  );
+}
+
 export default function MasterSharingAdd({ onChangePage}) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -187,6 +223,12 @@ export default function MasterSharingAdd({ onChangePage}) {
     setActiveStep(0);
   };
 
+  const handlePageChange = (content) => {
+    onChangePage(content);
+  };
+
+
+
   if (isLoading) return <Loading />;
 
   return (
@@ -198,13 +240,12 @@ export default function MasterSharingAdd({ onChangePage}) {
       )}
       <form onSubmit={handleAdd} style={{margin:"100px"}}>
         <div>
-          <Stepper activeStep={activeStep}>
-            {steps.map((label, index) => (
-              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
+        <CustomStepper
+      activeStep={1}
+      steps={steps}
+      onChangePage={handlePageChange}
+      getStepContent={getStepContent}
+    />
           <div>
             {activeStep === steps.length ? (
               <div>

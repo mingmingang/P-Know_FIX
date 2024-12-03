@@ -16,7 +16,7 @@ import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 import axios from "axios";
 import { Editor } from "@tinymce/tinymce-react";
-import { Stepper, Step, StepLabel } from "@mui/material";
+import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import BackPage from "../../../../../assets/backPage.png";
 import Konfirmasi from "../../../../part/Konfirmasi";
 
@@ -26,26 +26,66 @@ const steps = ["Pengenalan", "Materi", "Forum"];
 function getStepContent(stepIndex) {
   switch (stepIndex) {
     case 0:
-      return 'materiAdd';
+      return 'pengenalanAdd';
     case 1:
-      return 'pretestAdd';
+      return 'materiAdd';
     case 2:
-      return 'sharingAdd';
-    case 3:
       return 'forumAdd';
-    case 4:
-      return 'posttestAdd';
+    // case 3:
+    //   return 'forumAdd';
+    // case 4:
+    //   return 'posttestAdd';
     default:
       return 'Unknown stepIndex';
   }
 }
 
-export default function MastermateriAdd({ onChangePage }) {
+function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
+  return (
+    <Box sx={{ width: "100%", mt: 2 }}>
+      <Stepper activeStep={activeStep} alternativeLabel>
+        {steps.map((label, index) => (
+          <Step
+            key={label}
+            onClick={() => onChangePage(getStepContent(index))} 
+            sx={{
+              cursor: "pointer", 
+              "& .MuiStepIcon-root": {
+                fontSize: "2rem",
+                color: index <= activeStep ? "primary.main" : "grey.300",
+                "&.Mui-active": {
+                  color: "primary.main",
+                },
+                "& .MuiStepIcon-text": {
+                  fill: "#fff",
+                  fontSize: "1rem",
+                },
+              },
+            }}
+          >
+            <StepLabel
+              sx={{
+                "& .MuiStepLabel-label": {
+                  typography: "body1",
+                  color: index <= activeStep ? "primary.main" : "grey.500",
+                },
+              }}
+            >
+              {label}
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
+  );
+}
+
+export default function MastermateriAdd({ onChangePage}) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [listKategori, setListKategori] = useState([]);
-  const [isFormDisabled, setIsFormDisabled] = useState(false);
+  const [isFileDisabled, setIsFileDisabled] = useState(false);
   const [resetStepper, setResetStepper] = useState(0);
   const fileInputRef = useRef(null);
   const gambarInputRef = useRef(null);
@@ -72,39 +112,42 @@ export default function MastermateriAdd({ onChangePage }) {
   const previewFile = async (namaFile) => {
     try {
       namaFile = namaFile.trim();
-      const response = await axios.get(`${API_LINK}Utilities/Upload/DownloadFile`, {
-        params: {
-          namaFile 
-        },
+      console.log(namaFile);
+
+      // Ubah URL untuk menyertakan namaFile langsung di path URL
+      const response = await axios.get(`${API_LINK}Upload/GetFile/${namaFile}`, {
         responseType: 'arraybuffer' 
-      }); 
+      });
 
       const blob = new Blob([response.data], { type: response.headers['content-type'] });
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
     } catch (error) {
+      console.error("Error fetching file:", error);
     }
-  };
+};
+
 
 
   const kategori = AppContext_master.KategoriIdByKK;
 
   // Referensi ke form data menggunakan useRef
   const formDataRef = useRef({
+    mat_id: AppContext_master.dataIDMateri,
     kat_id: AppContext_master.KategoriIdByKK,
     mat_judul: "",
     mat_file_pdf: "",
     mat_file_video: "",
     mat_pengenalan: "",
     mat_keterangan: "",
-    kry_id: AppContext_test.activeUser,
+    kry_id: AppContext_test.karyawanId,
     mat_kata_kunci: "",
     mat_gambar: "",
-    createBy: AppContext_test.displayName,
   });
 
   // Validasi skema menggunakan Yup
   const userSchema = object({
+    mat_id:string(),
     kat_id: string(),
     mat_judul: string().required('Judul materi harus diisi'),
     mat_file_pdf: string(),
@@ -118,17 +161,17 @@ export default function MastermateriAdd({ onChangePage }) {
   });
 
   // Handle input change
-  const handleInputChange = async (e) => {
-    const { name, value } = e.target;
-    const validationError = await validateInput(name, value, userSchema);
-    formDataRef.current[name] = value;
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [validationError.name]: validationError.error,
-    }));
-  };
+  // const handleInputChange = async (e) => {
+  //   const { name, value } = e.target;
+  //   const validationError = await validateInput(name, value, userSchema);
+  //   formDataRef.current[name] = value;
+  //   setErrors((prevErrors) => ({
+  //     ...prevErrors,
+  //     [validationError.name]: validationError.error,
+  //   }));
+  // };
 
-  const handleGambarChange = () => handleFileChange(gambarInputRef, "jpg,png", 5);
+  // const handleGambarChange = () => handleFileChange(gambarInputRef, "jpg,png", 5);
   const handlePdfChange = () => handleFileChange(fileInputRef, "pdf", 5);
   const handleVideoChange = () => handleFileChange(vidioInputRef, "mp4,mov", 100);
 
@@ -160,7 +203,7 @@ export default function MastermateriAdd({ onChangePage }) {
   
   const fetchDataMateriById = async (id) => {
     try {
-      const response = await axios.post(API_LINK + "Materis/GetDataMateriById", id);
+      const response = await axios.post(API_LINK + "Materi/GetDataMateriById", id);
       return response.data;
     } catch (error) {
       console.error('Terjadi kesalahan saat mengambil data materi:', error);
@@ -171,6 +214,7 @@ export default function MastermateriAdd({ onChangePage }) {
   // Handle form submit
   const handleAdd = async (e) => {
     e.preventDefault();
+    console.log("ID Materi", AppContext_master.dataIDMateri)
 
     const validationErrors = await validateAllInputs(
       formDataRef.current,
@@ -194,27 +238,27 @@ export default function MastermateriAdd({ onChangePage }) {
       if (fileInputRef.current && fileInputRef.current.files.length > 0) {
         uploadPromises.push(
           uploadFile(fileInputRef.current).then((data) => {
-            formDataRef.current["mat_file_pdf"] = data.newFileName;
-            AppContext_test.materiPdf = data.newFileName;
+            formDataRef.current["mat_file_pdf"] = data.Hasil;
+            AppContext_test.materiPdf = data.Hasil;
             hasPdfFile = true;
           })
         );
       }
 
-      if (gambarInputRef.current && gambarInputRef.current.files.length > 0) {
-        uploadPromises.push(
-          uploadFile(gambarInputRef.current).then((data) => {
-            formDataRef.current["mat_gambar"] = data.newFileName;
-            AppContext_test.materiGambar = data.newFileName;
-          })
-        );
-      }
+      // if (gambarInputRef.current && gambarInputRef.current.files.length > 0) {
+      //   uploadPromises.push(
+      //     uploadFile(gambarInputRef.current).then((data) => {
+      //       formDataRef.current["mat_gambar"] = data.newFileName;
+      //       AppContext_test.materiGambar = data.newFileName;
+      //     })
+      //   );
+      // }
 
       if (vidioInputRef.current && vidioInputRef.current.files.length > 0) {
         uploadPromises.push(
           uploadFile(vidioInputRef.current).then((data) => {
-            formDataRef.current["mat_file_video"] = data.newFileName;
-            AppContext_test.materiVideo = data.newFileName;
+            formDataRef.current["mat_file_video"] = data.Hasil;
+            AppContext_test.materiVideo = data.Hasil;
             hasVideoFile = true;
           })
         );
@@ -226,14 +270,14 @@ export default function MastermateriAdd({ onChangePage }) {
           SweetAlert("Terjadi Kesalahan!", "Harus memilih salah satu file PDF atau file video, tidak boleh keduanya kosong.", "error");
           return;
         }
-        axios.post(API_LINK + "Materis/SaveDataMateri", formDataRef.current)
+        axios.post(API_LINK + "Materi/UpdateSaveDataMateri", formDataRef.current)
           .then(response => {
             const data = response.data;
             if (data[0].hasil === "OK") {
-              AppContext_master.dataIDMateri = data[0].newID;
               SweetAlert("Sukses", "Data Materi berhasil disimpan", "success");
-              setIsFormDisabled(true);
-              AppContext_master.formSavedMateri = true;
+              setIsFileDisabled(true);
+              AppContext_master.formSavedMateriFile = true;
+              onChangePage("forumAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1);
             } else {
               setIsError(prevError => ({
                 ...prevError,
@@ -311,12 +355,12 @@ export default function MastermateriAdd({ onChangePage }) {
       formDataRef.current = { ...formDataRef.current, ...AppContext_master.MateriForm.current };
     }
 
-    if (AppContext_master.formSavedMateri === false) {
-      setIsFormDisabled(false);
+    if (AppContext_master.formSavedMateriFile === false) {
+      setIsFileDisabled(false);
     }
-  }, [AppContext_master.MateriForm, AppContext_master.formSavedMateri]);
+  }, [AppContext_master.MateriForm,  AppContext_master.formSavedMateriFile]);
   // Render form
-  const dataSaved = AppContext_master.formSavedMateri; // Menyimpan nilai AppContext_master.formSavedMateri untuk menentukan apakah form harus di-disable atau tidak
+  const dataSimpan = AppContext_master.formSavedMateriFile; // Menyimpan nilai AppContext_master.formSavedMateri untuk menentukan apakah form harus di-disable atau tidak
 
   const [activeStep, setActiveStep] = useState(0);
 
@@ -332,7 +376,12 @@ export default function MastermateriAdd({ onChangePage }) {
     setActiveStep(0);
   };
 
-  if (isLoading) return <Loading />;
+  const handlePageChange = (content) => {
+    onChangePage(content);
+  };
+
+
+  // if (isLoading) return <Loading />;
 
 
   return (
@@ -359,16 +408,15 @@ export default function MastermateriAdd({ onChangePage }) {
                 </div>
               </div>
       <form onSubmit={handleAdd} style={{margin:"20px 100px"}}>
-        <div>
-          <Stepper activeStep={activeStep}>
-            {steps.map((label, index) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
+      <div className="mb-4">
+        <CustomStepper
+      activeStep={1}
+      steps={steps}
+      onChangePage={handlePageChange}
+      getStepContent={getStepContent}
+    />
           <div>
-            {activeStep === steps.length ? (
+            {/* {activeStep === steps.length ? (
               <div>
                 <Button onClick={handleReset}>Reset</Button>
               </div>
@@ -381,17 +429,17 @@ export default function MastermateriAdd({ onChangePage }) {
                   {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
                 </Button>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
-        <div className="card">
+        <div className="card mb-4">
           {/* <div className="card-header bg-outline-primary fw-medium text-black">
             Tambah Materi Baru
           </div> */}
           <div className="card-body p-4">
             <div className="row">
-              <div className="col-lg-6">
+              {/* <div className="col-lg-6">
                 <Input
                   type="text"
                   forInput="namaKK"
@@ -448,8 +496,8 @@ export default function MastermateriAdd({ onChangePage }) {
                   errorMessage={errors.mat_keterangan}
                   disabled={isFormDisabled || dataSaved}
                 />
-              </div>
-              <div className="col-lg-12 pb-4" >
+              </div> */}
+              {/* <div className="col-lg-12 pb-4" >
                 <div className="form-group">
                   <label htmlFor="pengenalanMateri" className="form-label fw-bold">
                     Pengenalan Materi <span style={{ color: 'Red' }}> *</span>
@@ -478,8 +526,8 @@ export default function MastermateriAdd({ onChangePage }) {
                     <div className="invalid-feedback">{errors.mat_pengenalan}</div>
                   )}
                 </div>
-              </div>
-              <div className="col-lg-4">
+              </div> */}
+              {/* <div className="col-lg-6" >
                 <FileUpload
                   ref={gambarInputRef}
                   forInput="mat_gambar"
@@ -491,6 +539,7 @@ export default function MastermateriAdd({ onChangePage }) {
                   errorMessage={errors.mat_gambar}
                   isRequired
                   disabled={isFormDisabled || dataSaved}
+                  style={{width:"95%"}}
                 />
                 {AppContext_test.materiGambar && (
                   <a
@@ -505,8 +554,8 @@ export default function MastermateriAdd({ onChangePage }) {
                     Lihat berkas yang telah diunggah
                   </a>
                 )}
-              </div>
-              <div className="col-lg-4">
+              </div> */}
+              <div className="">
                 <FileUpload
                   ref={fileInputRef}
                   forInput="mat_file_pdf"
@@ -516,14 +565,15 @@ export default function MastermateriAdd({ onChangePage }) {
                     handlePdfChange(fileInputRef, "pdf")
                   }
                   errorMessage={errors.mat_file_pdf}
-                  isRequired
-                  disabled={isFormDisabled || dataSaved}
+                  disabled={isFileDisabled || dataSimpan}
+                  style={{width:"195%"}}
                 />
                 {AppContext_test.materiPdf && (
                   <a
                     href="#"
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="text-decoration-none mt-0"
                     onClick={(e) => {
                       e.preventDefault(); 
                       previewFile(AppContext_test.materiPdf); 
@@ -533,7 +583,7 @@ export default function MastermateriAdd({ onChangePage }) {
                   </a>
                 )}
               </div>
-              <div className="col-lg-4">
+              <div className="">
                 <FileUpload
                   ref={vidioInputRef}
                   forInput="mat_file_video"
@@ -544,8 +594,8 @@ export default function MastermateriAdd({ onChangePage }) {
                     handleVideoChange(vidioInputRef, "mp4,mov")
                   }
                   errorMessage={errors.mat_file_video}
-                  isRequired
-                  disabled={isFormDisabled || dataSaved}
+                  disabled={isFileDisabled || dataSimpan}
+                  style={{width:"195%"}}
                 />
                 {AppContext_test.materiVideo && (
                   <a
@@ -556,6 +606,7 @@ export default function MastermateriAdd({ onChangePage }) {
                       e.preventDefault(); 
                       previewFile(AppContext_test.materiVideo); 
                     }}
+                     className="text-decoration-none mt-0"
                   >
                     Lihat berkas yang telah diunggah
                   </a>
@@ -564,8 +615,8 @@ export default function MastermateriAdd({ onChangePage }) {
 
             </div>
           </div>
-          <div className="float my-4 mx-1">
-          <Button
+          <div className="d-flex justify-content-between my-4 mx-1 mt-0">
+          {/* <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Kembali"
             onClick={() => onChangePage("index")}
@@ -581,7 +632,29 @@ export default function MastermateriAdd({ onChangePage }) {
             label="Berikutnya"
             onClick={() => onChangePage("pretestAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
             // isDisabled={!isFormSubmitted}
+          /> */}
+            <div className="ml-4">
+          <Button
+            classType="outline-secondary me-2 px-4 py-2"
+            label="Sebelumnya"
+            onClick={() => onChangePage("pengenalanAdd")}
           />
+          </div>
+          <div className="d-flex mr-4" >
+          <Button
+            classType="primary ms-2 px-4 py-2"
+            type="submit"
+            label="Simpan"
+            isDisabled={isFileDisabled || dataSimpan}
+            style={{marginRight:"10px"}}
+          />
+          <Button
+            classType="dark ms-3 px-4 py-2"
+            label="Berikutnya"
+            onClick={() => onChangePage("forumAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
+            // isDisabled={!isFormSubmitted}
+          />
+          </div>
         </div>
         </div>
       </form>

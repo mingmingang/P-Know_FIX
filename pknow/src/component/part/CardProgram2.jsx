@@ -33,7 +33,8 @@ const CardProgram = ({ program, onChangePage }) => {
             fontSize: "15px",
             maxHeight: expandDeskripsi ? "none" : "75px",
             overflow: "hidden",
-            textAlign:'justify'
+            textAlign:'justify',
+            
           }}
         >
           {program.Deskripsi.length > MAX_DESCRIPTION_LENGTH && !expandDeskripsi ? (

@@ -13,12 +13,12 @@ import { API_LINK } from "../../../util/Constants";
 import '@fortawesome/fontawesome-free/css/all.css';
 import "../../../../style/Materi.css";
 import "../../../../index.css";
-// Definisikan beberapa data contoh untuk tabel
 import AppContext_test from "./MasterContext";
 import AppContext_test2 from "../master-test/TestContext";
 import Search from "../../../part/Search";
 import BackPage from "../../../../assets/backPage.png";
 import Konfirmasi from "../../../part/Konfirmasi";
+import "../../../../style/KelompokKeahlian.css";
 
 const inisialisasiData = [
   {
@@ -111,13 +111,11 @@ export default function MasterProsesIndex({ onChangePage }) {
             }
           })
           .then(() => setIsLoading(false));
-      } else {
-      }
+      } 
     });
   }
 
   const kategori = AppContext_test.KategoriIdByKK;
-
 
   const fetchDataKategori = async (retries = 3, delay = 1000) => {
     for (let i = 0; i < retries; i++) {
@@ -232,7 +230,6 @@ export default function MasterProsesIndex({ onChangePage }) {
             } else if (data.length === 0) {
                 setCurrentData(inisialisasiData);
             } else {
-                //Mengosongkan isi form materi&forum
                 AppContext_test.MateriForm = "";
                 AppContext_test.ForumForm = "";
                 AppContext_test.formSavedMateri = false; 
@@ -243,29 +240,26 @@ export default function MasterProsesIndex({ onChangePage }) {
                 const promises = formattedData.map((value) => {
                     const filePromises = [];
 
-                    // Fetch image
                     if (value.Gambar) {
-                        const gambarPromise = fetch(
-                            API_LINK +
-                            `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
-                                value.Gambar
-                            )}`
-                        )
-                            .then((response) => response.blob())
-                            .then((blob) => {
-                                const url = URL.createObjectURL(blob);
-                                value.gbr = value.Gambar;
-                                value.Gambar = url;
-                                return value;
-                            })
-                            .catch((error) => {
-                                console.error("Error fetching gambar:", error);
-                                return value;
-                            });
-                        filePromises.push(gambarPromise);
-                    }
+                      const gambarPromise = fetch(
+                          API_LINK + `Upload/GetFile/${value.Gambar}`
+                      )
+                          .then((response) => {
+                              if (!response.ok) {
+                                  throw new Error(`HTTP error! status: ${response.status}`);
+                              }
+                              value.gbr = value.Gambar; 
+                              value.Gambar = API_LINK + `Upload/GetFile/${value.Gambar}`; 
+                              return value;
+                          })
+                          .catch((error) => {
+                              console.error("Error fetching gambar:", error);
+                              return value;
+                          });
+                      filePromises.push(gambarPromise);
+                  }
 
-                    // Fetch video
+                  
                     if (value.File_video) {
                         const videoPromise = fetch(
                             API_LINK +
@@ -330,7 +324,6 @@ export default function MasterProsesIndex({ onChangePage }) {
                         filePromises.push(sharingPdfPromise);
                     }
 
-                    // Fetch Sharing Video
                     if (value.Sharing_video) {
                         const sharingVideoPromise = fetch(
                             API_LINK +
@@ -489,48 +482,32 @@ export default function MasterProsesIndex({ onChangePage }) {
                     description={listKategori.find((item) => item.value === AppContext_test.KategoriIdByKK)?.deskripsi || ""}
                     showInput={false}
                 /> */}
-            <div className="mt-1">
-              <div className="row">
-                {currentFilter.status === "Semua"
-                  ? currentData.length > 1
-                    ? (
-                      <CardMateri
-                        materis={currentData}
-                        onDetail={onChangePage}
-                        onEdit={onChangePage}
-                        onStatus={handleSetStatus}
-                        isNonEdit={false}
-                        onReviewJawaban={onChangePage}
-                      />
-                    ) : (
-                      <div className="" style={{margin:"0px 85px", width:"90%"}}>
-                      <Alert
-                        type="warning"
-                        message="Tidak ada materi pada kategori ini. Klik Tambah Materi."
-                      />
-                      </div>
-                    )
-                  : currentData.filter(materi => materi.Status === currentFilter.status).length > 1
-                    ? (
-                      <CardMateri
-                        materis={currentData.filter(materi => materi.Status === currentFilter.status)}
-                        onDetail={onChangePage}
-                        onEdit={onChangePage}
-                        onStatus={handleSetStatus}
-                        isNonEdit={false}
-                        onReviewJawaban={onChangePage}
-                      />
-                    ) : (
-                      <Alert
-                        type="warning"
-                        message="Tidak ada materi pada kategori ini. Klik Tambah Materi."
-                      />
-                    )}
-              </div>
+           <div className="mt-1">
+  {currentFilter.status === "Semua" ? (
+    currentData.length > 0 ? (
+      <CardMateri
+        materis={currentData}
+        onDetail={onChangePage}
+        onEdit={onChangePage}
+        onStatus={handleSetStatus}
+        isNonEdit={false}
+        onReviewJawaban={onChangePage}
+      />
+    ) : (
+      <div className="" style={{ margin: "0px 85px", width: "90%" }}>
+        <Alert
+          type="warning"
+          message="Tidak ada materi pada kategori ini. Klik Tambah Materi."
+        />
+      </div>
+    )
+  ) : null}
+</div>
+
             </div>
 
           </div>
-        </div>
+
         {showConfirmation && (
         <Konfirmasi
           title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
