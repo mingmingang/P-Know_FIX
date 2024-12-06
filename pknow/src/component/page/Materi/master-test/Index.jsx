@@ -10,11 +10,16 @@ import Loading from "../../../part/Loading";
 import CardMateri from "../../../part/CardMateri2";
 import UseFetch from "../../../util/UseFetch";
 import { API_LINK } from "../../../util/Constants";
-import '@fortawesome/fontawesome-free/css/all.css';
+import "@fortawesome/fontawesome-free/css/all.css";
 import axios from "axios";
 // import "../../../../index.css";
 import AppContext_master from "../master-proses/MasterContext";
 import AppContext_test from "./TestContext";
+import BackPage from "../../../../assets/backPage.png";
+import Konfirmasi from "../../../part/Konfirmasi";
+import "../../../../index.css";
+import "../../../../style/KelompokKeahlian.css";
+import Search from "../../../part/Search";
 
 const inisialisasiData = [
   {
@@ -54,6 +59,8 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isBackAction, setIsBackAction] = useState(false);
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     status: "Semua",
@@ -65,7 +72,21 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
   const searchQuery = useRef(null);
   const searchFilterSort = useRef(null);
   const searchFilterStatus = useRef(null);
-  
+
+  const handleGoBack = () => {
+    setIsBackAction(true);
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmYes = () => {
+    setShowConfirmation(false);
+    onChangePage("kk");
+  };
+
+  const handleConfirmNo = () => {
+    setShowConfirmation(false);
+  };
+
   function handleSetStatus(id) {
     setIsError(false);
 
@@ -73,7 +94,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
       "Konfirmasi",
       "Apakah Anda yakin ingin mengubah status data Materi?",
       "warning",
-      "Ya",
+      "Ya"
     ).then((confirmed) => {
       if (confirmed) {
         UseFetch(API_LINK + "Materi/setStatusMateri", {
@@ -131,14 +152,16 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
       sort,
       order,
     }));
-  } 
+  }
 
-  
   useEffect(() => {
-    document.documentElement.style.setProperty('--responsiveContainer-margin-left', '13vw');
-    const sidebarMenuElement = document.querySelector('.sidebarMenu');
+    document.documentElement.style.setProperty(
+      "--responsiveContainer-margin-left",
+      "13vw"
+    );
+    const sidebarMenuElement = document.querySelector(".sidebarMenu");
     if (sidebarMenuElement) {
-      sidebarMenuElement.classList.remove('sidebarMenu-hidden');
+      sidebarMenuElement.classList.remove("sidebarMenu-hidden");
     }
   }, []);
 
@@ -152,7 +175,6 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
             API_LINK + "Materi/GetDataMateri",
             currentFilter
           );
-          console.log("bjir", currentFilter)
           if (data.length != 0) {
             setCurrentData(inisialisasiData);
             const formattedData = data.map((value) => ({
@@ -163,21 +185,19 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
 
               if (value.Gambar) {
                 const gambarPromise = fetch(
-                  API_LINK +
-                    `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
-                      value.Gambar
-                    )}`
+                  API_LINK + `Upload/GetFile/${value.Gambar}`
                 )
-                  .then((response) => response.blob())
-                  .then((blob) => {
-                    const url = URL.createObjectURL(blob);
+                  .then((response) => {
+                    if (!response.ok) {
+                      throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                     value.gbr = value.Gambar;
-                    value.Gambar = url;
+                    value.Gambar = API_LINK + `Upload/GetFile/${value.Gambar}`;
                     return value;
                   })
                   .catch((error) => {
-                    // console.error("Error fetching gambar:", error);
-                    // return value;
+                    console.error("Error fetching gambar:", error);
+                    return value;
                   });
                 filePromises.push(gambarPromise);
               }
@@ -202,7 +222,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
         } catch (error) {
           // setIsError(true);
           if (i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await new Promise((resolve) => setTimeout(resolve, delay));
           } else {
             throw error;
           }
@@ -210,16 +230,15 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
           setIsLoading(false);
         }
       }
-      
     };
 
     fetchData();
   }, [AppContext_test.refreshPage, currentFilter]);
-  
+
   return (
-    <div className="container">
-      <div className="row">
-        <div className="col-lg-12">
+    <div className="">
+      <div className="">
+        <div className="">
           {isError && (
             <div className="flex-fill">
               <Alert
@@ -229,48 +248,88 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
             </div>
           )}
           <div className="flex-fill">
-            <div className="input-group">
-              <Input
-                ref={searchQuery}
-                forInput="pencarianMateri"
-                placeholder="Cari Judul Materi"
-              />
-              <Button
-                iconName="search"
-                classType="primary px-4"
-                title="Cari"
-                onClick={handleSearch}
-              />
-              {/* <Filter>
-                <DropDown
-                  ref={searchFilterSort}
-                  forInput="ddUrut"
-                  label="Urut Berdasarkan"
-                  type="none"
-                  arrData={dataFilterSort}
-                  defaultValue="[Judul] ASC"
-                  // onChange={handleSortChange}
-                />
-                <DropDown
-                  ref={searchFilterStatus}
-                  forInput="ddStatus"
-                  label="Status"
-                  type="semua"
-                  arrData={dataFilterStatus}
-                  defaultValue="Semua"
-                  // onChange={handleStatusChange}
-                />
-              </Filter> */}
+            <div className="backSearch ml-0 mr-0">
+              <h1>Materi P-KNOW</h1>
+              <p>
+                Akses seluruh materi dari Aplikasi P-KNOW, nikmati pembelajaran
+                dari seluruh program studi yang dapat anda pelajari secara mudah
+                dan praktis.
+              </p>
+              <div className="input-wrapper">
+                <div
+                  className=""
+                  style={{
+                    width: "700px",
+                    display: "flex",
+                    backgroundColor: "white",
+                    borderRadius: "20px",
+                    height: "40px",
+                  }}
+                >
+                  <Input
+                    ref={searchQuery}
+                    forInput="pencarianKK"
+                    placeholder="Cari Materi"
+                    style={{
+                      border: "none",
+                      width: "680px",
+                      height: "40px",
+                      borderRadius: "20px",
+                    }}
+                  />
+                  <Button
+                    iconName="search"
+                    classType="primary px-4"
+                    title="Cari"
+                    onClick={handleSearch}
+                    style={{ backgroundColor: "transparent", color: "#08549F" }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="navigasi-layout-page">
+              <p className="title-kk" style={{ fontSize: "20px" }}>
+                Materi P-KNOW
+              </p>
+              <div className="left-feature">
+                <div className="tes" style={{ display: "flex" }}>
+                  <div className="mr-2">
+                    <Filter>
+                      <DropDown
+                        ref={searchFilterSort}
+                        forInput="ddUrut"
+                        label="Urut Berdasarkan"
+                        type="none"
+                        arrData={dataFilterSort}
+                        defaultValue="[Judul] ASC"
+                        // onChange={handleSortChange}
+                      />
+                      <DropDown
+                        ref={searchFilterStatus}
+                        forInput="ddStatus"
+                        label="Status"
+                        type="semua"
+                        arrData={dataFilterStatus}
+                        defaultValue="Semua"
+                        // onChange={handleStatusChange}
+                      />
+                    </Filter>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div className="mt-3">
             {isLoading ? (
               <Loading />
             ) : (
-              <div className="row">
+              <div className="">
                 {currentFilter.status === "Semua" && (
                   <CardMateri
-                    materis={currentData.filter(materi => materi.Status === "Aktif")}
+                    materis={currentData.filter(
+                      (materi) => materi.Status === "Aktif"
+                    )}
                     onDetail={onChangePage}
                     onEdit={onChangePage}
                     onReviewJawaban={onChangePage}
@@ -293,13 +352,14 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
           </div>
         </div>
       </div>
-      <div className="float my-4 mx-1">
-        <Button
-          classType="outline-secondary me-2 px-4 py-2"
-          label="Kembali"
-          onClick={() => onChangePage("kk")}
+      {showConfirmation && (
+        <Konfirmasi
+          title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
+          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYes}
+          onNo={handleConfirmNo}
         />
-      </div>
+        )}
     </div>
   );
 }

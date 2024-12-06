@@ -20,7 +20,6 @@ import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import BackPage from "../../../../../assets/backPage.png";
 import Konfirmasi from "../../../../part/Konfirmasi";
 
-// Define the steps
 const steps = ["Pengenalan", "Materi", "Forum"];
 
 function getStepContent(stepIndex) {
@@ -31,10 +30,6 @@ function getStepContent(stepIndex) {
       return 'materiAdd';
     case 2:
       return 'forumAdd';
-    // case 3:
-    //   return 'forumAdd';
-    // case 4:
-    //   return 'posttestAdd';
     default:
       return 'Unknown stepIndex';
   }
@@ -101,7 +96,7 @@ export default function MastermateriAdd({ onChangePage}) {
 
   const handleConfirmYes = () => {
     setShowConfirmation(false); 
-    onChangePage("index");
+    window.location.reload()  
   };
 
 
@@ -143,36 +138,27 @@ export default function MastermateriAdd({ onChangePage}) {
     kry_id: AppContext_test.karyawanId,
     mat_kata_kunci: "",
     mat_gambar: "",
+    createBy: AppContext_test.activeUser
   });
 
   // Validasi skema menggunakan Yup
   const userSchema = object({
     mat_id:string(),
     kat_id: string(),
-    mat_judul: string().required('Judul materi harus diisi'),
+    mat_judul: string(),
     mat_file_pdf: string(),
     mat_file_video: string(),
-    mat_pengenalan: string().required('Pengenalan materi harus diisi'),
-    mat_keterangan: string().required('Keterangan materi harus diisi'),
+    mat_pengenalan: string(),
+    mat_keterangan: string(),
     kry_id: string(),
-    mat_kata_kunci: string().required('Kata kunci materi harus diisi'),
+    mat_kata_kunci: string(),
     mat_gambar: string(),
     createBy: string(),
+    createdBy: string()
   });
 
-  // Handle input change
-  // const handleInputChange = async (e) => {
-  //   const { name, value } = e.target;
-  //   const validationError = await validateInput(name, value, userSchema);
-  //   formDataRef.current[name] = value;
-  //   setErrors((prevErrors) => ({
-  //     ...prevErrors,
-  //     [validationError.name]: validationError.error,
-  //   }));
-  // };
-
   // const handleGambarChange = () => handleFileChange(gambarInputRef, "jpg,png", 5);
-  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf", 5);
+  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf", 10);
   const handleVideoChange = () => handleFileChange(vidioInputRef, "mp4,mov", 100);
 
   const handleFileChange = async (ref, extAllowed, maxFileSize) => {
@@ -214,13 +200,14 @@ export default function MastermateriAdd({ onChangePage}) {
   // Handle form submit
   const handleAdd = async (e) => {
     e.preventDefault();
-    console.log("ID Materi", AppContext_master.dataIDMateri)
+    
 
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
       setErrors
     );
+    console.log(validationErrors);
 
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsFormSubmitted(true);
@@ -229,6 +216,7 @@ export default function MastermateriAdd({ onChangePage}) {
         return { ...prevError, error: false };
       });
       setErrors({});
+      console.log(formDataRef.current);
 
       const uploadPromises = [];
 
@@ -244,15 +232,6 @@ export default function MastermateriAdd({ onChangePage}) {
           })
         );
       }
-
-      // if (gambarInputRef.current && gambarInputRef.current.files.length > 0) {
-      //   uploadPromises.push(
-      //     uploadFile(gambarInputRef.current).then((data) => {
-      //       formDataRef.current["mat_gambar"] = data.newFileName;
-      //       AppContext_test.materiGambar = data.newFileName;
-      //     })
-      //   );
-      // }
 
       if (vidioInputRef.current && vidioInputRef.current.files.length > 0) {
         uploadPromises.push(
@@ -350,10 +329,11 @@ export default function MastermateriAdd({ onChangePage}) {
       isMounted = false;
     };
   }, [kategori]);
+
   useEffect(() => {
-    if (AppContext_master.MateriForm && AppContext_master.MateriForm.current && Object.keys(AppContext_master.MateriForm.current).length > 0) {
-      formDataRef.current = { ...formDataRef.current, ...AppContext_master.MateriForm.current };
-    }
+    // if (AppContext_master.MateriForm && AppContext_master.MateriForm.current && Object.keys(AppContext_master.MateriForm.current).length > 0) {
+    //   formDataRef.current = { ...formDataRef.current, ...AppContext_master.MateriForm.current };
+    // }
 
     if (AppContext_master.formSavedMateriFile === false) {
       setIsFileDisabled(false);
@@ -415,146 +395,11 @@ export default function MastermateriAdd({ onChangePage}) {
       onChangePage={handlePageChange}
       getStepContent={getStepContent}
     />
-          <div>
-            {/* {activeStep === steps.length ? (
-              <div>
-                <Button onClick={handleReset}>Reset</Button>
-              </div>
-            ) : (
-              <div>
-                <Button disabled={activeStep === 0} onClick={handleBack}>
-                  Back
-                </Button>
-                <Button variant="contained" color="primary" onClick={handleNext}>
-                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                </Button>
-              </div>
-            )} */}
-          </div>
         </div>
 
         <div className="card mb-4">
-          {/* <div className="card-header bg-outline-primary fw-medium text-black">
-            Tambah Materi Baru
-          </div> */}
           <div className="card-body p-4">
             <div className="row">
-              {/* <div className="col-lg-6">
-                <Input
-                  type="text"
-                  forInput="namaKK"
-                  label="Kelompok Keahlian"
-                  value={listKategori.find((item) => item.value === formDataRef.current.kat_id)?.namaKK || ""}
-                  disabled
-                  errorMessage={errors.namaKK}
-                />
-              </div>
-              <div className="col-lg-6">
-                <Input
-                  type="text"
-                  forInput="kat_id"
-                  label="Kategori Program"
-                  value={listKategori.find((item) => item.value === formDataRef.current.kat_id)?.label || ""}
-                  disabled
-                  errorMessage={errors.kat_id}
-                />
-              </div>
-              <div className="col-lg-6">
-                <Input
-                  type="text"
-                  forInput="mat_judul"
-                  label="Judul Materi"
-                  placeholder="Judul Materi"
-                  value={formDataRef.current.mat_judul}
-                  onChange={handleInputChange}
-                  errorMessage={errors.mat_judul}
-                  isRequired
-                  disabled={isFormDisabled || dataSaved}
-                />
-              </div>
-              <div className="col-lg-6">
-                <Input
-                  type="text"
-                  forInput="mat_kata_kunci"
-                  label="Kata Kunci Materi"
-                  placeholder="Kata Kunci Materi"
-                  value={formDataRef.current.mat_kata_kunci}
-                  onChange={handleInputChange}
-                  errorMessage={errors.mat_kata_kunci}
-                  isRequired
-                  disabled={isFormDisabled || dataSaved}
-                />
-              </div>
-              <div className="col-lg-12">
-                <Input
-                  type="textarea"
-                  forInput="mat_keterangan"
-                  label="Keterangan Materi"
-                  isRequired
-                  value={formDataRef.current.mat_keterangan}
-                  onChange={handleInputChange}
-                  errorMessage={errors.mat_keterangan}
-                  disabled={isFormDisabled || dataSaved}
-                />
-              </div> */}
-              {/* <div className="col-lg-12 pb-4" >
-                <div className="form-group">
-                  <label htmlFor="pengenalanMateri" className="form-label fw-bold">
-                    Pengenalan Materi <span style={{ color: 'Red' }}> *</span>
-                  </label>
-                  <Editor
-                    id="mat_pengenalan"
-                    value={formDataRef.current.mat_pengenalan}
-                    onEditorChange={(content) => handleInputChange({ target: { name: 'mat_pengenalan', value: content } })}
-                    apiKey="ci4fa00c13rk9erot37prff8jjekb93mdcwji9rtr2envzvi"
-                    init={{
-                      height: 300,
-                      menubar: false,
-                      plugins: [
-                        'advlist autolink lists link image charmap print preview anchor',
-                        'searchreplace visualblocks code fullscreen',
-                        'insertdatetime media table paste code help wordcount'
-                      ],
-                      toolbar:
-                        'undo redo | formatselect | bold italic backcolor | \
-                        alignleft aligncenter alignright alignjustify | \
-                        bullist numlist outdent indent | removeformat | help'
-                    }}
-                    disabled={isFormDisabled || dataSaved}
-                  />
-                  {errors.mat_pengenalan && (
-                    <div className="invalid-feedback">{errors.mat_pengenalan}</div>
-                  )}
-                </div>
-              </div> */}
-              {/* <div className="col-lg-6" >
-                <FileUpload
-                  ref={gambarInputRef}
-                  forInput="mat_gambar"
-                  label="Gambar Cover (.jpg, .png)"
-                  formatFile=".jpg,.png"
-                  onChange={() =>
-                    handleGambarChange(gambarInputRef, "jpg,png")
-                  }
-                  errorMessage={errors.mat_gambar}
-                  isRequired
-                  disabled={isFormDisabled || dataSaved}
-                  style={{width:"95%"}}
-                />
-                {AppContext_test.materiGambar && (
-                  <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => {
-                      e.preventDefault(); 
-                      previewFile(AppContext_test.materiGambar); 
-                    }}
-                  >
-                    Lihat berkas yang telah diunggah
-                  </a>
-                )}
-              </div> */}
               <div className="">
                 <FileUpload
                   ref={fileInputRef}

@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { object, string } from "yup";
-import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
-import SweetAlert from "../../../util/SweetAlert";
-import Button from "../../../part/Button";
-import Input from "../../../part/Input";
-import Loading from "../../../part/Loading";
-import Alert from "../../../part/Alert";
+import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
+import SweetAlert from "../../../../util/SweetAlert";
+import Button from "../../../../part/Button copy";
+import Input from "../../../../part/Input";
+import Loading from "../../../../part/Loading";
+import Alert from "../../../../part/Alert";
 import axios from "axios";
-import { API_LINK } from "../../../util/Constants";
-import UseFetch from "../../../util/UseFetch";
+import { API_LINK } from "../../../../util/Constants";
+import UseFetch from "../../../../util/UseFetch";
 import { Editor } from '@tinymce/tinymce-react';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
@@ -16,25 +16,69 @@ const userSchema = object({
   forumJudul: string().max(100, "Maksimum 100 karakter").required("Harus diisi"),
   forumIsi: string().required("Harus diisi"),
 });
-import { Stepper, Step, StepLabel } from '@mui/material';
+import { Stepper, Step, StepLabel, Box } from '@mui/material';
+import BackPage from "../../../../../assets/backPage.png";
+import Konfirmasi from "../../../../part/Konfirmasi";
 
-const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+const steps = ["Pengenalan", "Materi", "Forum", "Sharing Expert", "Pre Test", "Post Test"];
 
 function getStepContent(stepIndex) {
   switch (stepIndex) {
     case 0:
-      return 'materiAdd';
+      return 'pengenalanEdit';
     case 1:
-      return 'pretestAdd';
+      return 'materiEdit';
     case 2:
-      return 'sharingAdd';
-    case 3:
-      return 'forumAdd';
+      return 'forumEdit';
+      case 3:
+      return 'sharingEdit';
     case 4:
-      return 'posttestAdd';
+      return 'pretestEdit';
+      case 5:
+      return 'posttestEdit';
     default:
       return 'Unknown stepIndex';
   }
+}
+
+function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
+  return (
+    <Box sx={{ width: "100%", mt: 2 }}>
+      <Stepper activeStep={activeStep} alternativeLabel>
+        {steps.map((label, index) => (
+          <Step
+            key={label}
+            onClick={() => onChangePage(getStepContent(index))} 
+            sx={{
+              cursor: "pointer",
+              "& .MuiStepIcon-root": {
+                fontSize: "2rem",
+                color: index <= activeStep ? "primary.main" : "grey.300",
+                "&.Mui-active": {
+                  color: "primary.main",
+                },
+                "& .MuiStepIcon-text": {
+                  fill: "#fff",
+                  fontSize: "1rem",
+                },
+              },
+            }}
+          >
+            <StepLabel
+              sx={{
+                "& .MuiStepLabel-label": {
+                  typography: "body1",
+                  color: index <= activeStep ? "primary.main" : "grey.500",
+                },
+              }}
+            >
+              {label}
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
+  );
 }
 
 export default function MasterForumEdit({ onChangePage }) {
@@ -47,7 +91,35 @@ export default function MasterForumEdit({ onChangePage }) {
     // modifBY:"ika",
   });
   const [forumDataExists, setForumDataExists] = useState(false);
-  const Materi = AppContext_test.DetailMateriEdit;
+  const Materi = AppContext_master.MateriForm;
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isBackAction, setIsBackAction] = useState(false); 
+
+  const handleGoBack = () => {
+    console.log(AppContext_test.activeUser);
+    setIsBackAction(true);  
+    setShowConfirmation(true);  
+  };
+
+  const handleConfirmYes = () => {
+    setShowConfirmation(false); 
+    window.location.reload();
+  };
+
+
+  const handleConfirmNo = () => {
+    setShowConfirmation(false);  
+  };
+
+  const stripHTMLTags = (htmlContent) => {
+    const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
+    return doc.body.textContent || "";
+  };
+  
+  const cleanedForum = stripHTMLTags(Materi.current);
+
+
+  console.log("materi", Materi)
 
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
@@ -64,16 +136,16 @@ export default function MasterForumEdit({ onChangePage }) {
 
       try {
         const data = await UseFetch(API_LINK + "Forum/GetDataForumByMateri", {
-          p1: Materi.Key
+          p1: Materi.current.mat_id
         });
-
+        console.log("data forum", data)
         if (data === "ERROR") {
           setIsError(true);
         } else {
           if (data.length > 0) {
             setFormData({
               forumJudul: data[0]["Nama Forum"] || "",
-              forumIsi: data[0]["Isi Forum"] || "",
+              forumIsi: stripHTMLTags(data[0]["Isi Forum"]) || "",
             });
             setForumDataExists(true);
           } else {
@@ -114,12 +186,12 @@ export default function MasterForumEdit({ onChangePage }) {
 
     try {
       const response = await axios.post(API_LINK + "Forum/EditDataForum", {
-        p1: Materi.Key,
+        p1: Materi.current.mat_id,
         p2: formData.forumJudul,
         p3: formData.forumIsi,
-        p4: AppContext_test.displayName,
+        p4: Materi.current.modifiedBy,
       });
-      console.log("FormData being sent:", Materi.Key,formData,AppContext_test.displayName,);
+      console.log("FormData being sent:", Materi.current.mat_id,formData,AppContext_test.displayName,);
       if (response.status === 200) {
         SweetAlert("Berhasil", "Data forum berhasil diubah!", "success");
       } else {
@@ -151,41 +223,35 @@ export default function MasterForumEdit({ onChangePage }) {
     return <Loading />;
   }
 
+  const handlePageChange = (content) => {
+    onChangePage(content);
+  };
 
   return (
     <>
+     <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
+            <div className="back-and-title" style={{display:"flex"}}>
+              <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Materi Baru</h4>
+              </div>
+                <div className="ket-draft">
+                <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
+                </div>
+              </div>
       <form onSubmit={handleAdd}>
         <div>
-          <Stepper activeStep={activeStep}>
-            {steps.map((label, index) => (
-              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-          <div>
-            {activeStep === steps.length ? (
-              <div>
-                <Button onClick={handleReset}>Reset</Button>
-              </div>
-            ) : (
-              <div>
-                <Button disabled={activeStep === 0} onClick={handleBack}>
-                  Back
-                </Button>
-                <Button variant="contained" color="primary" onClick={handleNext}>
-                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                </Button>
-              </div>
-            )}
-          </div>
+        <div className="mb-4">
+        <CustomStepper
+      activeStep={2}
+      steps={steps}
+      onChangePage={handlePageChange}
+      getStepContent={getStepContent}
+    />
+        </div>
+         
         </div>
   
-        <div className="card">
-          <div className="card-header bg-outline-primary fw-medium text-black">
-            Edit Forum
-          </div>
-          
+        <div className="card mt-0" style={{margin:"100px"}}>
           {/* Handling different scenarios */}
           {isLoading && (
             <div className="card-body">
@@ -249,31 +315,42 @@ export default function MasterForumEdit({ onChangePage }) {
               </div>
             </div>
           )}
-  
+   <div className="d-flex justify-content-between my-4 mx-1 mt-0">
+          <div className="ml-4">
+          <Button
+            classType="outline-secondary me-2 px-4 py-2"
+            label="Sebelumnya"
+            onClick={() => onChangePage("materiAdd", AppContext_test.ForumForm = formData)}
+          />
+          </div>
+          <div className="d-flex mr-4" >
+          <Button
+            classType="primary ms-2 px-4 py-2"
+            type="submit"
+            label="Simpan"
+            style={{marginRight:"10px"}}
+          />
+          <Button
+            classType="dark ms-3 px-4 py-2"
+            label="Berikutnya"
+            onClick={() => onChangePage("posttestAdd", AppContext_test.ForumForm = formData)}
+          />
+          </div>
+        </div>
         </div>
         
-        {/* Render the save button only if forumDataExists */}
-          <div className="float my-4 mx-1">
-            <Button
-              classType="outline-secondary me-2 px-4 py-2"
-              label="Kembali"
-              onClick={() => onChangePage("sharingEdit")}
-            />
-            {forumDataExists && (
-              <Button
-                classType="primary ms-2 px-4 py-2"
-                type="submit"
-                label="Simpan"
-              />
-            )}
-            <Button
-              classType="dark ms-3 px-4 py-2"
-              label="Berikutnya"
-              onClick={() => onChangePage("posttestEdit")}
-            />
-          </div>
+       
+          {showConfirmation && (
+        <Konfirmasi
+          title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
+          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYes}
+          onNo={handleConfirmNo}
+        />
+        )}
         
       </form>
+      
     </>
   );
 }

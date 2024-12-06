@@ -374,14 +374,13 @@ export default function DaftarPustaka({ onChangePage }) {
         </div>
 
 
-          {currentData.length === 0 || currentData[0].Message ? (
+          {currentData.length == 0 ? (
             <div className="" style={{margin:"10px 70px"}}>
             <Alert type="warning mt-3" message="Tidak ada data daftar pustaka!" />
             </div>
           ) : (
             <>
           <div style={{ margin: "10px 50px" }}>
-           
                   <CardPustaka
                     pustakas={currentData}
                     onDetail={onChangePage}

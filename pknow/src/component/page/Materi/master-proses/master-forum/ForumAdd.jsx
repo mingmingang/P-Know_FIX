@@ -13,6 +13,9 @@ import AppContext_test from "../../master-test/TestContext";
 import { Editor } from '@tinymce/tinymce-react';
 import { Stepper, Step, StepLabel, Box } from '@mui/material';
 import BackPage from "../../../../../assets/backPage.png";
+import Konfirmasi from "../../../../part/Konfirmasi";
+import axios from "axios";
+
 
 const steps = ["Pengenalan", "Materi", "Forum"];
 
@@ -25,10 +28,6 @@ function getStepContent(stepIndex) {
       return 'materiAdd';
     case 2:
       return 'forumAdd';
-    // case 3:
-    //   return 'forumAdd';
-    // case 4:
-    //   return 'posttestAdd';
     default:
       return 'Unknown stepIndex';
   }
@@ -42,9 +41,9 @@ function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
         {steps.map((label, index) => (
           <Step
             key={label}
-            onClick={() => onChangePage(getStepContent(index))} // Tambahkan onClick di sini
+            onClick={() => onChangePage(getStepContent(index))} 
             sx={{
-              cursor: "pointer", // Menambahkan pointer untuk memberikan indikasi klik
+              cursor: "pointer",
               "& .MuiStepIcon-root": {
                 fontSize: "2rem",
                 color: index <= activeStep ? "primary.main" : "grey.300",
@@ -89,7 +88,6 @@ export default function MasterForumAdd({ onChangePage }) {
   const [isBackAction, setIsBackAction] = useState(false); 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSectionAction, setIsSectionAction] = useState(false); 
-  const [showConfirmation, setShowConfirmation] = useState(false);
   const [showConfirmationSection, setShowConfirmationSection] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -100,14 +98,23 @@ export default function MasterForumAdd({ onChangePage }) {
     forumStatus: "Aktif",
   });
 
+  const [dataSection, setDataSection] = useState({
+    materiId: AppContext_master.dataIDMateri,
+    secJudul: "Section Materi " + AppContext_master.dataIDMateri,
+    createdby: AppContext_test.activeUser
+  });
+
+  
+
   const handleGoBack = () => {
+    console.log(AppContext_test.activeUser);
     setIsBackAction(true);  
     setShowConfirmation(true);  
   };
 
   const handleConfirmYes = () => {
     setShowConfirmation(false); 
-    onChangePage("index");
+    window.location.reload();
   };
 
 
@@ -122,7 +129,49 @@ export default function MasterForumAdd({ onChangePage }) {
   };
 
   const handleConfirmYesSection = () => {
+    
     setShowConfirmationSection(false); 
+    try {
+      axios.post(API_LINK + "Section/CreateSection", dataSection)
+      .then(response => {
+        const data = response.data;
+        console.log("data section", dataSection);
+        if (data[0].hasil === "OK") {
+          AppContext_master.dataIdSection = data[0].newID;
+          console.log("id section", AppContext_master.dataIdSection);
+          SweetAlert("Sukses", "Data Section berhasil ditambahkan", "success");
+          setIsFormDisabled(true);
+          AppContext_master.formSavedMateri = true;
+          SweetAlert(
+            "Sukses",
+            "Data Section berhasil disimpan",
+            "success"
+          );
+          onChangePage("sharingAdd", AppContext_master.MateriForm = formData, AppContext_master.count += 1, AppContext_master.dataIdSection, AppContext_test.activeUser);
+        } else {
+          setIsError(prevError => ({
+            ...prevError,
+            error: true,
+            message: "Terjadi kesalahan: Gagal menyimpan data Materi."
+          }));
+        }
+      })
+      .catch(error => {
+        console.error('Terjadi kesalahan:', error);
+        setIsError(prevError => ({
+          ...prevError,
+          error: true,
+          message: "Terjadi kesalahan: " + error.message
+        }));
+      })
+      .finally(() => setIsLoading(false));
+    } catch (error) {
+      setIsError({
+        error: true,
+        message: "Failed to save forum data: " + error.message,
+      });
+      setIsLoading(false);
+    }
     onChangePage("sharingAdd", AppContext_master.MateriForm = formData);
   };
 
@@ -160,9 +209,11 @@ export default function MasterForumAdd({ onChangePage }) {
     setErrors({});
     setIsError({ error: false, message: "" });
   };
+
   useEffect(() => {
     setResetStepper((prev) => !prev + 1);
   });
+
   const handleAdd = async (e) => {
     e.preventDefault();
 
@@ -186,7 +237,6 @@ export default function MasterForumAdd({ onChangePage }) {
     try {
       console.log("Data yang dikirim ke backend:", formData);
       const response = await UseFetch(API_LINK + "Forum/SaveDataForum", formData);
-      console.log("Hasil response", response);
       if (response === "ERROR") {
         setIsError({ error: true, message: "Terjadi kesalahan: Gagal menyimpan data Sharing." });
       } else {
@@ -261,22 +311,6 @@ export default function MasterForumAdd({ onChangePage }) {
       onChangePage={handlePageChange}
       getStepContent={getStepContent}
     />
-          <div>
-            {/* {activeStep === steps.length ? (
-              <div>
-                <Button onClick={handleReset}>Reset</Button>
-              </div>
-            ) : (
-              <div>
-                <Button disabled={activeStep === 0} onClick={handleBack}>
-                  Back
-                </Button>
-                <Button variant="contained" color="primary" onClick={handleNext}>
-                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                </Button>
-              </div>
-            )} */}
-          </div>
         </div>
 
         <div className="card mb-4">
@@ -362,7 +396,7 @@ export default function MasterForumAdd({ onChangePage }) {
         {showConfirmationSection && (
         <Konfirmasi
           title={isSectionAction ? "Tambah Section" : "Tambah Section"}
-          pesan={isSectionAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          pesan={isSectionAction ? "Apakah anda ingin menambah section?" : "Anda yakin ingin simpan data?"}
           onYes={handleConfirmYesSection}
           onNo={handleConfirmNoSection}
         />

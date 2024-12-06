@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Button from "./Button";
+import Button from "./Button copy";
 import { PAGE_SIZE, API_LINK, ROOT_LINK } from "../util/Constants";
 import Icon from "./Icon";
 import UseFetch from "../util/UseFetch";
@@ -15,7 +15,9 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
   let activeUser = "";
   const cookie = Cookies.get("activeUser");
   if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
   AppContext_test.activeUser = activeUser;
+
   const [dropdowns, setDropdowns] = useState({});
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [widthDynamic, setwidthDynamic] = useState("");
@@ -28,8 +30,10 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
   const [currentDataMateri, setCurrentDataMateri] = useState([]);
   const [currentFilter, setCurrentFilter] = useState([]);
   const [idMateri, setIdMateri] = useState("");
+
   useEffect(() => {
   }, [AppContext_test]);
+
   useEffect(() => {
     setShowMainContent_SideBar(isOpen);
   }, [isOpen]);
@@ -43,9 +47,8 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
       setIsLoading(true);
       let materiData = null;
       let progresData = null;
-      let maxRetries = 10; // Batas maksimal percobaan
+      let maxRetries = 10; 
       let retryCount = 0;
-
       if (AppContext_test.materiId != null){
         while ((!materiData || !progresData) && retryCount < maxRetries) {
           try {
@@ -83,8 +86,9 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
       let materiData = null;
       let maxRetries = 10; 
       let retryCount = 0;
-
+     
       if (AppContext_test.materiId != null){
+        console.log("test")
         while ((!materiData) && retryCount < maxRetries) {
           try {
             const [materiResponse] = await Promise.all([fetchDataMateri()]);
@@ -108,9 +112,7 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
         }
       setIsLoading(false);
       }
-
     };
-
     fetchData();
   }, [AppContext_test.materiId]);
 
@@ -119,7 +121,7 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
     let success = false;
     while (!success){
       try {
-        const response = await axios.post(API_LINK + 'Materis/GetDataMateriById', {
+        const response = await axios.post(API_LINK + 'Materi/GetDataMateriById', {
           materiId: AppContext_test.materiId,
         });
         if (response.data != 0) {
@@ -137,7 +139,7 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
     let success = false;
     while (!success){
       try {
-        const response = await axios.post(API_LINK + 'Materis/GetProgresMateri', {
+        const response = await axios.post(API_LINK + 'Materi/GetProgresMateri', {
           materiId: AppContext_test.materiId,
           karyawanId: AppContext_test.activeUser,
         });
@@ -346,9 +348,10 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
       AppContext_test.refreshPage = "pengenalan";
     }
   return (
-  <div className="h-100 pt-2 overflow-y-auto position-fixed" style={{ right: "10px", width: widthDynamic }}>
+  <div className="h-100 pt-2 overflow-y-auto position-fixed" style={{ right: "10px", width: widthDynamic}}>
     <div className="px-2 collapseTrue">
       {showElement &&
+      <div className="" style={{marginTop:"100px" }}>
         <div className="" style={button_listOfLearningStyle}>
           <Icon
             name="angle-left"
@@ -357,10 +360,11 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
             onClick={handleCombinedClick_open}
           />
         </div>
+        </div>
       }
     </div>
     {showMainContent_SideBar && (
-      <div className="collapseFalse">
+      <div className="collapseFalse" style={{marginTop:"100px"}}>
         <div style={listOfLearningStyle}>
           <div style={button_listOfLearningStyle}>
             <Icon
@@ -378,7 +382,7 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
           <Loading />
         ) : (
           <>
-            <div className="border-top border-bottom" style={{ ...progressStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+            <div className="border-top border-bottom" style={{ ...progressStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', marginTop:"100px" }}>
               <Button 
                 style={{width:"100%"}}
                 classType="btn btn-outline-primary py-2" 

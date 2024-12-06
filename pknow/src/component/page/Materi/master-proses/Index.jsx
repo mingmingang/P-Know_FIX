@@ -440,8 +440,6 @@ export default function MasterProsesIndex({ onChangePage }) {
         <div className="navigasi-layout-page">
           <p className="title-kk" style={{fontSize:"20px"}}> <button style={{backgroundColor:"transparent", border:"none", marginRight:"10px"}} onClick={handleGoBack}><img src={BackPage} width="50px" alt="" /></button>Kelola Materi / Program / Kategori <span style={{fontWeight:"bold"}}>{listKategori.find((item) => item.value === AppContext_test.KategoriIdByKK)?.label || ""}</span></p>
           <div className="left-feature">
-           
-
             <div className="tes" style={{ display: "flex" }}>
               <div className="mr-2">
               <Filter>
@@ -482,28 +480,27 @@ export default function MasterProsesIndex({ onChangePage }) {
                     description={listKategori.find((item) => item.value === AppContext_test.KategoriIdByKK)?.deskripsi || ""}
                     showInput={false}
                 /> */}
-           <div className="mt-1">
-  {currentFilter.status === "Semua" ? (
-    currentData.length > 0 ? (
-      <CardMateri
-        materis={currentData}
-        onDetail={onChangePage}
-        onEdit={onChangePage}
-        onStatus={handleSetStatus}
-        isNonEdit={false}
-        onReviewJawaban={onChangePage}
-      />
-    ) : (
-      <div className="" style={{ margin: "0px 85px", width: "90%" }}>
-        <Alert
-          type="warning"
-          message="Tidak ada materi pada kategori ini. Klik Tambah Materi."
-        />
-      </div>
-    )
-  ) : null}
-</div>
-
+                        <div className="mt-1">
+                {currentFilter.status === "Semua" ? (
+                  currentData.length > 0 ? (
+                    <CardMateri
+                      materis={currentData}
+                      onDetail={onChangePage}
+                      onEdit={onChangePage}
+                      onStatus={handleSetStatus}
+                      isNonEdit={false}
+                      onReviewJawaban={onChangePage}
+                    />
+                  ) : (
+                    <div className="" style={{ margin: "0px 85px", width: "90%" }}>
+                      <Alert
+                        type="warning"
+                        message="Tidak ada materi pada kategori ini. Klik Tambah Materi."
+                      />
+                    </div>
+                  )
+                ) : null}
+              </div>
             </div>
 
           </div>

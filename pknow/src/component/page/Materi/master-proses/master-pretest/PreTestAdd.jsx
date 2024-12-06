@@ -3,8 +3,8 @@ import Button from "../../../../part/Button copy";
 import { object, string } from "yup";
 import Input from "../../../../part/Input";
 import Loading from "../../../../part/Loading";
-import { Stepper, Step, StepLabel } from '@mui/material';
-
+import { Stepper, Step, StepLabel, Box } from '@mui/material';
+import SweetAlert from "../../../../util/SweetAlert";
 import * as XLSX from 'xlsx';
 import axios from 'axios';
 import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
@@ -15,6 +15,9 @@ import Swal from 'sweetalert2';
 import { Editor } from '@tinymce/tinymce-react';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
+import Konfirmasi from "../../../../part/Konfirmasi";
+import BackPage from "../../../../../assets/backPage.png";
+import UploadFile from "../../../../util/UploadFile";
 
 const steps = ['Sharing Expert', 'Pretest', 'Post Test'];
 
@@ -78,18 +81,114 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const [formContent, setFormContent] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [errors, setErrors] = useState({});
+  const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
   const [timer, setTimer] = useState('');
   const gambarInputRef = useRef(null);
   const [resetStepper, setResetStepper] = useState(0);
+  const [isBackAction, setIsBackAction] = useState(false); 
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isSectionAction, setIsSectionAction] = useState(false); 
+  const [showConfirmationSection, setShowConfirmationSection] = useState(false);
+
+  const [dataSection, setDataSection] = useState({
+    materiId: AppContext_master.dataIDMateri,
+    secJudul: "Section Materi " + AppContext_master.dataIDMateri,
+    createdby: AppContext_test.activeUser
+  });
+
+  const handleConfirmYesSection = () => {
+    setShowConfirmationSection(false); 
+    try {
+      axios.post(API_LINK + "Section/CreateSection", dataSection)
+      .then(response => {
+        const data = response.data;
+        console.log("data section", dataSection);
+        if (data[0].hasil === "OK") {
+          AppContext_master.dataIdSection = data[0].newID;
+          console.log("id section", AppContext_master.dataIdSection);
+          SweetAlert("Sukses", "Data Section Pretest berhasil ditambahkan", "success");
+          // setIsFormDisabled(true);
+          AppContext_master.formSavedMateri = true;
+          SweetAlert(
+            "Sukses",
+            "Data section berhasil disimpan",
+            "success"
+          );
+          onChangePage("posttestAdd", AppContext_master.MateriForm = formData, AppContext_master.count += 1, AppContext_master.dataIdSection);
+        } else {
+          setIsError(prevError => ({
+            ...prevError,
+            error: true,
+            message: "Terjadi kesalahan: Gagal menyimpan data Materi."
+          }));
+        }
+      })
+      .catch(error => {
+        console.error('Terjadi kesalahan:', error);
+        setIsError(prevError => ({
+          ...prevError,
+          error: true,
+          message: "Terjadi kesalahan: " + error.message
+        }));
+      })
+      .finally(() => setIsLoading(false));
+    } catch (error) {
+      setIsError({
+        error: true,
+        message: "Failed to save forum data: " + error.message,
+      });
+      setIsLoading(false);
+    }
+  };
+
+
+  const handleConfirmNoSection = () => {
+    setShowConfirmationSection(false);  
+    window.location.reload();
+  };
+
   const handleChange = (name, value) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: value,
     }));
   };
+
+  const handleGoBack = () => {
+    setIsBackAction(true);  
+    setShowConfirmation(true);  
+  };
+
+  const handleConfirmYes = () => {
+    setShowConfirmation(false); 
+    window.location.reload();
+  };
+
+
+  const handleConfirmNo = () => {
+    setShowConfirmation(false);  
+  };
+
+  const [formData, setFormData] = useState({
+    materiId: AppContext_master.dataIDMateri,
+    sec_id: AppContext_master.dataIdSection,
+    quizDeskripsi: '',
+    quizTipe: 'Pretest',
+    tanggalAwal: '',
+    tanggalAkhir: '',
+    timer: '',
+    status: 'Aktif',
+    createdby: AppContext_test.displayName,
+  });
+
+  // useEffect(() => {
+  //   formData.current.materiId = AppContext_test.dataIDMateri;
+  //   formData.current.sec_id = AppContext_master.dataIdSection;
+  // }, [AppContext_master.dataIdSection, AppContext_test.dataIDMateri]); 
+
   const handlePointChange = (e, index) => {
     const { value } = e.target;
 
@@ -111,29 +210,19 @@ export default function MasterPreTestAdd({ onChangePage }) {
       text: `Pertanyaan ${formContent.length + 1}`,
       options: [],
       point: 0,
-      correctAnswer: "", // Default correctAnswer
+      correctAnswer: "", 
     };
     setFormContent([...formContent, newQuestion]);
     setSelectedOptions([...selectedOptions, ""]);
   };
-  const [formData, setFormData] = useState({
-    materiId: AppContext_master.dataIDMateri,
-    quizJudul: '',
-    quizDeskripsi: '',
-    quizTipe: 'Pretest',
-    tanggalAwal: '',
-    tanggalAkhir: '',
-    timer: '',
-    status: 'Aktif',
-    createdby: AppContext_test.displayName,
-  });
+  
 
   const [formQuestion, setFormQuestion] = useState({
     quizId: '',
     soal: '',
     tipeQuestion: 'Essay',
     gambar: null,
-    questionDeskripsi: '',
+    // questionDeskripsi: '',
     status: 'Aktif',
     quecreatedby: AppContext_test.displayName,
   });
@@ -150,6 +239,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
 
    const userSchema = object({
     materiId: string(),
+    sec_id:string(),
     quizJudul: string(),
     quizDeskripsi: string().required('Quiz deskripsi harus diisi'),
     quizTipe: string(),
@@ -192,6 +282,39 @@ export default function MasterPreTestAdd({ onChangePage }) {
     return start <= end;
   };
 
+  const fileGambarRef = useRef(null);
+
+  const handleFileChangeGambar = (ref, extAllowed) => {
+    const { name, value } = ref.current;
+    const file = ref.current.files[0];
+    const fileName = file ? file.name : "";
+    const fileSize = file ? file.size : 0;
+    const fileExt = fileName.split(".").pop().toLowerCase();
+    const validationError = validateInput(name, value, userSchema);
+    let error = "";
+
+    if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
+    else if (!extAllowed.split(",").includes(fileExt))
+      error = "format berkas tidak valid";
+
+    if (error) ref.current.value = "";
+    else {
+      // Show preview if the file is an image
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          //setFilePreview(reader.result); // Set the preview
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [validationError.name]: error,
+    }));
+  };
+
   const handleAdd = async (e) => {
     e.preventDefault();
 
@@ -202,6 +325,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
       userSchema,
       setErrors
     );
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       Swal.fire({
@@ -263,9 +387,10 @@ export default function MasterPreTestAdd({ onChangePage }) {
     }
   
     try {
-      
+
       formData.timer = convertTimeToSeconds(timer);
       const response = await axios.post(API_LINK + 'Quiz/SaveDataQuiz', formData);
+      console.log("data quiz", formData);
       if (response.data.length === 0) {
         Swal.fire({
           title: 'Gagal!',
@@ -275,9 +400,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
         });
         return;
       }
-  
+
       const quizId = response.data[0].hasil;
-  
       for (let i = 0; i < formContent.length; i++) {
         const question = formContent[i];
         const formQuestion = {
@@ -285,36 +409,49 @@ export default function MasterPreTestAdd({ onChangePage }) {
           soal: question.text,
           tipeQuestion: question.type,
           gambar: question.gambar,
-          questionDeskripsi: '',
           status: 'Aktif',
           quecreatedby: AppContext_test.displayName,
         };
+        const uploadPromises = [];
         if (question.type === 'Essay' || question.type === 'Praktikum') {
-          if (question.selectedFile) {
-            try {
-              const uploadResult = await uploadFile(question.selectedFile);
-              formQuestion.gambar = uploadResult.newFileName;
-            } catch (uploadError) {
-              console.error('Gagal mengunggah gambar:', uploadError);
-              Swal.fire({
-              title: 'Gagal!',
-              text: 'Gagal untuk mengunggah gambar',
-              icon: 'error',
-              confirmButtonText: 'OK'
-            });
-              return;
-            }
-          } else {
-            // Jika tidak ada file yang dipilih, atur question.gambar menjadi null
-            formQuestion.gambar = null;
+          if (fileGambarRef.current.files.length >= 0) {
+            uploadPromises.push(
+              UploadFile(fileGambarRef.current).then(
+                (data) => (formQuestion.gambar = data.Hasil)
+              )
+            );
           }
+        //   if (question.selectedFile) {
+        //     try {
+        //       const uploadResult = await uploadFile(question.selectedFile);
+        //       if (uploadResult !== "ERROR" && uploadResult?.newFileName) {
+        //         formQuestion.gambar = uploadResult.newFileName;
+        //       } else {
+        //         formQuestion.gambar = null; // Atur default jika gagal
+        //         console.error("Gagal mengunggah file.");
+        //       }
+        //     } catch (uploadError) {
+        //       console.error('Gagal mengunggah gambar:', uploadError);
+        //       Swal.fire({
+        //       title: 'Gagal!',
+        //       text: 'Gagal untuk mengunggah gambar',
+        //       icon: 'error',
+        //       confirmButtonText: 'OK'
+        //     });
+        //       return;
+        //     }
+        //   } else {
+        //     // Jika tidak ada file yang dipilih, atur question.gambar menjadi null
+        //     formQuestion.gambar = null;
+        //   }
         } else if (question.type === 'Pilgan') {
           formQuestion.gambar = '';
         }
-  
+
         try {
-          const questionResponse = await axios.post(API_LINK + 'Questions/SaveDataQuestion', formQuestion);
-  
+          await Promise.all(uploadPromises);
+          const questionResponse = await axios.post(API_LINK + 'Question/SaveDataQuestion', formQuestion);
+          console.log("pertanyaan", formQuestion)
           if (questionResponse.data.length === 0) {
             Swal.fire({
               title: 'Gagal!',
@@ -335,8 +472,10 @@ export default function MasterPreTestAdd({ onChangePage }) {
               nilaiChoice: question.point,
               quecreatedby: AppContext_test.displayName,
             };
+
             try {
-              const answerResponse = await axios.post(API_LINK + 'Choices/SaveDataChoice', answerData);
+              const answerResponse = await axios.post(API_LINK + 'Choice/SaveDataChoice', answerData);
+              console.log("jawaban",answerData);
             } catch (error) {
               console.error('Gagal menyimpan jawaban Essay:', error);
               Swal.fire({
@@ -357,7 +496,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
               };
   
               try {
-                const answerResponse = await axios.post(API_LINK + 'Choices/SaveDataChoice', answerData);
+                const answerResponse = await axios.post(API_LINK + 'Choice/SaveDataChoice', answerData);
+                console.log("jawaban",answerData);
               } catch (error) {
                 console.error('Gagal menyimpan jawaban multiple choice:', error);
                 Swal.fire({
@@ -396,7 +536,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
           setSelectedFile(null);
           setTimer('');
           setIsButtonDisabled(true);
-          
+          handleSection();
         }
       });
   
@@ -409,6 +549,11 @@ export default function MasterPreTestAdd({ onChangePage }) {
         confirmButtonText: 'OK'
       });
     }
+  };
+
+  const handleSection = () => {
+    setIsSectionAction(true);  
+    setShowConfirmationSection(true);  
   };
 
 
@@ -712,7 +857,16 @@ export default function MasterPreTestAdd({ onChangePage }) {
           }
         `}
       </style>
-      <form id="myForm" onSubmit={handleAdd} style={{margin:"100px"}}>
+      <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
+            <div className="back-and-title" style={{display:"flex"}}>
+              <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Materi Baru</h4>
+              </div>
+                <div className="ket-draft">
+                <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
+                </div>
+              </div>
+      <form id="myForm" onSubmit={handleAdd}>
         <div>
         <CustomStepper
       activeStep={1}
@@ -720,26 +874,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
       onChangePage={handlePageChange}
       getStepContent={getStepContent}
     />
-          <div>
-            {activeStep === steps.length ? (
-              <div>
-                <Button onClick={handleReset}>Reset</Button>
-              </div>
-            ) : (
-              <div>
-                <Button disabled={activeStep === 0} onClick={handleBack}>
-                  Back
-                </Button>
-                <Button variant="contained" color="primary" onClick={handleNext}>
-                </Button>
-              </div>
-            )}
-          </div>
         </div>
-        <div className="card">
-          <div className="card-header bg-outline-primary fw-medium text-black">
-            Tambah Pretest Baru
-          </div>
+        <div className="card mt-4"  style={{margin:"100px"}}>
           <div className="card-body p-4">
             <div className="row mb-4">
 
@@ -821,11 +957,14 @@ export default function MasterPreTestAdd({ onChangePage }) {
             <div className="row mb-4">
               <div className="mb-2">
               </div>
-              <div className="col-lg-4">
+              <div className="">
+                <div className="d-flex justify-content-end">
+                <div className="">
                 <Button
                   title="Tambah Pertanyaan"
                   onClick={() => addQuestion("Essay")}
                   iconName="plus"
+                  label="Tambah Soal"
                   classType="primary btn-sm px-3 py-1"
                 />
                 <input
@@ -835,16 +974,23 @@ export default function MasterPreTestAdd({ onChangePage }) {
                   onChange={handleFileExcel }
                   accept=".xls, .xlsx"
                 />
+                </div>
+                <div className="ml-3">
                 <Button
                   title="Tambah File Excel"
                   iconName="upload"
+                  label="Tambah File Excel"
                   classType="primary btn-sm mx-2 px-3 py-1"
                   onClick={() => document.getElementById('fileInput').click()} // Memicu klik pada input file
                 />
+                </div>
+                </div>
                 {/* Tampilkan nama file yang dipilih */}
                 {selectedFile && <span>{selectedFile.name}</span>}
                 <br></br>
                 <br></br>
+                <div className="d-flex justify-content-end">
+                  <div className="mr-4">
                 <Button
                   title="Unggah File Excel"
                   iconName="paper-plane"
@@ -852,6 +998,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
                   onClick={handleUploadFile}
                   label="Unggah File"
                 />
+                </div>
 
                 <Button
                   iconName="download"
@@ -860,6 +1007,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
                   onClick={handleDownloadTemplate}
                   title="Unduh Template Excel"
                 />
+                </div>
 
               </div>
 
@@ -979,14 +1127,22 @@ export default function MasterPreTestAdd({ onChangePage }) {
                       {(question.type === "Essay" || question.type === "Praktikum") && (
                         
                         <div className="d-flex flex-column w-100">
-                          <FileUpload
+                          {/* <FileUpload
                             forInput={`fileInput_${index}`}
                             formatFile=".jpg,.png"
                             label={<span className="file-upload-label">Gambar (.jpg, .png)</span>}
                             onChange={(e) => handleFileChange(e, index)} // Memanggil handleFileChange dengan indeks
                             hasExisting={question.gambar}
                             style={{ fontSize: '12px' }}
-                          />
+                          /> */}
+                           <FileUpload
+                        forInput="gambarMateri"
+                        label="Gambar Soal Essay (.jpg, .png)"
+                        formatFile=".jpg,.png"
+                        ref={fileGambarRef}
+                        onChange={() => handleFileChangeGambar(fileGambarRef, "jpg, png")}
+                        hasExisting={question.gambar}
+                      />
                           {/* Tampilkan preview gambar jika ada gambar yang dipilih */}
                           {question.selectedFile && (
                             <div style={{
@@ -1001,12 +1157,12 @@ export default function MasterPreTestAdd({ onChangePage }) {
                                 style={{
                                   width: '100%', // Ensure image occupies full width of container
                                   height: 'auto', // Maintain aspect ratio
-                                  objectFit: 'contain' // Fit image within container without distortion
+                                  objectFit: 'contain' 
                                 }}
                               />
                             </div>
                           )}
-                          <div className="mt-2"> {/* Memberikan margin atas kecil untuk jarak yang rapi */}
+                          <div className="mt-2">
                             <Input
                               type="number"
                               label="Skor"
@@ -1015,9 +1171,9 @@ export default function MasterPreTestAdd({ onChangePage }) {
                               isRequired={true}
                             />
                           </div>
-                        </div>
-                        
+                        </div> 
                       )}
+
                       {question.type === "Pilgan" && (
                         <div className="col-lg-12">
                           {question.options.map((option, optionIndex) => (
@@ -1041,6 +1197,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
                               />
                               <Button
                                 iconName="delete"
+                                label="Hapus"
                                 classType="btn-sm ms-2 px-2 py-0"
                                 onClick={() => handleDeleteOption(index, optionIndex)}
                                 style={{ marginRight: '10px' }}
@@ -1063,18 +1220,22 @@ export default function MasterPreTestAdd({ onChangePage }) {
                           />
                         </div>
                       )}
+
                       <div className="d-flex justify-content-between my-2 mx-1">
                         <div>
-
                         </div>
-                        <div>
+                        <div className="d-flex">
+                          <div className="mr-3">
                           <Button
                             iconName="trash"
+                            label="Hapus"
                             classType="btn-sm ms-2 px-3 py-1"
                             onClick={() => handleDeleteQuestion(index)}
                           />
+                          </div>
                           <Button
                             iconName="duplicate"
+                            label="Duplikat"
                             classType="btn-sm ms-2 px-3 py-1"
                             onClick={() => handleDuplicateQuestion(index)}
                           />
@@ -1085,27 +1246,50 @@ export default function MasterPreTestAdd({ onChangePage }) {
                 </div>
               </div>
             ))}
+
           </div>
-        </div>
-        <div className="float my-4 mx-1">
+          <div className="d-flex justify-content-between my-4 mx-1 mt-0">
+          <div className="ml-4">
           <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Kembali"
-            onClick={() => onChangePage("materiAdd")}
+            onClick={() => onChangePage("sharingAdd")}
           />
+          </div>
+          <div className="d-flex mr-4" >
+            <div className="mr-2">
           <Button
             classType="primary ms-2 px-4 py-2"
             type="submit"
             label="Simpan"
             disabled={isButtonDisabled}
           />
+          </div>
           <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("sharingAdd")}
+            onClick={() => onChangePage("posttestAdd")}
           />
+          </div>
+        </div>
         </div>
       </form>
+      {showConfirmation && (
+        <Konfirmasi
+          title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
+          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYes}
+          onNo={handleConfirmNo}
+        />
+        )}
+         {showConfirmationSection && (
+        <Konfirmasi
+          title={isSectionAction ? "Tambah Section" : "Tambah Section"}
+          pesan={isSectionAction ? "Apakah anda ingin menambah PostTest?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYesSection}
+          onNo={handleConfirmNoSection}
+        />
+        )}
     </>
   );
 }

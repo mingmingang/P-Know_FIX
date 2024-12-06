@@ -1,7 +1,7 @@
 import "../../style/KelompokKeahlian.css";
 import { API_LINK } from "../util/Constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faBook } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import Icon from "../part/Icon";
 import Input from "./Input";
@@ -94,7 +94,15 @@ function CardPustaka({
                       }}
                     >
                       <div className="kk" style={{fontSize:"18px", fontWeight:"bold"}}>
-                      <span>Kelompok Keahlian : {book["Kelompok Keahlian"]}</span>
+                      <FontAwesomeIcon
+                        icon={faBook}
+                        style={{
+                          marginRight: "10px",
+                          color: "black",
+                          fontSize: "20px",
+                        }}
+                      />
+                      <span>{book["Kelompok Keahlian"]}</span>
                       </div>
                     </div>
                     <div className="mb-1 mt-2">
@@ -221,7 +229,7 @@ function CardPustaka({
                 <div className="card-footer p-1 d-flex align-items-center justify-content-end" style={{marginLeft:"20px", marginTop:"-10px"}}>
                   <button
                     onClick={() => onDetail("detail", book)}
-                    style={{width:"100px", border:"none", padding:"10px 20px", color:"white", background:"#0E6EFE", borderRadius:"10px", fontWeight:"bold"}}
+                    style={{width:"100px", border:"none", padding:"10px 20px", color:"white", background:"#0E6EFE", borderRadius:"10px", fontWeight:"bold", marginBottom:"10px"}}
                   >
                     Buka
                   </button>
@@ -285,7 +293,15 @@ function CardPustaka({
                     }}
                   >
                     <div className="kk" style={{fontSize:"18px", fontWeight:"bold"}}>
-                    <span>Kelompok Keahlian : {book["Kelompok Keahlian"]}</span>
+                    <FontAwesomeIcon
+                        icon={faBook}
+                        style={{
+                          marginRight: "10px",
+                          color: "black",
+                          fontSize: "20px",
+                        }}
+                      />
+                      <span>{book["Kelompok Keahlian"]}</span>
                     </div>
                   </div>
                   <div className="mb-1 mt-2">
@@ -345,8 +361,7 @@ function CardPustaka({
                 </div>
               </div>
               <div className="d-flex ">
-
-              <p className="mb-0 text-secondary" style={{marginRight:"80px"}}><i
+              <p className="mb-0 text-secondary mb-4" style={{marginRight:"80px"}}><i
                 className="fas fa-circle"
                 icon="circle"
                 style={{
@@ -367,7 +382,7 @@ function CardPustaka({
               }</p>
 
             {uploader === book.Uploader && (
-              <div className="card-footer p-1 d-flex align-items-center justify-content-end">
+              <div className="card-footer p-1 d-flex align-items-center justify-content-end mb-4">
                 <Icon
                   name="edit"
                   type="Bold"

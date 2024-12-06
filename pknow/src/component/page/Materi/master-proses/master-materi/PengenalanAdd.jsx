@@ -33,10 +33,6 @@ function getStepContent(stepIndex) {
       return 'materiAdd';
     case 2:
       return 'forumAdd';
-    // case 3:
-    //   return 'forumAdd';
-    // case 4:
-    //   return 'posttestAdd';
     default:
       return 'Unknown stepIndex';
   }
@@ -105,7 +101,7 @@ export default function Pengenalan({ onChangePage }) {
 
   const handleConfirmYes = () => {
     setShowConfirmation(false); 
-    onChangePage("index");
+    window.location.reload();
   };
 
 
@@ -143,7 +139,8 @@ export default function Pengenalan({ onChangePage }) {
     mat_keterangan: "",
     kry_id: AppContext_test.karyawanId,
     mat_kata_kunci: "",
-    mat_gambar: ""
+    mat_gambar: "",
+    createdby: AppContext_test.activeUser
   });
 
   // Validasi skema menggunakan Yup
@@ -157,11 +154,18 @@ export default function Pengenalan({ onChangePage }) {
     kry_id: string(),
     mat_kata_kunci: string().required('Kata kunci materi harus diisi'),
     mat_gambar: string(),
+    createdby:string(),
   });
 
   // Handle input change
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
+    if (name === 'mat_pengenalan') {
+      const textOnly = value.replace(/<\/?[^>]+(>|$)/g, ""); // Menghapus semua tag HTML
+      formDataRef.current[name] = textOnly;
+    } else {
+      formDataRef.current[name] = value;
+    }
 
     try {
       if (name === "personInCharge" && value === "") {
@@ -256,6 +260,7 @@ export default function Pengenalan({ onChangePage }) {
         .then(response => {
           const data = response.data;
           if (data[0].hasil === "OK") {
+            console.log("new materi",formDataRef.current);
             AppContext_master.dataIDMateri = data[0].newID;
             console.log("id materi", AppContext_master.dataIDMateri);
             SweetAlert("Sukses", "Data Materi berhasil disimpan", "success");
@@ -360,7 +365,7 @@ export default function Pengenalan({ onChangePage }) {
     }
   }, [AppContext_master.MateriForm, AppContext_master.formSavedMateri]);
   // Render form
-  const dataSaved = AppContext_master.formSavedMateri; // Menyimpan nilai AppContext_master.formSavedMateri untuk menentukan apakah form harus di-disable atau tidak
+  const dataSaved = AppContext_master.formSavedMateri; 
 
   const [activeStep, setActiveStep] = useState(0);
 
@@ -409,41 +414,15 @@ export default function Pengenalan({ onChangePage }) {
               </div>
       <form onSubmit={handleAdd} style={{margin:"20px 100px"}}>
         <div className="mb-4">
-          {/* <Stepper activeStep={activeStep}>
-            {steps.map((label, index) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper> */}
          <CustomStepper
       activeStep={0}
       steps={steps}
       onChangePage={handlePageChange}
       getStepContent={getStepContent}
     />
-          {/* <div>
-            {activeStep === steps.length ? (
-              <div>
-                <Button onClick={handleReset}>Reset</Button>
-              </div>
-            ) : (
-              <div>
-                <Button disabled={activeStep === 0} onClick={handleBack}>
-                  Back
-                </Button>
-                <Button variant="contained" color="primary" onClick={handleNext}>
-                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                </Button>
-              </div>
-            )}
-          </div> */}
         </div>
 
         <div className="card mb-4">
-          {/* <div className="card-header bg-outline-primary fw-medium text-black">
-            Tambah Materi Baru
-          </div> */}
           <div className="col-lg-4 mt-4" style={{ display: "flex" }}>
                     <div className="preview-img">
                       {filePreview ? (
@@ -471,7 +450,7 @@ export default function Pengenalan({ onChangePage }) {
                           }}
                         >
                           <img
-                            src={NoImage} // Use fallback image if no preview available
+                            src={NoImage} 
                             alt="No Preview Available"
                             style={{
                               width: "200px",
@@ -589,98 +568,10 @@ export default function Pengenalan({ onChangePage }) {
       ></div>
                 </div>
               </div>
-              {/* <div className="col-lg-4">
-                <FileUpload
-                  ref={gambarInputRef}
-                  forInput="mat_gambar"
-                  label="Gambar Cover (.jpg, .png)"
-                  formatFile=".jpg,.png"
-                  onChange={() =>
-                    handleGambarChange(gambarInputRef, "jpg,png")
-                  }
-                  errorMessage={errors.mat_gambar}
-                  isRequired
-                  disabled={isFormDisabled || dataSaved}
-                />
-                {AppContext_test.materiGambar && (
-                  <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => {
-                      e.preventDefault(); 
-                      previewFile(AppContext_test.materiGambar); 
-                    }}
-                  >
-                    Lihat berkas yang telah diunggah
-                  </a>
-                )}
-              </div>
-              <div className="col-lg-4">
-                <FileUpload
-                  ref={fileInputRef}
-                  forInput="mat_file_pdf"
-                  label="File Materi (.pdf)"
-                  formatFile=".pdf"
-                  onChange={() =>
-                    handlePdfChange(fileInputRef, "pdf")
-                  }
-                  errorMessage={errors.mat_file_pdf}
-                  isRequired
-                  disabled={isFormDisabled || dataSaved}
-                />
-                {AppContext_test.materiPdf && (
-                  <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => {
-                      e.preventDefault(); 
-                      previewFile(AppContext_test.materiPdf); 
-                    }}
-                  >
-                    Lihat berkas yang telah diunggah
-                  </a>
-                )}
-              </div>
-              <div className="col-lg-4">
-                <FileUpload
-                  ref={vidioInputRef}
-                  forInput="mat_file_video"
-                  label="File Materi (.mp4, .mov)"
-                  formatFile=".mp4,.mov"
-                  maxFileSize={100}
-                  onChange={() =>
-                    handleVideoChange(vidioInputRef, "mp4,mov")
-                  }
-                  errorMessage={errors.mat_file_video}
-                  isRequired
-                  disabled={isFormDisabled || dataSaved}
-                />
-                {AppContext_test.materiVideo && (
-                  <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => {
-                      e.preventDefault(); 
-                      previewFile(AppContext_test.materiVideo); 
-                    }}
-                  >
-                    Lihat berkas yang telah diunggah
-                  </a>
-                )}
-              </div> */}
-
             </div>
           </div>
           <div className="d-flex justify-content-between my-4 mx-1 mt-0">
             <div className="ml-4">
-          {/* <Button
-            classType="outline-secondary me-2 px-4 py-2"
-            label="Kembali"
-            onClick={() => onChangePage("index")}
-          /> */}
           </div>
           <div className="d-flex mr-4" >
           <Button

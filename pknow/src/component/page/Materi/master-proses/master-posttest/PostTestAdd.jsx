@@ -13,26 +13,69 @@ import Swal from 'sweetalert2';
 import { Editor } from '@tinymce/tinymce-react';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
-import { Stepper, Step, StepLabel } from '@mui/material';
+import { Stepper, Step, StepLabel,Box } from '@mui/material';
+import Konfirmasi from "../../../../part/Konfirmasi";
+import BackPage from "../../../../../assets/backPage.png";
+import UploadFile from "../../../../util/UploadFile";
 
-const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+const steps = ['Sharing Expert', 'Pretest', 'Post Test'];
 
 function getStepContent(stepIndex) {
   switch (stepIndex) {
+    // case 0:
+    //   return 'materiAdd';
     case 0:
-      return 'materiAdd';
+      return 'sharingAdd';
     case 1:
       return 'pretestAdd';
     case 2:
-      return 'sharingAdd';
-    case 3:
-      return 'forumAdd';
-    case 4:
       return 'posttestAdd';
     default:
       return 'Unknown stepIndex';
   }
 }
+
+function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
+  return (
+    <Box sx={{ width: "100%", mt: 2 }}>
+      <Stepper activeStep={activeStep} alternativeLabel>
+        {steps.map((label, index) => (
+          <Step
+            key={label}
+            onClick={() => onChangePage(getStepContent(index))} // Tambahkan onClick di sini
+            sx={{
+              cursor: "pointer", // Menambahkan pointer untuk memberikan indikasi klik
+              "& .MuiStepIcon-root": {
+                fontSize: "2rem",
+                color: index <= activeStep ? "primary.main" : "grey.300",
+                "&.Mui-active": {
+                  color: "primary.main",
+                },
+                "& .MuiStepIcon-text": {
+                  fill: "#fff",
+                  fontSize: "1rem",
+                },
+              },
+            }}
+          >
+            <StepLabel
+              sx={{
+                "& .MuiStepLabel-label": {
+                  typography: "body1",
+                  color: index <= activeStep ? "primary.main" : "grey.500",
+                },
+              }}
+            >
+              {label}
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
+  );
+}
+
+
 export default function MasterPostTestAdd({ onChangePage }) {
   const [formContent, setFormContent] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -40,6 +83,8 @@ export default function MasterPostTestAdd({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
+  const [isBackAction, setIsBackAction] = useState(false); 
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [timer, setTimer] = useState('');
   const gambarInputRef = useRef(null);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -69,6 +114,21 @@ export default function MasterPostTestAdd({ onChangePage }) {
     }));
   };
 
+  const handleGoBack = () => {
+    setIsBackAction(true);  
+    setShowConfirmation(true);  
+  };
+
+  const handleConfirmYes = () => {
+    setShowConfirmation(false); 
+    window.location.reload();
+  };
+
+
+  const handleConfirmNo = () => {
+    setShowConfirmation(false);  
+  };
+
   const addQuestion = (questionType) => {
     const newQuestion = {
       type: questionType,
@@ -83,7 +143,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
 
   const [formData, setFormData] = useState({
     materiId: AppContext_master.dataIDMateri,
-    quizJudul: '',
+    sec_id: AppContext_master.dataIdSection,
     quizDeskripsi: '',
     quizTipe: 'Posttest',
     tanggalAwal: '',
@@ -98,7 +158,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
     soal: '',
     tipeQuestion: 'Essay',
     gambar: null,
-    questionDeskripsi: '',
+    //questionDeskripsi: '',
     status: 'Aktif',
     quecreatedby: AppContext_test.displayName,
   });
@@ -115,6 +175,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
 
   const userSchema = object({
     materiId: string(),
+    sec_id:string(),
     quizJudul: string(),
     quizDeskripsi: string().required('Quiz deskripsi harus diisi'),
     quizTipe: string(),
@@ -152,6 +213,39 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     return start <= end;
+  };
+
+  const fileGambarRef = useRef(null);
+
+  const handleFileChangeGambar = (ref, extAllowed) => {
+    const { name, value } = ref.current;
+    const file = ref.current.files[0];
+    const fileName = file ? file.name : "";
+    const fileSize = file ? file.size : 0;
+    const fileExt = fileName.split(".").pop().toLowerCase();
+    const validationError = validateInput(name, value, userSchema);
+    let error = "";
+
+    if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
+    else if (!extAllowed.split(",").includes(fileExt))
+      error = "format berkas tidak valid";
+
+    if (error) ref.current.value = "";
+    else {
+      // Show preview if the file is an image
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          //setFilePreview(reader.result); // Set the preview
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [validationError.name]: error,
+    }));
   };
 
   const handleAdd = async (e) => {
@@ -226,6 +320,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
       formData.timer = convertTimeToSeconds(timer)
   
       const response = await axios.post(API_LINK + 'Quiz/SaveDataQuiz', formData);
+      console.log("data quiz", formData);
   
       if (response.data.length === 0) {
         Swal.fire({
@@ -246,24 +341,33 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
           soal: question.text,
           tipeQuestion: question.type,
           gambar: question.gambar,
-          questionDeskripsi: '',
           status: 'Aktif',
           quecreatedby: AppContext_test.displayName,
         };
+
+        const uploadPromises = [];
+
         if (question.type === 'Essay' || question.type === 'Praktikum') {
-          if (question.selectedFile) {
-            try {
-              const uploadResult = await uploadFile(question.selectedFile);
-              console.log("Image Upload Response:", JSON.stringify(uploadResult.newFileName));
-              formQuestion.gambar = uploadResult.newFileName;
-            } catch (uploadError) {
-              console.error('Gagal mengunggah gambar:', uploadError);
-              alert('Gagal mengunggah gambar untuk pertanyaan: ' + question.text);
-              return;
-            }
-          } else {
-            // Jika tidak ada file yang dipilih, atur question.gambar menjadi null
-            formQuestion.gambar = null;
+          // if (question.selectedFile) {
+          //   try {
+          //     const uploadResult = await uploadFile(question.selectedFile);
+          //     console.log("Image Upload Response:", JSON.stringify(uploadResult.newFileName));
+          //     formQuestion.gambar = uploadResult.newFileName;
+          //   } catch (uploadError) {
+          //     console.error('Gagal mengunggah gambar:', uploadError);
+          //     alert('Gagal mengunggah gambar untuk pertanyaan: ' + question.text);
+          //     return;
+          //   }
+          // } else {
+          //   // Jika tidak ada file yang dipilih, atur question.gambar menjadi null
+          //   formQuestion.gambar = null;
+          // }
+          if (fileGambarRef.current.files.length >= 0) {
+            uploadPromises.push(
+              UploadFile(fileGambarRef.current).then(
+                (data) => (formQuestion.gambar = data.Hasil)
+              )
+            );
           }
         } else if (question.type === 'Pilgan') {
           formQuestion.gambar = '';
@@ -273,7 +377,8 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
         console.log(formQuestion);
   
         try {
-          const questionResponse = await axios.post(API_LINK + 'Questions/SaveDataQuestion', formQuestion);
+          await Promise.all(uploadPromises);
+          const questionResponse = await axios.post(API_LINK + 'Question/SaveDataQuestion', formQuestion);
           console.log('Pertanyaan berhasil disimpan:', questionResponse.data);
   
           if (questionResponse.data.length === 0) {
@@ -298,7 +403,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
             };
   
             try {
-              const answerResponse = await axios.post(API_LINK + 'Choices/SaveDataChoice', answerData);
+              const answerResponse = await axios.post(API_LINK + 'Choice/SaveDataChoice', answerData);
             } catch (error) {
               console.error('Gagal menyimpan jawaban Essay:', error);
               Swal.fire({
@@ -319,7 +424,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
               };
   
               try {
-                const answerResponse = await axios.post(API_LINK + 'Choices/SaveDataChoice', answerData);
+                const answerResponse = await axios.post(API_LINK + 'Choice/SaveDataChoice', answerData);
               } catch (error) {
                 console.error('Gagal menyimpan jawaban multiple choice:', error);
                 Swal.fire({
@@ -358,7 +463,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
           setSelectedFile(null);
           setTimer('');
           setIsButtonDisabled(true);
-          onChangePage("index");
+          onChangePage("kk");
           
           setResetStepper((prev) => !prev);
         }
@@ -661,6 +766,11 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
     setActiveStep(0);
   };
 
+  const handlePageChange = (content) => {
+    onChangePage(content);
+  };
+
+
   if (isLoading) return <Loading />;
 
   return (
@@ -698,41 +808,27 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
           }
         `}
       </style>
-      <form id="myForm" onSubmit={handleAdd} style={{margin:"100px"}}>
+      <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
+            <div className="back-and-title" style={{display:"flex"}}>
+              <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Materi Baru</h4>
+              </div>
+                <div className="ket-draft">
+                <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
+                </div>
+              </div>
+      <form id="myForm" onSubmit={handleAdd}>
         <div>
-          <Stepper activeStep={activeStep}>
-            {steps.map((label, index) => (
-              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-          <div>
-            {activeStep === steps.length ? (
-              <div>
-                <Button onClick={handleReset} label="Reset"/>
-                <Button
-            classType="outline-secondary me-2 px-4 py-2"
-            label="Reset"
-            onClick={() => onChangePage("forumAdd")}
-          />
-              </div>
-            ) : (
-              <div>
-                <Button disabled={activeStep === 0} onClick={handleBack}>
-                  Back
-                </Button>
-                <Button variant="contained" color="primary" onClick={handleNext}>
-                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                </Button>
-              </div>
-            )}
-          </div>
+        <div>
+        <CustomStepper
+      activeStep={2}
+      steps={steps}
+      onChangePage={handlePageChange}
+      getStepContent={getStepContent}
+    />
         </div>
-        <div className="card">
-          <div className="card-header bg-outline-primary fw-medium text-black">
-            Tambah Posttest Baru
-          </div>
+        </div>
+        <div className="card mt-4 " style={{margin:"100px"}}>
           <div className="card-body p-4">
             <div className="row mb-4">
 
@@ -809,11 +905,14 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
             <div className="row mb-4">
               <div className="mb-2">
               </div>
-              <div className="col-lg-4">
+              <div className="">
+                <div className="d-flex justify-content-end">
+                <div className="">
                 <Button
                   title="Tambah Pertanyaan"
                   onClick={() => addQuestion("Essay")}
                   iconName="plus"
+                  label="Tambah Soal"
                   classType="primary btn-sm px-3 py-1"
                 />
                 <input
@@ -823,16 +922,23 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                   onChange={handleFileExcel }
                   accept=".xls, .xlsx"
                 />
+                </div>
+                <div className="ml-3">
                 <Button
                   title="Tambah File Excel"
                   iconName="upload"
+                  label="Tambah File Excel"
                   classType="primary btn-sm mx-2 px-3 py-1"
                   onClick={() => document.getElementById('fileInput').click()} // Memicu klik pada input file
                 />
+                </div>
+                </div>
                 {/* Tampilkan nama file yang dipilih */}
                 {selectedFile && <span>{selectedFile.name}</span>}
                 <br></br>
                 <br></br>
+                <div className="d-flex justify-content-end">
+                  <div className="mr-4">
                 <Button
                   title="Unggah File Excel"
                   iconName="paper-plane"
@@ -840,6 +946,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                   onClick={handleUploadFile}
                   label="Unggah File"
                 />
+                </div>
 
                 <Button
                   iconName="download"
@@ -848,6 +955,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                   onClick={handleDownloadTemplate}
                   title="Unduh Template Excel"
                 />
+                </div>
               </div>
 
             </div>
@@ -1013,14 +1121,14 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                       {(question.type === "Essay" || question.type === "Praktikum") && (
                         
                         <div className="d-flex flex-column w-100">
-                          <FileUpload
-                            forInput={`fileInput_${index}`}
-                            formatFile=".jpg,.png"
-                            label={<span className="file-upload-label">Gambar (.jpg, .png)</span>}
-                            onChange={(e) => handleFileChange(e, index)} // Memanggil handleFileChange dengan indeks
-                            hasExisting={question.gambar}
-                            style={{ fontSize: '12px' }}
-                          />
+                           <FileUpload
+                        forInput="gambarMateri"
+                        label="Gambar Soal Essay (.jpg, .png)"
+                        formatFile=".jpg,.png"
+                        ref={fileGambarRef}
+                        onChange={() => handleFileChangeGambar(fileGambarRef, "jpg, png")}
+                        hasExisting={question.gambar}
+                      />
                           {/* Tampilkan preview gambar jika ada gambar yang dipilih */}
                           {question.selectedFile && (
                             <div style={{
@@ -1102,16 +1210,22 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
 
                         </div>
                         <div>
+                          <div className="d-flex">
+                            <div className="mr-3">
                           <Button
                             iconName="trash"
+                            label="Hapus"
                             classType="btn-sm ms-2 px-3 py-1"
                             onClick={() => handleDeleteQuestion(index)}
                           />
+                          </div>
                           <Button
                             iconName="duplicate"
+                            label="Duplikat"
                             classType="btn-sm ms-2 px-3 py-1"
                             onClick={() => handleDuplicateQuestion(index)}
                           />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1120,26 +1234,40 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
               </div>
             ))}
           </div>
-        </div>
-        <div className="float my-4 mx-1">
+          <div className="d-flex justify-content-between my-4 mx-1 mt-0">
+          <div className="ml-4">
           <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Kembali"
-            onClick={() => onChangePage("forumAdd")}
+            onClick={() => onChangePage("pretestAdd")}
           />
+          </div>
+          <div className="d-flex mr-4" >
+            <div className="mr-2">
           <Button
             classType="primary ms-2 px-4 py-2"
             type="submit"
             label="Simpan"
             disabled={isButtonDisabled}
           />
+          </div>
           {/* <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("sharingAdd")}
+            onClick={() => onChangePage("posttestAdd")}
           /> */}
+          </div>
+        </div>
         </div>
       </form>
+      {showConfirmation && (
+        <Konfirmasi
+          title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
+          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYes}
+          onNo={handleConfirmNo}
+        />
+        )}
     </>
   );
 }

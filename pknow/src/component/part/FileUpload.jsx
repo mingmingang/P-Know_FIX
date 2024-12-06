@@ -10,13 +10,14 @@ const FileUpload = forwardRef(function FileUpload(
     isDisabled = false,
     errorMessage,
     hasExisting,
+    maxFileSize = 10, // Default 10 MB
     ...props
   },
   ref
 ) {
   return (
     <>
-      <div className="mb-3 mt-4" style={{width:"600px"}}>
+      <div className="mb-3 mt-4" style={{ width: "600px" }}>
         <label htmlFor={forInput} className="form-label fw-bold">
           {label}
           {isRequired ? <span className="text-danger"> *</span> : ""}
@@ -41,7 +42,9 @@ const FileUpload = forwardRef(function FileUpload(
               {...props}
               required={isRequired}
             />
-            <sub>Maksimum ukuran berkas adalah 10 MB</sub>
+            <sub>
+              Maksimum ukuran berkas adalah {maxFileSize} MB
+            </sub>
             {hasExisting && (
               <sub>
                 <br />
@@ -50,6 +53,7 @@ const FileUpload = forwardRef(function FileUpload(
                   href={FILE_LINK + hasExisting}
                   className="text-decoration-none"
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   [Unduh Berkas]
                 </a>
@@ -67,6 +71,7 @@ const FileUpload = forwardRef(function FileUpload(
                 href={FILE_LINK + hasExisting}
                 className="text-decoration-none"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 Unduh berkas
               </a>

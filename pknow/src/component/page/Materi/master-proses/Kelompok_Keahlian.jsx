@@ -168,14 +168,24 @@ export default function SubKKIndex({ onChangePage }) {
   return (
     <>
       {isLoading && <Loading />}
+      <Search
+        title="Kelola Materi"
+        description="Program ini terdiri dari berbagai kategori yang dirancang untuk mempermudah pengelompokan materi sesuai dengan topik atau tema tertentu. Setiap kategori memiliki sejumlah materi yang dapat Anda kelola secara fleksibel, mulai dari menambah, mengedit, hingga menghapus materi sesuai kebutuhan."
+        showInput={false}
+      />
       {isError.error && <Alert type="danger" message={isError.message} />}
       <div className="d-flex flex-column">
-        
-          {listKK.map((kk, index) => (
+        {listKK.length === 0 ? (
+          <div className="mx-5 my-5">
+          <Alert type="warning" message="Anda tidak tergabung pada Program Kelompok Keahlian manapun saat ini." />
+          </div>
+        ) : (
+          listKK.map((kk, index) => (
             <CardKK key={index} kk={kk} onChangePage={onChangePage} />
-          ))}
-       
+          ))
+        )}
       </div>
     </>
   );
+  
 }

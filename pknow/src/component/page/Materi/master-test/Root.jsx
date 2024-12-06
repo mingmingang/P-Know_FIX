@@ -3,16 +3,16 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 // import KMS_Rightbar from "../../backbone/KMS_RightBar";
 import KMS_Rightbar from "../../../part/RightBar"
 import MasterTestIndex from "./Index";
-import MasterTestPostTest from "./PostTest";
-import MasterTestPreTest from "./PreTest";
-import MasterTestPengerjaanTest from "./Test";
-import MasterTestHasilTest from "./HasilTest";
-import MasterTestDetailTest from "./DetailTest";
-import MasterTestForum from "./Forum";
-import MasterTestMateriPDF from "./MateriPDF";
-import MasterTestMateriVideo from "./MateriVideo";
+// import MasterTestPostTest from "./PostTest";
+// import MasterTestPreTest from "./PreTest";
+// import MasterTestPengerjaanTest from "./Test";
+// import MasterTestHasilTest from "./HasilTest";
+// import MasterTestDetailTest from "./DetailTest";
+// import MasterTestForum from "./Forum";
+// import MasterTestMateriPDF from "./MateriPDF";
+// import MasterTestMateriVideo from "./MateriVideo";
 import MasterTestPengenalan from "./Pengenalan";
-import AppContext_test from "./TestContext";
+// import AppContext_test from "./TestContext";
 
 export default function MasterTest() {
   
@@ -53,15 +53,15 @@ export default function MasterTest() {
             isOpen={isOpen}
           />
         );
-      // case "pengenalan":
-      //   return (
-      //     <MasterTestPengenalan
-      //       onChangePage={handleSetPageMode}
-      //       CheckDataReady={isDataReady}
-      //       materiId={materiId}
-      //       isOpen={isOpen}
-      //     />
-      //   );
+      case "pengenalan":
+        return (
+          <MasterTestPengenalan
+            onChangePage={handleSetPageMode}
+            CheckDataReady={isDataReady}
+            materiId={materiId}
+            isOpen={isOpen}
+          />
+        );
       // case "pretest":
       //   return (
       //     <MasterTestPreTest

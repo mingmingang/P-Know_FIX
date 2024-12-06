@@ -36,4 +36,4 @@ const ProgressBar = ({ progress }) => {
   );
 };
 
-export default KMS_ProgressBar;
+export default ProgressBar;

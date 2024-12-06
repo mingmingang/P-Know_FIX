@@ -403,7 +403,7 @@ function CardKelompokKeahlian({
               </p>
         </div>
 
-        <div className="card-footer status-open">
+        <div className="card-footer status-open mb-4">
                     <div className="card-content" style={{alignItems:"center"}}>
                     {cardContent}
                     </div>

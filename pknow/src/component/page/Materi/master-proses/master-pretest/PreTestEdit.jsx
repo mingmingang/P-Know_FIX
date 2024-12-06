@@ -1,18 +1,18 @@
 import React, { useRef, useState, useEffect } from "react";
-import Button from "../../../part/Button";
+import Button from "../../../../part/Button copy";
 import { object, string } from "yup";
-import Input from "../../../part/Input";
-import Loading from "../../../part/Loading";
+import Input from "../../../../part/Input";
+import Loading from "../../../../part/Loading";
 import * as XLSX from 'xlsx';
 import axios from 'axios';
-import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
-import { API_LINK } from "../../../util/Constants";
-import FileUpload from "../../../part/FileUpload";
-import uploadFile from "../../../util/UploadImageQuiz";
+import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
+import { API_LINK } from "../../../../util/Constants";
+import FileUpload from "../../../../part/FileUpload";
+import uploadFile from "../../../../util/UploadImageQuiz";
 import { Editor } from '@tinymce/tinymce-react';
 import Swal from 'sweetalert2';
 import AppContext_test from "../../master-test/TestContext";
-import Alert from "../../../part/Alert";
+import Alert from "../../../../part/Alert";
 import { Stepper, Step, StepLabel } from '@mui/material';
 
 const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];

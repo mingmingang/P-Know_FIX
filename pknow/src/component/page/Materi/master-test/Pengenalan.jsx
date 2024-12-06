@@ -13,6 +13,9 @@ import Loading from "../../../part/Loading";
 import axios from "axios";
 import AppContext_master from "../master-proses/MasterContext";
 import AppContext_test from "./TestContext";
+import maskotPknow from "../../../../assets/pknowmaskot.png";
+import he from "he";
+
 
 export default function MasterTestIndex({  onChangePage, CheckDataReady, materiId  }) {
   const [isError, setIsError] = useState(false);
@@ -21,6 +24,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
   const [marginRight, setMarginRight] = useState("5vh");
 
   AppContext_test.refreshPage = "pengenalan";
+
   useEffect(() => {
     document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
     const sidebarMenuElement = document.querySelector('.sidebarMenu');
@@ -29,6 +33,11 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
     }
   }, []);
 
+  const decodeHTML = (input) => {
+    const doc = new DOMParser().parseFromString(input, "text/html");
+    return doc.documentElement.textContent;
+  };
+
   async function updateProgres() {
     let success = false;
     let retryCount = 0;
@@ -36,7 +45,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
 
     while (!success && retryCount < maxRetries) {
       try {
-        const response = await axios.post(API_LINK + "Materis/UpdatePoinProgresMateri", {
+        const response = await axios.post(API_LINK + "Materi/UpdatePoinProgresMateri", {
           materiId: AppContext_test.materiId,
         });
 
@@ -78,6 +87,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
           const [dataQuiz] = await Promise.all([getMateri()]);
           if (isMounted) {
             setCurrentData(dataQuiz);
+            setIsLoading(false);
           }
         } catch (error) {
           if (isMounted) {
@@ -89,18 +99,14 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
               return; // Exit function if max retries reached
             }
           }
-        } finally {
-          if (isMounted) {
-            setIsLoading(false);
-          }
-        }
+        } 
       }
     };
 
     const getMateri = async (retries = 10, delay = 2000) => {
       for (let i = 0; i < retries; i++) {
         try {
-          const response = await axios.post(API_LINK + "Materis/GetDataMateriById", {
+          const response = await axios.post(API_LINK + "Materi/GetDataMateriById", {
             materiId: AppContext_test.materiId,
           });
           if (response.data.length !== 0) {
@@ -163,30 +169,21 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
             <Loading />
           ) : (
             <>
-            <div style={{ marginRight: marginRight }}>
+            <div style={{ marginRight: "marginRight", marginTop:"100px", marginLeft:"100px", marginBottom:"80px" }}>
                <div
                   className="d-flex align-items-center mb-4"
                   >
                   <div
-                    className="rounded-circle overflow-hidden d-flex justify-content-center align-items-center"
-                    style={circleStyle}
+                  
                   >
-                    <img
-                      className="align-self-start"
-                      style={{
-                        width: "450%",
-                        height: "auto",
-                        position: "relative",
-                        right: "30px",
-                        bottom: "40px",
-                      }}
-                    />
-                  </div>
-                
-                  <h6 className="mb-0">{currentData[0].Uploader} - {formatDate(currentData[0].Creadate)}</h6>
+                    <img src={maskotPknow} alt="" width="50px" />
+                  </div>    
+                  <h6 className="mb-0 ml-4">{currentData[0].Uploader} - {formatDate(currentData[0].Creadate)}</h6>
                 </div>
               <div className="text-left" style={{marginLeft:"6%", marginRight:"6%"}}>
-                <div dangerouslySetInnerHTML={{ __html: currentData[0].Pengenalan }} />
+                <div dangerouslySetInnerHTML={{
+                  __html: he.decode(currentData[0].Pengenalan),
+                }} />
                 <div>
               </div>
               </div>

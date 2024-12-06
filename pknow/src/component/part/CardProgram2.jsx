@@ -25,7 +25,7 @@ const CardProgram = ({ program, onChangePage }) => {
           {program["Nama Program"]}
         </p>
         <p
-          className="lh-sm mb-0 mt-2"
+          className="mb-0 mt-2"
           style={{
             width: "100%",
             WebkitLineClamp: 2,
@@ -34,7 +34,7 @@ const CardProgram = ({ program, onChangePage }) => {
             maxHeight: expandDeskripsi ? "none" : "75px",
             overflow: "hidden",
             textAlign:'justify',
-            
+            lineHeight:"25px"
           }}
         >
           {program.Deskripsi.length > MAX_DESCRIPTION_LENGTH && !expandDeskripsi ? (

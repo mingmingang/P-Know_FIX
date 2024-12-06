@@ -5,14 +5,15 @@ import { decryptId } from "../../../util/Encryptor";
 import MasterProsesIndex from "./Index";
 //Pengenalan
 import PengenalanAdd from "./master-materi/PengenalanAdd";
+import PengenalanEdit from "./master-materi/PengenalanEdit";
 // PreTest
 import MasterPreTestAdd from "./master-pretest/PreTestAdd";
 // import MasterPreTestAddNot from "./master-pretest/PreTestAddNot";
-// import MasterPreTestEdit from "./master-pretest/PreTestEdit";
-// import MasterPreTestDetail from "./master-pretest/PreTestDetail";
+import MasterPreTestEdit from "./master-pretest/PreTestEdit";
+import MasterPreTestDetail from "./master-pretest/PreTestDetail";
 // // Materi
 import MasterMateriAdd from "./master-materi/MateriAdd";
-// import MasterMateriEdit from "./master-materi/MateriEdit";
+import MasterMateriEdit from "./master-materi/MateriEdit";
 // import MasterMateriDetail from "./master-materi/MateriDetail";
 // import MasterMateriReviewJawaban from "./master-materi/MateriReviewJawaban";
 // // Sharing Expert
@@ -25,7 +26,7 @@ import MasterSharingAdd from "./master-sharing/SharingAdd";
 import MasterForumAdd from "./master-forum/ForumAdd";
 // import MasterForumDetailNot from "./master-forum/ForumDetailNot";
 // import MasterForumEditNot from "./master-forum/ForumEditNot";
-// import MasterForumEdit from "./master-forum/ForumEdit";
+import MasterForumEdit from "./master-forum/ForumEdit";
 // import MasterForumDetail from "./master-forum/ForumDetail";
 // // Post Test
 import MasterPostTestAdd from "./master-posttest/PostTestAdd";
@@ -67,10 +68,10 @@ export default function MasterProses() {
       //   return <MasterPreTestAddNot 
       //           onChangePage={handleSetPageMode} 
       //           withID={dataID}/>;
-      // case "pretestEdit":
-      //   return <MasterPreTestEdit 
-      //           onChangePage={handleSetPageMode} 
-      //           withID={dataID}/>;
+      case "pretestEdit":
+        return <MasterPreTestEdit 
+                onChangePage={handleSetPageMode} 
+                withID={dataID}/>;
       // case "pretestDetail":
       //   return <MasterPreTestDetail 
       //           onChangePage={handleSetPageMode} 
@@ -79,14 +80,18 @@ export default function MasterProses() {
         return <PengenalanAdd 
                 onChangePage={handleSetPageMode} 
                 withID={dataID}/>;
+      case "pengenalanEdit":
+          return <PengenalanEdit 
+                onChangePage={handleSetPageMode} 
+                withID={dataID}/>;
       case "materiAdd":
         return <MasterMateriAdd 
                 onChangePage={handleSetPageMode} 
                 withID={dataID}/>;
-      // case "materiEdit":
-      //   return <MasterMateriEdit 
-      //         onChangePage={handleSetPageMode}             
-      //         withID={dataID}/>;
+      case "materiEdit":
+        return <MasterMateriEdit 
+              onChangePage={handleSetPageMode}             
+              withID={dataID}/>;
       // case "materiDetail":
       //   return <MasterMateriDetail 
       //           onChangePage={handleSetPageMode}             
@@ -126,10 +131,10 @@ export default function MasterProses() {
       //   return <MasterForumEditNot
       //           onChangePage={handleSetPageMode}
       //           withID={dataID}/>;
-      // case "forumEdit":
-      //   return <MasterForumEdit 
-      //           onChangePage={handleSetPageMode}
-      //           withID={dataID}/>;
+      case "forumEdit":
+        return <MasterForumEdit 
+                onChangePage={handleSetPageMode}
+                withID={dataID}/>;
       // case "forumDetail":
       //   return <MasterForumDetail 
       //           onChangePage={handleSetPageMode} 

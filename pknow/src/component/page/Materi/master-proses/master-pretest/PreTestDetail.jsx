@@ -1,11 +1,11 @@
 import React, { useRef, useState, useEffect } from "react";
-import Button from "../../../part/Button";
-import Loading from "../../../part/Loading";
+import Button from "../../../../part/Button copy";
+import Loading from "../../../../part/Loading";
 import { Stepper } from 'react-form-stepper';
 import axios from 'axios';
-import { API_LINK } from "../../../util/Constants";
+import { API_LINK } from "../../../../util/Constants";
 import AppContext_test from "../MasterContext";
-import Alert from "../../../part/Alert";
+import Alert from "../../../../part/Alert";
 
 export default function MasterPreTestDetail({ onChangePage, withID }) {
   const [formContent, setFormContent] = useState([]);

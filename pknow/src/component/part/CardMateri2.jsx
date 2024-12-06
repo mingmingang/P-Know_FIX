@@ -3,7 +3,7 @@ import Icon from "./Icon.jsx";
 import Button from "./Button.jsx";
 import AppContext_master from "../page/Materi/master-proses/MasterContext.jsx";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faBook } from '@fortawesome/free-solid-svg-icons';
 import AppContext_test from "../page/Materi/master-test/TestContext.jsx";
 import { API_LINK } from "../util/Constants.js";
 import "../../style/KelompokKeahlian.css";
@@ -36,7 +36,7 @@ function CardMateri({
     AppContext_test.materiId = book.Key;
     AppContext_master.materiId = book.Key;
     AppContext_test.refreshPage += 1;
-    onBacaMateri("pengenalan", true, book.Key, true);
+    onBacaMateri("pengenalan", true, AppContext_master.materiId, true);
   };
 
   const handleReviewJawaban = (book) => {
@@ -58,24 +58,33 @@ function CardMateri({
             <div className="col-md-4 mb-4"  key={book.Key}>
               <div
                 className="bg-white-kk"
-                style={{ borderColor: book.Status === "Aktif" ? "blue" : "grey" }}
+                style={{ borderColor: book.Status === "Aktif" ? "blue" : "grey", width:"374px" }}
               >
                 <div>
-                  <img src={book.Gambar} alt="gambar" />
+                  <img  className="mr-0" src={book.Gambar} alt="gambar" />
                   <div>
                     <h3
-                      className="text-xl font-bold text-blue-600"
+                      className="text-xl font-bold text-blue-600 mt-3"
                       style={{ fontSize: "20px", textAlign: "justify" }}
                     >
                       {book.Judul}
                     </h3>
-                    <div className="mb-1" style={{ fontSize: "12px", marginLeft: "20px" }}>
+                    <div className="mb-1 mt-3" style={{ fontSize: "16px"}}>
+                    <FontAwesomeIcon
+                        icon={faBook}
+                        style={{
+                          marginRight: "10px",
+                          marginLeft: "20px",
+                          fontWeight: "600",
+                          color: "black",
+                        }}
+                      />
                       <span style={{ color: "black", fontSize: "16px", fontWeight: "600" }}>
                         {book.Kategori}
                       </span>
                     </div>
                     <div
-                      className="mb-1"
+                      className="mb-1 mt-3"
                       style={{ color: "black", fontSize: "16px", fontWeight: "600" }}
                     >
                       <FontAwesomeIcon
@@ -90,12 +99,14 @@ function CardMateri({
                       <span>{book.Uploader} • {book.Creadate?.slice(0, 10)}</span>
                     </div>
                     <p
-                      className="card-text p-0 m-0"
+                      className="card-text p-0 mt-3 mb-3"
                       style={{
-                        fontSize: "12px",
-                        maxHeight: "75px",
+                        fontSize: "15px",
+                        
                         overflow: "hidden",
                         textAlign: 'justify',
+                        marginLeft: '16px',
+                        color:'grey'
                       }}
                     >
                       {book.Keterangan.length > MAX_DESCRIPTION_LENGTH && !expandDeskripsi[book.Key] ? (
@@ -126,17 +137,17 @@ function CardMateri({
                     </p>
                   </div>
                 </div>
-                <hr className="m-0 p-0" style={{ color: "#67ACE9" }} />
-                <div className="card-footer d-flex justify-content-end bg-white">
+               
+                <div className="card-footer d-flex justify-content-end bg-white mr-4 mb-4" style={{borderRadius:"14px", fontSize:"18px", marginBottom:"15px", height:"70px"}}>
                   {isNonEdit === false ? (
                     <>
                       {book.Status === "Aktif" && (
                         <button
                           className="btn btn-sm text-primary"
                           title="Edit Materi"
-                          onClick={() => onEdit("materiEdit", AppContext_test.DetailMateriEdit = book, AppContext_test.DetailMateri = book, AppContext_master.DetailMateri = book)}
+                          onClick={() => onEdit("pengenalanEdit", AppContext_test.DetailMateriEdit = book, AppContext_test.DetailMateri = book, AppContext_master.DetailMateri = book)}
                         >
-                          <i className="fas fa-edit"></i>
+                          <i className="fas fa-edit" style={{fontSize:"20px"}} ></i>
                         </button>
                       )}
                       <button
@@ -160,10 +171,11 @@ function CardMateri({
                         title="Review Jawaban"
                         onClick={() => handleReviewJawaban(book)}
                       >
-                        <i className="fas fa-file"></i>
+                        <i className="fas fa-file" style={{fontSize:"20px"}} ></i>
                       </button>
                     </>
                   ) : (
+                    <div className="">
                     <button
                       className="btn btn-outline-primary"
                       type="button"
@@ -171,6 +183,7 @@ function CardMateri({
                     >
                       Baca Materi
                     </button>
+                    </div>
                   )}
                 </div>
               </div>
