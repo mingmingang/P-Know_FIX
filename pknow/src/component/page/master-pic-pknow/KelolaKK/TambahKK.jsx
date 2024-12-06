@@ -54,9 +54,7 @@ export default function TambahKK({ onChangePage }) {
     nama: string().max(25, "maksimum 25 karakter").required("harus diisi"),
     programStudi: string().required("harus dipilih"),
     personInCharge: string(),
-    deskripsi: string().min(100,"minimum 100 karakter")
-      .max(130, "maksimum 130 karakter")
-      .required("harus diisi"),
+    deskripsi: string().min(100,"minimum 100 karakter").required("harus diisi"),
     gambar: string(),
   });
 

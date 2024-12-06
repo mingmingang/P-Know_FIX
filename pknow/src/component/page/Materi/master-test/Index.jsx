@@ -325,20 +325,26 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
               <Loading />
             ) : (
               <div className="">
-                {currentFilter.status === "Semua" && (
-                  <CardMateri
-                    materis={currentData.filter(
-                      (materi) => materi.Status === "Aktif"
-                    )}
-                    onDetail={onChangePage}
-                    onEdit={onChangePage}
-                    onReviewJawaban={onChangePage}
-                    onStatus={handleSetStatus}
-                    isNonEdit={true}
-                    onBacaMateri={onChangePage}
-                  />
-                )}
-              </div>
+              {currentData.length === 1 && (
+                <div className="alert alert-warning mt-0 mb-4" style={{margin:"80px"}}>
+                  Tidak ada data Materi yang tersedia.
+                </div>
+              )}
+            
+              {currentFilter.status === "Semua" && currentData.length > 1 && (
+                <CardMateri
+                  materis={currentData.filter(
+                    (materi) => materi.Status === "Aktif"
+                  )}
+                  onDetail={onChangePage}
+                  onEdit={onChangePage}
+                  onReviewJawaban={onChangePage}
+                  onStatus={handleSetStatus}
+                  isNonEdit={true}
+                  onBacaMateri={onChangePage}
+                />
+              )}
+            </div>
             )}
             {currentData.length > 0 && currentData[0].Count > 20 && (
               <Paging

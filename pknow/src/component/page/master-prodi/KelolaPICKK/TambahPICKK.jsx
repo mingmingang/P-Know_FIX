@@ -59,7 +59,6 @@ export default function TambahPIC({ onChangePage, withID }) {
     programStudi: string().required("harus dipilih"),
     personInCharge: string(),
     deskripsi: string().min(100,"minimum 100 karakter")
-      .max(130, "maksimum 130 karakter")
       .required("harus diisi"),
     gambar: string(),
     status:string()

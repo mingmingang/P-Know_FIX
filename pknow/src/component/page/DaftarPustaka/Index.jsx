@@ -171,6 +171,7 @@ export default function DaftarPustaka({ onChangePage }) {
             };
           });
           setCurrentData(formattedData);
+          console.log(formattedData);
         }
     } catch (error) {
       setIsError(true);
@@ -374,7 +375,7 @@ export default function DaftarPustaka({ onChangePage }) {
         </div>
 
 
-          {currentData.length == 0 ? (
+          {currentData.length === 0 ?  (
             <div className="" style={{margin:"10px 70px"}}>
             <Alert type="warning mt-3" message="Tidak ada data daftar pustaka!" />
             </div>
