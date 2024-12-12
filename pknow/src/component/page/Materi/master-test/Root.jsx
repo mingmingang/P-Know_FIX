@@ -7,7 +7,7 @@ import MasterTestPostTest from "./PostTest";
 import MasterTestPreTest from "./PreTest";
 import MasterTestPengerjaanTest from "./Test";
 // import MasterTestHasilTest from "./HasilTest";
-// import MasterTestDetailTest from "./DetailTest";
+import MasterTestDetailTest from "./DetailTest";
 import MasterTestForum from "./Forum";
 import MasterTestMateriPDF from "./MateriPDF";
 import MasterTestMateriVideo from "./MateriVideo";
@@ -91,15 +91,15 @@ export default function MasterTest() {
           quizType={quizType}
           durasi={durasi}
         />;
-      // case "detailtest":
-      //   return (
-      //     <MasterTestDetailTest 
-      //       onChangePage={handleSetPageMode} 
-      //       quizType={quizType}
-      //       materiId={materiId}
-      //       quizId={quizId}
-      //     />
-      //   );
+      case "detailtest":
+        return (
+          <MasterTestDetailTest 
+            onChangePage={handleSetPageMode} 
+            quizType={quizType}
+            materiId={materiId}
+            quizId={quizId}
+          />
+        );
       // case "hasiltest":
       //   return (
       //     <MasterTestHasilTest

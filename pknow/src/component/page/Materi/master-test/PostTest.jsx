@@ -46,7 +46,7 @@ export default function MasterTestPreTest({
         .post(API_LINK + "Quiz/SaveTransaksiQuiz", {
           karyawanId: activeUser,
           status: "",
-          quizId: currentData.quizId,
+          createdBy: activeUser,
           // nilai: "", 
           // answers: [],
           // createdBy: AppContext_test.displayName,
@@ -316,7 +316,7 @@ export default function MasterTestPreTest({
                   >
                     {currentData.quizDeskripsi}
                     <h6 className="mt-2" style={{ fontWeight: "400" }}>
-                      Oleh {currentData.createdby} -{" "}
+                      Oleh {currentData.Nama} -{" "}
                       {formatDate(currentData.createdDate)}
                     </h6>
                   </h2>
@@ -404,7 +404,9 @@ export default function MasterTestPreTest({
             </div>
             
           ) : (
-            <Alert type="info" message="Tidak ada data post-test tersedia." />
+            <div className="" style={{marginTop:"110px", }}>
+            <Alert type="info" message="Saat ini belum tersedia Post Test pada Materi ini." />
+            </div>
           )}
         </div>
       </div>

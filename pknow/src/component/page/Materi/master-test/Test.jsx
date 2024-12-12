@@ -158,14 +158,14 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
       setErrors
     );
 
-    
-
     let countBenar = 0;
+    let totalPoint = 0;
     const totalNilai = answers.reduce((accumulator, currentValue) => {
       console.log("value",currentValue.nilaiSelected);
       const nilaiSelected = parseFloat(currentValue.nilaiSelected) || 0;
       if (nilaiSelected !== 0) {
-        countBenar += currentValue.nilaiSelected;
+        countBenar += 1;
+        totalPoint += currentValue.nilaiSelected;
         console.log("totalPoin", countBenar)
       }
       return accumulator + nilaiSelected;
@@ -195,7 +195,8 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
           try {
             const response = await axios.post(API_LINK + 'Quiz/UpdateNilaiQuiz', {
               idTrQuiz: AppContext_test.dataIdTrQuiz,
-              nilai: countBenar
+              jumlahBenar: countBenar,
+              nilai: totalPoint
             });
             if (response.data.length != 0){
               responseSave = true;
@@ -247,6 +248,8 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
   const [selectedOption, setSelectedOption] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [submittedAnswers, setSubmittedAnswers] = useState([]);
+
+  console.log("array answer")
 
   useEffect(() => {
   }, [AppContext_test.arrayAnswerQuiz]);

@@ -206,8 +206,8 @@ export default function MasterTestIndex({ onChangePage, materiId }) {
                 ) : (
                     <>
                        <div style={{ marginRight: "marginRight",marginTop:"100px", marginLeft:"20px", marginBottom:"80px" }}>
-                            <h1 style={{ fontWeight: 600, color: "#0A5EA8" }}>Materi Video {currentData.Judul}</h1>
-                            <h6 style={{ color: "#0A5EA8" }}>
+                            <h1 style={{ fontWeight: 600, color: "#002B6C" }}>Materi Video {currentData.Judul}</h1>
+                            <h6 style={{ color: "#002B6C" }}>
                                 Oleh {currentData.Nama} - {formatDate(currentData.Creadate)}
                             </h6>
                             {currentData.File_video ? (

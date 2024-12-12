@@ -11,12 +11,14 @@ import Input from "../../../part/Input";
 import FileUpload from "../../../part/FileUpload";
 import Loading from "../../../part/Loading";
 import Alert from "../../../part/Alert";
-// import KMS_Sidebar from '../../../part/KMS_SideBar';
+import KMS_Sidebar from '../../../part/KMS_SideBar';
 // import Sidebar from '../../../backbone/SideBar';
 import styled from 'styled-components';
 import KMS_Uploader from "../../../part/KMS_Uploader";
 import axios from "axios";
 import AppContext_test from "./TestContext";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../util/Encryptor";
 
 const ButtonContainer = styled.div`
     position: fixed;
@@ -27,6 +29,10 @@ const ButtonContainer = styled.div`
   `;
 
 export default function PengerjaanTest({ onChangePage, quizType, materiId, quizId}) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
   const [showSidebar, setShowSidebar] = useState(true);
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -43,7 +49,9 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
       setSelectedQuestion(selectedQuestion + totalQuestion - 1);
     }
   };
+
   AppContext_test.quizType = quizType;
+  console.log("tipe", AppContext_test.quizType)
   const selectNextQuestion = () => {
     if (selectedQuestion < totalQuestion) {
       setSelectedQuestion(selectedQuestion + 1);
@@ -89,31 +97,29 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
       try {
         // Fetch questions data
         const questionResponse = await axios.post(API_LINK + "Quiz/GetDataQuestion", {
-          id: materiId,
-          status: 'Aktif',
-          quizType: quizType,
+          idQuiz: quizId
         });
+        console.log("response",questionResponse.data)
         // Fetch user answers data
         const answerResponse = await axios.post(API_LINK + "Quiz/GetDataResultQuiz", {
-          id: materiId,
-          userId: AppContext_test.activeUser, 
-          tipeQuiz: quizType,
-          idQuiz: quizId,
+          id: quizId,
+          userId: activeUser, 
         });
-        console.log('ddd', materiId, AppContext_test.activeUser, quizType, AppContext_test.reviewQuizId)
-        const jawabanPenggunaStr = answerResponse.data[0].JawabanPengguna;
 
-        const jawabanPengguna = jawabanPenggunaStr
-            .slice(1, -1)  
-            .split('], [')  
-            .map(item => item.replace(/[\[\]]/g, '').split(','));
-        const filteredTransaksi = jawabanPengguna.filter(transaksi =>
-              transaksi.length === 2
-            );
+        console.log('ddd', materiId, activeUser, AppContext_test.quizType, quizId)
+        // const jawabanPenggunaStr = answerResponse.data[0].JawabanPengguna;
 
-        const essayOnly = jawabanPengguna.filter(transaksi =>
-              transaksi.length === 3
-            );
+        // const jawabanPengguna = jawabanPenggunaStr
+        //     .slice(1, -1)  
+        //     .split('], [')  
+        //     .map(item => item.replace(/[\[\]]/g, '').split(','));
+        // const filteredTransaksi = jawabanPengguna.filter(transaksi =>
+        //       transaksi.length === 2
+        //     );
+
+        // const essayOnly = jawabanPengguna.filter(transaksi =>
+        //       transaksi.length === 3
+        //     );
 
         // const currentRespondent = currentData[currentRespondentIndex];
         const jawabanPenggunaEssayStr = answerResponse.data[0].JawabanPengguna;
@@ -298,6 +304,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
           answerStatus={answerStatus} 
           checkMainContent="detail_test"
           quizId={AppContext_test.reviewQuizId}
+          quizType={quizType}
         />
         <div className="flex-fill p-3 d-flex flex-column"  style={{marginLeft:"21vw"}}>
           <div className="mb-3 d-flex flex-wrap" style={{ overflowX: 'auto' }}> 

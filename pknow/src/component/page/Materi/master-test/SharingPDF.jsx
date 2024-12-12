@@ -134,7 +134,7 @@ export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, mat
     />
             
                 <div className="file-preview" style={{ marginTop: "100px",color:"#002B6C" }}>
-                    <h1 className="ml-4" style={{fontWeight:"600", color: "#0A5EA8" }}>Sharing Expert PDF</h1>
+                    <h1 className="ml-4" style={{fontWeight:"600", color: "#002B6C" }}>Sharing Expert PDF</h1>
                     {currentData ? (
                         <p className="ml-4">
                             Dibuat oleh {currentData.Nama} - {formatDate(currentData.CreatedDate)}

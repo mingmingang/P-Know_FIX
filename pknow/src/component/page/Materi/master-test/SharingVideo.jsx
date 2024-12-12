@@ -132,7 +132,7 @@ export default function MasterTestSharingVideo({ onChangePage, CheckDataReady, m
       // setRefreshKey={setRefreshKey}
     />
             <div className="file-preview" style={{marginBottom:"50px", marginTop:"100px", color:"#002B6C" }}>
-            <h1 className="ml-4" style={{fontWeight:"600", color: "#0A5EA8" }} >Sharing Expert Video</h1>
+            <h1 className="ml-4" style={{fontWeight:"600", color: "#002B6C" }} >Sharing Expert Video</h1>
                     {currentData ? (
                         <p className="ml-4">
                             Dibuat oleh {currentData.Nama} - {formatDate(currentData.CreatedDate)}

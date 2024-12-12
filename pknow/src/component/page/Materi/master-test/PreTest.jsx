@@ -38,14 +38,12 @@ export default function MasterTestPreTest({
   const [error, setError] = useState(null);
 
   function onStartTest() {
-    console.log("id quiiizz", currentData.quizId);
-    console.log("durasi", currentData.timer);
     try {
       axios
         .post(API_LINK + "Quiz/SaveTransaksiQuiz", {
           karyawanId: activeUser,
-          status: "",
-          quizId: currentData.quizId,
+          status: "Aktif",
+          quizId: activeUser,
           // nilai: "", 
           // answers: [],
           // createdBy: AppContext_test.displayName,
@@ -53,7 +51,6 @@ export default function MasterTestPreTest({
         })
         .then((response) => {
           const data = response.data;
-          console.log("data trQuiz", data[0]);
           if (data[0].hasil === "OK") {
             AppContext_test.dataIdTrQuiz = data[0].tempIDAlt;
             onChangePage(
@@ -103,33 +100,54 @@ export default function MasterTestPreTest({
   }, []);
 
   let idSection;
+  let jumlahSoal;
 
   useEffect(() => {
     let isMounted = true;
+    let totalSoal = 0;
 
     const fetchData_pretest = async (retries = 10, delay = 1000) => {
       for (let i = 0; i < retries; i++) {
         setIsLoading(true);
         try {
-          const [dataQuiz] = await Promise.all([
-            // fetchDataWithRetry_pretest(),
-            getListSection(),
-            getQuiz_pretest(),
-          ]);
-
+          const data = await fetchDataWithRetry_pretest();
+          console.log("data pretess", data);
           if (isMounted) {
-            // if (data) {
-            //   if (Array.isArray(data)) {
-            //     if (data.length !== 0) {
-            //       onChangePage("hasiltest", "Pretest", data[0].IdQuiz);
-            //       AppContext_test.quizType = "Pretest";
-            //       break;
-            //     }
-            //   } else {
-            //     console.error("Data is not an array:", data);
-            //   }
-            // } else {
-            // }
+            if (data != "") {
+              if (Array.isArray(data)) {
+                if (data.length != 0) {
+                  setTableData(data.map((item, index) => ({
+                    Key: item.IdQuiz,
+                    No: index + 1,
+                    ['Tanggal Ujian']:   new Intl.DateTimeFormat("id-ID", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    }).format(new Date(item["Tanggal Quiz"])),
+                    Nilai: item.Status == "Reviewed" ? item.Nilai : "",
+                    Keterangan: item.Status == "Reviewed" ? item.JumlahBenar + " / " + totalSoal : "Sedang direview oleh Tenaga Pendidik",
+                    Aksi: item.Status == "Reviewed" ? ['Detail'] : [''],
+                    Alignment: ['center', 'center', 'center', 'center', 'center'],
+                  })));
+                }
+              } else {
+                console.error("Data is not an array:", data);
+              }
+            } else {
+              setTableData([{
+                Key: '',
+                No:'',
+                ['Tanggal Ujian']:'',
+                Nilai: '',
+                Keterangan: '',
+                Aksi:'',
+                
+                Alignment: ['center', 'center', 'center', 'center', 'center'], 
+              }]); 
+            }
           }
         } catch (error) {
           if (isMounted) {
@@ -149,31 +167,6 @@ export default function MasterTestPreTest({
       }
     };
 
-    // const fetchDataWithRetry_pretest = async (retries = 15, delay = 500) => {
-    //   for (let i = 0; i < retries; i++) {
-    //     try {
-    //       const response = await axios.post(
-    //         API_LINK + "Quiz/GetDataResultQuiz",
-    //         {
-    //           quizId: AppContext_test.materiId,
-    //           karyawanId: AppContext_test.activeUser,
-    //           tipeQuiz: "Pretest",
-    //         }
-    //       );
-    //       if (response.data.length !== 0) {
-    //         return response.data;
-    //       }
-    //     } catch (error) {
-    //       // console.error("Error fetching quiz data:", error);
-    //       if (i < retries - 1) {
-    //         await new Promise((resolve) => setTimeout(resolve, delay));
-    //       } else {
-    //         throw error; // Throw error if max retries reached
-    //       }
-    //     }
-    //   }
-    // };
-
     const fetchDataWithRetry_pretest = async (retries = 15, delay = 500) => {
       for (let i = 0; i < retries; i++) {
         try {
@@ -185,8 +178,6 @@ export default function MasterTestPreTest({
               karyawanId: activeUser,
             }
           );
-
-          console.log("fetch data riwayat",response.data);
           if (response.data.length !== 0) {
             setDataDetailQuiz(response.data);
             return response.data;
@@ -215,7 +206,6 @@ export default function MasterTestPreTest({
 
           if (response.data.length !== 0) {
             idSection = response.data[0].SectionId;
-            return response.data;
           }
         } catch (e) {
           console.error("Error fetching materi data: ", error);
@@ -228,20 +218,6 @@ export default function MasterTestPreTest({
       }
     };
 
-    // const getQuizData = async () => {
-    //     try {
-    //       const sectionData = await getSectionData();
-    //       const data = await UseFetch(API_LINK + "Quiz/GetDataQuizByIdSection", {
-    //         section: sectionData.SectionId
-    //       });
-    //       if (data === "ERROR" || data.length === 0) throw new Error("Gagal mengambil data quiz.");
-    //       return data[0];
-    //     } catch (error) {
-    //       console.error("Error fetching quiz data:", error);
-    //       throw error;
-    //     }
-    //   };
-
     const getQuiz_pretest = async (retries = 10, delay = 500) => {
       for (let i = 0; i < retries; i++) {
         try {
@@ -253,8 +229,7 @@ export default function MasterTestPreTest({
           );
           if (quizResponse.data && quizResponse.data.length > 0) {
             setCurrentData(quizResponse.data[0]); // Hanya set data pertama
-            console.log("data quiz", quizResponse.data[0]); // Debugging
-            break;
+            return quizResponse.data[0];
           }
         } catch (error) {
           console.error("Error fetching quiz data:", error);
@@ -267,8 +242,32 @@ export default function MasterTestPreTest({
       }
     };
 
-    fetchData_pretest();
-    fetchDataWithRetry_pretest();
+    const initializeData = async () => {
+      try {
+        setIsLoading(true);
+  
+        // Ambil data quiz terlebih dahulu untuk mendapatkan jumlah soal
+        await getListSection(); // Pastikan ID Section diambil
+        const quizData = await getQuiz_pretest();
+       
+  
+        if (quizData) {
+          totalSoal = quizData.jumlahSoal;
+          setCurrentData(quizData); // Set currentData lebih awal
+        }
+  
+        // Setelah currentData tersedia, panggil fetchData_pretest
+        await fetchData_pretest();
+  
+      } catch (error) {
+        console.error("Error initializing data:", error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    initializeData();
 
     return () => {
       isMounted = false;
@@ -291,6 +290,17 @@ export default function MasterTestPreTest({
     AppContext_test.durasiTest = duration;
     return Math.floor(duration / 60);
   };
+
+
+  const [tableData, setTableData] = useState([]);
+
+  function handleDetailAction(action, key) {
+    if (action === "detail") {
+      onChangePage("detailtest", "Pretest", AppContext_test.materiId, key);
+      AppContext_test.QuizType = "Pretest";
+    }
+  }
+
 
   return (
     <>
@@ -336,7 +346,7 @@ export default function MasterTestPreTest({
                   >
                     {currentData.quizDeskripsi}
                     <h6 className="mt-2" style={{ fontWeight: "400" }}>
-                      Oleh {currentData.createdby} -{" "}
+                      Oleh {currentData.Nama} -{" "}
                       {formatDate(currentData.createdDate)}
                     </h6>
                   </h2>
@@ -365,7 +375,7 @@ export default function MasterTestPreTest({
                 />
               </div>
               <hr style={{marginRight:"20px"}}/>
-              <div className="table-container">
+              {/* <div className="table-container">
       <h3>Riwayat</h3>
       {error ? (
         <p>{error}</p>
@@ -373,7 +383,7 @@ export default function MasterTestPreTest({
         <table className="dynamic-table mb-4">
         <thead>
           <tr>
-            <th>No</th> {/* Tambahkan kolom No */}
+            <th>No</th> 
             <th>Tanggal Quiz</th>
             <th>Nilai</th>
             <th>Keterangan</th>
@@ -417,10 +427,22 @@ export default function MasterTestPreTest({
       </table>
       
       )}
-    </div>
+    </div> */}
+    
+          <div className="">
+          <div className="mb-4">
+            <h3 className="" style={{fontWeight:"600", color:"#002B6C"}}>Riwayat</h3>
+              <Table
+                  data={tableData}
+                  onDetail={handleDetailAction}
+              />
+            </div>
+          </div>
             </div>
           ) : (
-            <Alert type="info" message="Tidak ada data pre-test tersedia." />
+            <div className="" style={{marginTop:"110px", }}>
+            <Alert type="info" message="Saat ini belum tersedia Pre-Test Pada Materi ini." />
+            </div>
           )}
         </div>
       </div>

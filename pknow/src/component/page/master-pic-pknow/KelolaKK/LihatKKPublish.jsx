@@ -29,21 +29,21 @@ export default function KKDetailPublish({ onChangePage, withID }) {
   const [listAnggota, setListAnggota] = useState([]);
   const [listProgram, setListProgram] = useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [isBackAction, setIsBackAction] = useState(false);  
+  const [isBackAction, setIsBackAction] = useState(false);
 
   const handleGoBack = () => {
-    setIsBackAction(true);  
-    setShowConfirmation(true);  
+    setIsBackAction(true);
+    setShowConfirmation(true);
   };
 
   const handleConfirmYes = () => {
-    setShowConfirmation(false); 
+    setShowConfirmation(false);
     onChangePage("index");
   };
 
 
   const handleConfirmNo = () => {
-    setShowConfirmation(false);  
+    setShowConfirmation(false);
   };
 
 
@@ -56,7 +56,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
     status: "",
     members: [],
     memberCount: "",
-    gambar:""
+    gambar: ""
   });
 
   const getListAnggota = async () => {
@@ -196,45 +196,51 @@ export default function KKDetailPublish({ onChangePage, withID }) {
           <Alert type="danger" message={isError.message} />
         </div>
       )}
-        <div className="back-and-title" style={{display:"flex", marginLeft:"80px", marginTop:"100px"}}>
-      <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
-                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Kelompok Keahlian</h4>
-              </div>
-                <div className="ket-draft">
-                </div>
-      <div className="card" style={{margin:"10px 140px", border:"none"}}>
+      <div className="back-and-title" style={{ display: "flex", marginLeft: "80px", marginTop: "100px" }}>
+        <button style={{ backgroundColor: "transparent", border: "none" }} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
+        <h4 style={{ color: "#0A5EA8", fontWeight: "bold", fontSize: "30px", marginTop: "10px", marginLeft: "20px" }}>Kelompok Keahlian</h4>
+      </div>
+      <div className="ket-draft">
+      </div>
+      <div className="card" style={{ margin: "10px 140px", border: "none" }}>
         <div className="card-body">
           <div className="row pt-2">
             <div className="col-lg-7 px-4">
-              <h3 className="mb-3 fw-semibold" style={{fontSize:"50px", color:"#0A5EA8"}}>{formData.nama}</h3>
+              <h3 className="mb-3 fw-semibold" style={{ fontSize: "50px", color: "#0A5EA8" }}>{formData.nama}</h3>
               <h5 className="fw-semibold">
-              <FontAwesomeIcon icon={faGraduationCap} className="icon-style" style={{marginRight:"10px"}}/>    
+                <FontAwesomeIcon icon={faGraduationCap} className="icon-style" style={{ marginRight: "10px" }} />
                 {formData.programStudi}
               </h5>
-              <h4 className="fw-semibold" style={{marginTop:"30px"}}>Tentang Kelompok Keahlian</h4>
-              <p className="py-2" style={{ textAlign: "justify", width:"500px" }}>
+              <h4 className="fw-semibold" style={{ marginTop: "30px" }}>Tentang Kelompok Keahlian</h4>
+              <p className="py-2" style={{ textAlign: "justify", width: "500px" }}>
                 {formData.deskripsi}
               </p>
               <div className="">
                 <i className="fas fa-user"></i>
-                <span style={{marginLeft:"10px", fontWeight:"bold"}}>PIC : {formData.personInCharge}</span>
+                <span style={{ marginLeft: "10px", fontWeight: "bold" }}>PIC : {formData.personInCharge}</span>
               </div>
             </div>
             <div className="col-lg-5">
-            <img
-          alt={`image`}
-          className="cover-daftar-kk"
-          height="200"
-          src={`${API_LINK}Upload/GetFile/${formData.gambar}`}
-          width="300"
-          style={{width:500,height:300, borderRadius:"20px", objectFit:"cover"}}
-        />
+              <img
+                className="cover-daftar-kk"
+                height="200"
+                src={`${API_LINK}Upload/GetFile/${formData.gambar}`}
+                width="300"
+                style={{
+                  width: 500,
+                  height: 300,
+                  borderRadius: "20px",
+                  objectFit: "",
+                  border: "1px solid #ccc", // Border dengan warna abu-abu muda
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Drop shadow
+                }}
+              />
             </div>
-            <div className="" style={{marginTop:"40px"}}>
-            <h5 className="text-primary pt-2">
-           Daftar Anggota Kelompok Keahlian{" "}
-            <strong>{formData.nama}</strong>
-          </h5>
+            <div className="mt-3">
+              <h5 className="pt-2">
+                Daftar Anggota Kelompok Keahlian{" "}
+                <strong style={{color:"#0A5EA8"}}>{formData.nama}</strong>
+              </h5>
               {listAnggota.length > 0 ? (
                 listAnggota[0].Message ? (
                   <p>Tidak Ada Anggota Aktif</p>
@@ -286,9 +292,9 @@ export default function KKDetailPublish({ onChangePage, withID }) {
               )}
             </div>
           </div>
-          <h5 className="text-primary pt-2">
+          <h5 className="pt-2">
             Daftar Program dalam Kelompok Keahlian{" "}
-            <strong>{formData.nama}</strong>
+            <strong style={{color:"#0A5EA8"}}>{formData.nama}</strong>
           </h5>
           {listProgram.length > 0 ? (
             listProgram[0].Message ? (
@@ -481,7 +487,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
           onYes={handleConfirmYes}
           onNo={handleConfirmNo}
         />
-        )}
+      )}
     </>
   );
 }

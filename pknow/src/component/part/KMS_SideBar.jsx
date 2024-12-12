@@ -3,7 +3,7 @@ import Button from "../part/Button copy";
 import { ROOT_LINK } from "../util/Constants";
 import AppContext_test from "../page/master-test/TestContext";
 
-export default function KMS_Sidebar({ onChangePage, questionNumbers, selectedQuestion, setSelectedQuestion, answerStatus, checkMainContent, quizId, timeRemaining, setTimeRemaining }) {
+export default function KMS_Sidebar({ onChangePage, questionNumbers, selectedQuestion, setSelectedQuestion, answerStatus, checkMainContent, quizId, timeRemaining, setTimeRemaining, quizType }) {
   const [remainingTime, setRemainingTime] = useState(timeRemaining);
   useEffect(() => {
   const timer = setInterval(() => {
@@ -30,7 +30,7 @@ export default function KMS_Sidebar({ onChangePage, questionNumbers, selectedQue
   };
 
   function exitReview() {
-    if (AppContext_test.quizType == "Pretest"){
+    if (quizType == "Pretest"){
       onChangePage("pretest", true, quizId);
     }else{
       onChangePage("posttest", true, quizId);

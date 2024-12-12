@@ -207,7 +207,7 @@ export default function Table({
               </tr>
             ) : (
               <tr>
-                <td colSpan={colCount}>Tidak ada data.</td>
+                
               </tr>
             )}
           </thead>
@@ -260,7 +260,7 @@ export default function Table({
               })
             ) : (
               <tr>
-                <td colSpan={colCount}>Tidak ada data.</td>
+                <td colSpan={colCount}>Tidak ada data riwayat.</td>
               </tr>
             )}
           </tbody>

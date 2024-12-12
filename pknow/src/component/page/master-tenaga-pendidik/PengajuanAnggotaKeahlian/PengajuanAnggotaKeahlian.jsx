@@ -14,6 +14,15 @@ import Alert from "../../../part/Alert";
 import "../../../../index.css";
 import Search from "../../../part/Search";
 import Button2 from "../../../part/Button copy";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faGraduationCap,
+  faUser,
+  faArrowRight,
+  faPeopleGroup,
+  faClock,
+  faUsers,
+} from "@fortawesome/free-solid-svg-icons";
 
 const inisialisasiData = [
   {
@@ -343,23 +352,21 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
         <div className="d-flex flex-column">
           {dataAktif ? (
             <div className="flex-fill">
-              <div className="card" style={{margin:"10px 65px"}}>
-                <div className="card-header bg-primary text-white fw-medium">
-                  Terdaftar sebagai anggota keahlian
+               <div className="text-white fw-medium" style={{padding:"10px", backgroundColor:"#0E6EFE", marginLeft:"70px", width:"25%", borderRadius:"10px"}}>
+               ↓ Terdaftar sebagai anggota keahlian
                 </div>
+              <div className="card" style={{margin:"10px 65px"}}>
                 <div className="card-body p-3">
                   <div className="row">
                     <div className="col-lg-7 pe-4">
-                      <h3 className="mb-3 fw-semibold">
+                      <img src={`${API_LINK}Upload/GetFile/${dataAktif["Gambar"]}`} alt="" style={{width:"100%", borderRadius:"20px", marginBottom:"20px"}}/>
+                      <h3 className="mb-3 fw-semibold" style={{color:"#0A5EA8"}}>
                         {dataAktif["Nama Kelompok Keahlian"]}
                       </h3>
-                      <h6 className="fw-semibold">
-                        <span
-                          className="bg-primary me-2"
-                          style={{ padding: "2px" }}
-                        ></span>
+                      <h5 className="fw-semibold">
+                      <FontAwesomeIcon icon={faGraduationCap} className="icon-style" />
                         {dataAktif?.Prodi}
-                      </h6>
+                      </h5>
                       <p
                         className="pt-3"
                         style={{
@@ -406,10 +413,10 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
                   </div>
                 </div>
               </div>
-              <div className="card" style={{margin:"20px 65px"}}>
-                <div className="card-header fw-medium">
-                  Kelompok Keahlian lainnya
+              <div className="text-white fw-medium" style={{padding:"10px", backgroundColor:"#A7AAAC", marginLeft:"70px", width:"25%", borderRadius:"10px"}}>
+              ↓ Kelompok Keahlian Lainnya
                 </div>
+              <div className="card" style={{margin:"20px 65px"}}>
                 <div className="card-body p-3">
                   <div className="row mt-0 gx-4">
                     {listKK

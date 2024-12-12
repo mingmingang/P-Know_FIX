@@ -208,8 +208,8 @@ return (
         ) : (
           <>
           <div style={{  marginTop:"100px", marginBottom:"80px" }}>
-           <h1 style={{ fontWeight: 600, color: "#0A5EA8" }} className="ml-4">Materi {fileData.judul}</h1>
-                        <h6 style={{ color: "#0A5EA8" }} className="ml-4">
+           <h1 style={{ fontWeight: 600, color: "#002B6C" }} className="ml-4">Materi {fileData.judul}</h1>
+                        <h6 style={{ color: "#002B6C" }} className="ml-4">
                             Oleh {fileData.uploader} - {formatDate(fileData.creadate)}
                         </h6>
                         {fileData.file ? (
