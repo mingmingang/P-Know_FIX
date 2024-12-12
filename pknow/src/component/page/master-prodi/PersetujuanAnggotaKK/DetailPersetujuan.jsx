@@ -12,6 +12,16 @@ import Filter from "../../../part/Filter";
 import Icon from "../../../part/Icon";
 import Label from "../../../part/Label";
 import SweetAlert from "../../../util/SweetAlert";
+import maskotPknow from "../../../../assets/pknowmaskot.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faGraduationCap,
+  faUser,
+  faArrowRight,
+  faPeopleGroup,
+  faClock,
+  faUsers,
+} from "@fortawesome/free-solid-svg-icons";
 
 const inisialisasiData = [
   {
@@ -25,7 +35,7 @@ const inisialisasiData = [
   },
 ];
 
-export default function DetailPersetujuan({onChangePage, withID}) {
+export default function DetailPersetujuan({ onChangePage, withID }) {
 
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -167,9 +177,9 @@ export default function DetailPersetujuan({onChangePage, withID}) {
               return { ...item, Lampiran: [] };
             }
           }
-          return item; 
+          return item;
         });
-        setDetail(updatedData); 
+        setDetail(updatedData);
       }
     } catch (error) {
       setIsError((prevError) => ({
@@ -237,264 +247,289 @@ export default function DetailPersetujuan({onChangePage, withID}) {
             placeholder="Cari Kelompok Keahlian"
             showInput={false}
           />
-          
+
 
           <>
-      {isError.error && (
-        <div className="flex-fill">
-          <Alert type="danger" message={isError.message} />
-        </div>
-      )}
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <div style={{marginLeft:"100px", marginRight:"100px", marginBottom:"100px", marginTop:"30px"}}>
-          <div className="card mb-3">
-          <div className="fw-bold ml-3 mt-4" style={{fontSize:"22px", color:"#0A5EA8"}}>
-                      Detail Kelompok Keahlian
-                    </div>
-            <div className="card-body">
-              <div className="row pt-2">
-                <div className="col-lg-7 px-4">
-                  <h3 className="mb-3 fw-semibold">
-                    {formData["Nama Kelompok Keahlian"]}
-                  </h3>
-                  <h6 className="fw-semibold">
-                    <span
-                      className="bg-primary me-2"
-                      style={{ padding: "2px" }}
-                    ></span>
-                    {formData.Prodi}
-                  </h6>
-                  <div className="pt-2 ps-2">
-                    <Icon
-                      name="user"
-                      cssClass="p-0 ps-1 text-dark"
-                      title="PIC Kelompok Keahlian"
-                    />{" "}
-                    <span>PIC : {formData.PIC}</span>
-                  </div>
-                  <hr className="mb-0" style={{ opacity: "0.2" }} />
-                  <p className="py-3" style={{
-                    textAlign: "justify"
-                  }}>{formData.Deskripsi}</p>
-                </div>
-                <div className="col-lg-5">
-                  {/* <p>3 orang baru saja bergabung!</p> */}
-                  {listAnggota
-                    ?.filter((value) => {
-                      return value.Status === "Aktif";
-                    })
-                    .map((pr) => (
-                      <div className="card-profile mb-2 d-flex shadow-sm">
-                        <div
-                          className="bg-primary"
-                          style={{ width: "1.5%" }}
-                        ></div>
-                        <div className="p-1 ps-2 d-flex">
-                          <img
-                            src="https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"
-                            alt={pr["Nama Anggota"]}
-                            className="img-fluid rounded-circle"
-                            width="45"
-                          />
-                          <div className="ps-3">
-                            <p className="mb-0">{pr["Nama Anggota"]}</p>
-                            <p className="mb-0" style={{ fontSize: "13px" }}>
-                              {pr.Prodi}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  {/* <div className="text-end">
-                <Button
-                  classType="light btn-sm text-primary text-decoration-underline px-3 mt-2"
-                  type="submit"
-                  label="Lihat Semua"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalAnggota"
-                />
-              </div> */}
-                </div>
+            {isError.error && (
+              <div className="flex-fill">
+                <Alert type="danger" message={isError.message} />
               </div>
-            </div>
-          </div>
-          <div className="card">
-          <div className="fw-bold ml-3 mt-4 d-flex" style={{justifyContent:"space-between", marginRight:"20px"}} >
-                     <span style={{fontSize:"22px", color:"#0A5EA8"}}>
-                     Menunggu Persetujuan
-                      </span> 
-                      <h6 className="mb-3 fw-semibold">
-                    {
-                      listAnggota?.filter((value) => {
-                        return value.Status === "Menunggu Acc";
-                      }).length
-                    }{" "}
-                    Tenaga Pendidik menunggu persetujuan untuk menjadi Anggota
-                  </h6>
+            )}
+            {isLoading ? (
+              <Loading />
+            ) : (
+              <div style={{ marginLeft: "100px", marginRight: "100px", marginBottom: "100px", marginTop: "30px" }}>
+                <div className="card mb-3 mt-2">
+                  <div className="row pt-3">
+                    <div className="col-lg-6 px-4 ml-3">
+                      <h3 className="mb-3 fw-semibold" style={{ fontSize: "50px", color: "#0A5EA8" }}>{formData["Nama Kelompok Keahlian"]}</h3>
+                      <h5 className="fw-semibold">
+                        <FontAwesomeIcon icon={faGraduationCap} className="icon-style" style={{ marginRight: "10px" }} />
+                        {formData.Prodi}
+                      </h5>
+                      <h4 className="fw-semibold" style={{ marginTop: "30px" }}>Tentang Kelompok Keahlian</h4>
+                      <p className="py-2" style={{ textAlign: "justify", width: "500px" }}>
+                        {formData.Deskripsi}
+                      </p>
+                      <div className="">
+                        <i className="fas fa-user"></i>
+                        <span style={{ marginLeft: "10px", fontWeight: "bold" }}>PIC : {formData.PIC}</span>
+                      </div>
                     </div>
-            <div className="card-body">
-              <div className="row pt-2">
-                <div className="col-lg-6">
-                  
-                  {listAnggota
-                    ?.filter((value) => {
-                      return value.Status === "Menunggu Acc";
-                    })
-                    .map((value) => (
-                      <div key={value.Key}>
-                        <h6 className="fw-semibold mb-3">{value.Text}</h6>
-                        <div className="card-profile mb-3 d-flex justify-content-between shadow-sm">
-                          <div className="d-flex w-100">
-                            <div
-                              className="bg-primary"
-                              style={{ width: "1.5%" }}
-                            ></div>
-                            <div className="p-1 ps-2 d-flex">
-                              <img
-                                src="https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"
-                                alt={value["Nama Anggota"]}
-                                className="img-fluid rounded-circle"
-                                width="45"
-                              />
-                              <div className="ps-3">
-                                <p className="mb-0 fw-semibold">
-                                  {value["Nama Anggota"]}
-                                </p>
-                                <p
-                                  className="mb-0"
-                                  style={{ fontSize: "13px" }}
-                                >
-                                  {value.Prodi}
-                                </p>
+                    <div className="col-lg-1 ">
+                      <img
+                        className="cover-daftar-kk mt-4"
+                        height="200"
+                        src={`${API_LINK}Upload/GetFile/${formData.Gambar}`}
+                        width="300"
+                        style={{
+                          width: 500,
+                          height: 300,
+                          borderRadius: "20px",
+                          objectFit: "",
+                          border: "1px solid #ccc", // Border dengan warna abu-abu muda
+                          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Drop shadow
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="card-body">
+                    <div className="row pt-2">
+                      <div className="col-lg-5">
+                        {/* <p>3 orang baru saja bergabung!</p> */}
+                        {listAnggota
+                          ?.filter((value) => {
+                            return value.Status === "Aktif";
+                          })
+                          .map((pr, index) => (
+                            <div className="card-profile mb-2 d-flex shadow-sm">
+                              <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
+                                {index + 1}
+                              </p>
+                              <div
+                                className="bg-primary"
+                                style={{ width: "1.5%" }}
+                              ></div>
+                              <div className="p-1 ps-2 d-flex">
+                                <img
+                                  src={maskotPknow}
+                                  alt={pr["Nama Anggota"]}
+                                  className="img-fluid rounded-circle"
+                                  width="45"
+                                />
+                                <div className="ps-3">
+                                  <p className="mb-0">{pr["Nama Anggota"]}</p>
+                                  <p className="mb-0" style={{ fontSize: "13px" }}>
+                                    {pr.Prodi}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="d-flex align-items-center">
+                          ))}
+                        {/* <div className="text-end">
                             <Button
-                              classType="primary btn-sm px-3 mx-1"
-                              iconName="list"
-                              title="Lihat Detail Pengajuan"
-                              onClick={() => handleDetailLampiran(value)}
+                              classType="light btn-sm text-primary text-decoration-underline px-3 mt-2"
+                              type="submit"
+                              label="Lihat Semua"
+                              data-bs-toggle="modal"
+                              data-bs-target="#modalAnggota"
                             />
-                            <Button
-                              classType="light btn-sm text-primary px-3 mx-1"
-                              iconName="check"
-                              title="Konfirmasi"
-                              onClick={() => handleSetStatus(value, "Aktif")}
-                            />
-                            <Button
-                              classType="light btn-sm text-danger px-3 mx-1"
-                              iconName="x"
-                              title="Tolak"
-                              onClick={() => handleSetStatus(value, "Ditolak")}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-                <div className="col-lg-6 border-start">
-                  <h6 className="mb-3 fw-semibold">
-                    Detail pengajuan dan lampiran pendukung
-                  </h6>
-                  <div className="px-3">
-                    <div className="row">
-                      <div className="col-6">
-                        <Label
-                          title="Nama"
-                          data={karyawan?.["Nama Anggota"] || "-"}
-                        />
-                      </div>
-                      <div className="col-6">
-                        <Label
-                          title="Program Studi"
-                          data={karyawan?.["Prodi"] || "-"}
-                        />
+                          </div> */}
                       </div>
                     </div>
-                    <div className="mt-2">
-                      {karyawan.Key ? (
-                        detail?.map((item, index) => (
-                          <div key={index}>
-                            {item.Lampiran ? (
-                              Array.isArray(item.Lampiran) ? (
-                                // Jika Lampiran adalah array
-                                item.Lampiran.map((link, linkIndex) => (
-                                  <div key={linkIndex} style={{ marginTop: "15px" }}>
-                                    <h5 className="mb-3">{`Lampiran ${linkIndex + 1}`}</h5>
-                                    <a href={link.trim()} target="_blank" rel="noopener noreferrer">
-                                      {`Lampiran ${linkIndex + 1} ${withID["Nama Kelompok Keahlian"]}`}
-                                    </a>
-                                  </div>
-                                ))
-                              ) : typeof item.Lampiran === "string" ? (
-                                // Jika Lampiran adalah string
-                                item.Lampiran.split(",").map((link, linkIndex) => (
-                                  <div key={linkIndex} style={{ marginTop: "15px" }}>
-                                    <h5 className="mb-3">{`Lampiran ${index + 1}`}</h5>
-                                    <a href={link.trim()} target="_blank" rel="noopener noreferrer">
-                                      {`Lampiran ${linkIndex + 1} ${withID["Nama Kelompok Keahlian"]}`}
-                                    </a>
-                                  </div>
-                                ))
-                              ) : (
-                                // Jika Lampiran bukan string atau array
-                                <p>Invalid Lampiran format</p>
-                              )
-                            ) : (
-                              // Jika tidak ada Lampiran
-                              <p>Tidak ada lampiran</p>
-                            )}
-                          </div>
-                        ))
-                      ) : (
-                        // Jika karyawan.Key tidak ada
-                        <Label title="Lampiran Pendukung" data="-" />
-                      )}
-                    </div>
-                    {karyawan?.Key && (
-                      <div className="d-flex justify-content-between mt-5 mb-2">
-                        <Button
-                          classType="secondary btn-sm px-3 mx-1"
-                          label="Batalkan"
-                          onClick={handleBatalkan}
-                        />
-                        <div className="text-end">
-                          <Button
-                            classType="primary btn-sm px-3 mx-1"
-                            iconName="check"
-                            label="Konfirmasi"
-                            onClick={() => handleSetStatus(karyawan, "Aktif")}
-                          />
-                          <Button
-                            classType="danger btn-sm px-3 mx-1"
-                            iconName="x"
-                            label="Tolak"
-                            onClick={() => handleSetStatus(karyawan, "Ditolak")}
-                          />
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <div className="float-end" >
-            <Button
-            style={{marginBottom:"80px", marginTop:"20px", backgroundColor:"grey"}}
-              classType="secondary me-2 px-4 py-2"
-              label="Kembali"
-              onClick={() => onChangePage("index")}
-            />
-          </div>
-          
-        </div>
-      )}
 
-      {/* <div
+                <div className="card mb-3">
+                  <div className="fw-bold ml-3 mt-4 d-flex" style={{ justifyContent: "space-between", marginRight: "20px" }} >
+                    <span style={{ fontSize: "25px", color: "#0A5EA8" }}>
+                      Menunggu Persetujuan
+                    </span>
+                    <h6 className="mb-3 mt-3 d-flex fw-bold" style={{ color: "#0A5EA8" }}>
+                      {
+                        listAnggota?.filter((value) => {
+                          return value.Status === "Menunggu Acc";
+                        }).length
+                      }{" "}
+                      Tenaga Pendidik Menunggu Persetujuan
+                    </h6>
+                  </div>
+
+
+                  <div className="card-body">
+                    <div className="row">
+                      <div className="col-lg-6">
+
+                        {listAnggota
+                          ?.filter((value) => {
+                            return value.Status === "Menunggu Acc";
+                          })
+                          .map((value, index) => (
+                            <div key={value.Key}>
+                              <h6 className="fw-semibold mb-3">{value.Text}</h6>
+                              <div className="card-profile mb-3 d-flex justify-content-between shadow-sm">
+                                <div className="d-flex w-100">
+                                  <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
+                                    {index + 1}
+                                  </p>
+                                  <div
+                                    className="bg-primary"
+                                    style={{ width: "1.5%" }}
+                                  ></div>
+                                  <div className="p-1 ps-2 d-flex">
+                                    <img
+                                      src={maskotPknow}
+                                      alt={value["Nama Anggota"]}
+                                      className="img-fluid rounded-circle"
+                                      width="45"
+                                    />
+                                    <div className="ps-3">
+                                      <p className="mb-0 fw-semibold">
+                                        {value["Nama Anggota"]}
+                                      </p>
+                                      <p
+                                        className="mb-0"
+                                        style={{ fontSize: "13px" }}
+                                      >
+                                        {value.Prodi}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="d-flex align-items-center" style={{ gap: "10px" }}>
+                                  <Button
+                                    classType="light btn-sm text-primary px-3 mx-1"
+                                    iconName="list"
+                                    title="Lihat Detail Pengajuan"
+                                    onClick={() => handleDetailLampiran(value)}
+                                  />
+                                  <Button
+                                    classType="light btn-sm text-primary px-3 mx-1"
+                                    iconName="check"
+                                    title="Konfirmasi"
+                                    style={{ backgroundColor: "#00BF29" }}
+                                    onClick={() => handleSetStatus(value, "Aktif")}
+                                  />
+                                  <Button
+                                    classType="light btn-sm text-danger px-3 mx-1"
+                                    iconName="x"
+                                    title="Tolak"
+                                    style={{ backgroundColor: "red" }}
+                                    onClick={() => handleSetStatus(value, "Ditolak")}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card mb-3 ">
+                  <div className="col-lg-20">
+                    <h3 className="col-6 mb-3 mt-3 fw-bold" style={{ color: "#0A5EA8", fontSize:"25px" }}>
+                      Detail pengajuan dan lampiran pendukung
+                    </h3>
+                    <div className="">
+                        <div className="col-6">
+                          <Label
+                            title="Nama"
+                            data={karyawan?.["Nama Anggota"] || "-"}
+                          />
+                        </div>
+                        <div className="col-6">
+                          <Label 
+                            title="Program Studi"
+                            data={karyawan?.["Prodi"] || "-"}
+                          />
+                        </div>
+                      <div className="mt-2 col-6">
+                        {karyawan.Key ? (
+                          detail?.map((item, index) => (
+                            <div key={index}>
+                              {item.Lampiran ? (
+                                Array.isArray(item.Lampiran) ? (
+                                  // Jika Lampiran adalah array
+                                  item.Lampiran.map((link, linkIndex) => (
+                                    <div key={linkIndex} style={{ marginTop: "15px" }}>
+                                      <p className="mb-3 fw-bold">{`Lampiran ${linkIndex + 1}`}</p>
+                                      <a href={link.trim()} target="_blank" rel="noopener noreferrer">
+                                        {`Lampiran ${linkIndex + 1} ${withID["Nama Kelompok Keahlian"]}`}
+                                      </a>
+                                    </div>
+                                  ))
+                                ) : typeof item.Lampiran === "string" ? (
+                                  // Jika Lampiran adalah string
+                                  item.Lampiran.split(",").map((link, linkIndex) => (
+                                    <div key={linkIndex} style={{ marginTop: "15px" }}>
+                                      <p className="mb-3" style={{color:"blue"}}>{`Lampiran ${index + 1}`}</p>
+                                      <a href={link.trim()} target="_blank" rel="noopener noreferrer">
+                                        {`Lampiran ${linkIndex + 1} ${withID["Nama Kelompok Keahlian"]}`}
+                                      </a>
+                                    </div>
+                                  ))
+                                ) : (
+                                  // Jika Lampiran bukan string atau array
+                                  <p>Invalid Lampiran format</p>
+                                )
+                              ) : (
+                                // Jika tidak ada Lampiran
+                                <p>Tidak ada lampiran</p>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          // Jika karyawan.Key tidak ada
+                          
+                          <Label title="Lampiran Pendukung" data="-" />
+                        )}
+                      </div>
+                      {karyawan?.Key && (
+                        <div className="d-flex justify-content-between ml-3 mr-3 mt-5 mb-3">
+                          <Button
+                            classType="secondary btn-sm px-3 mx-1"
+                            label="Batalkan"
+                            style={{ height: "50px", backgroundColor: "#5A5A5A" }}
+                            onClick={handleBatalkan}
+                          />
+                          <div className="d-flex text-end">
+                            <div className="mr-2">
+                            <Button
+                              classType="primary btn-sm px-3 mx-1"
+                              iconName="check"
+                              label="Konfirmasi"
+                              onClick={() => handleSetStatus(karyawan, "Aktif")}
+                            />
+                            </div>
+                            <Button
+                              classType="danger btn-sm px-3 mx-1"
+                              iconName="x"
+                              label="Tolak"
+                              style={{ backgroundColor: "red" }}
+                              onClick={() => handleSetStatus(karyawan, "Ditolak")}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="float-end" >
+                  <Button
+                    style={{ marginBottom: "80px", marginTop: "20px", backgroundColor: "#5A5A5A" }}
+                    classType="secondary me-2 px-4 py-2"
+                    label="Kembali"
+                    onClick={() => onChangePage("index")}
+                  />
+                </div>
+
+              </div>
+            )}
+
+            {/* <div
         class="modal fade"
         id="modalAnggota"
         tabindex="-1"
@@ -587,7 +622,7 @@ export default function DetailPersetujuan({onChangePage, withID}) {
           </div>
         </div>
       </div> */}
-    </>
+          </>
 
         </main>
       </div>

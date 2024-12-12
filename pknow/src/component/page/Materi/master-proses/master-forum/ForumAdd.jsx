@@ -15,65 +15,7 @@ import { Stepper, Step, StepLabel, Box } from '@mui/material';
 import BackPage from "../../../../../assets/backPage.png";
 import Konfirmasi from "../../../../part/Konfirmasi";
 import axios from "axios";
-
-
-const steps = ["Pengenalan", "Materi", "Forum"];
-
-
-function getStepContent(stepIndex) {
-  switch (stepIndex) {
-    case 0:
-      return 'pengenalanAdd';
-    case 1:
-      return 'materiAdd';
-    case 2:
-      return 'forumAdd';
-    default:
-      return 'Unknown stepIndex';
-  }
-}
-
-
-function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
-  return (
-    <Box sx={{ width: "100%", mt: 2 }}>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label, index) => (
-          <Step
-            key={label}
-            onClick={() => onChangePage(getStepContent(index))} 
-            sx={{
-              cursor: "pointer",
-              "& .MuiStepIcon-root": {
-                fontSize: "2rem",
-                color: index <= activeStep ? "primary.main" : "grey.300",
-                "&.Mui-active": {
-                  color: "primary.main",
-                },
-                "& .MuiStepIcon-text": {
-                  fill: "#fff",
-                  fontSize: "1rem",
-                },
-              },
-            }}
-          >
-            <StepLabel
-              sx={{
-                "& .MuiStepLabel-label": {
-                  typography: "body1",
-                  color: index <= activeStep ? "primary.main" : "grey.500",
-                },
-              }}
-            >
-              {label}
-            </StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-    </Box>
-  );
-}
-
+import CustomStepper from "../../../../part/Stepp";
 
 const userSchema = object({
   forumJudul: string().max(100, "maksimum 100 karakter").required("harus diisi"),
@@ -81,6 +23,8 @@ const userSchema = object({
 });
 
 export default function MasterForumAdd({ onChangePage }) {
+
+
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -101,10 +45,9 @@ export default function MasterForumAdd({ onChangePage }) {
   const [dataSection, setDataSection] = useState({
     materiId: AppContext_master.dataIDMateri,
     secJudul: "Section Materi " + AppContext_master.dataIDMateri,
-    createdby: AppContext_test.activeUser
+    createdby: AppContext_test.activeUser,
+    secType: ""
   });
-
-  
 
   const handleGoBack = () => {
     console.log(AppContext_test.activeUser);
@@ -121,66 +64,6 @@ export default function MasterForumAdd({ onChangePage }) {
   const handleConfirmNo = () => {
     setShowConfirmation(false);  
   };
-
-
-  const handleSection = () => {
-    setIsSectionAction(true);  
-    setShowConfirmationSection(true);  
-  };
-
-  const handleConfirmYesSection = () => {
-    
-    setShowConfirmationSection(false); 
-    try {
-      axios.post(API_LINK + "Section/CreateSection", dataSection)
-      .then(response => {
-        const data = response.data;
-        console.log("data section", dataSection);
-        if (data[0].hasil === "OK") {
-          AppContext_master.dataIdSection = data[0].newID;
-          console.log("id section", AppContext_master.dataIdSection);
-          SweetAlert("Sukses", "Data Section berhasil ditambahkan", "success");
-          setIsFormDisabled(true);
-          AppContext_master.formSavedMateri = true;
-          SweetAlert(
-            "Sukses",
-            "Data Section berhasil disimpan",
-            "success"
-          );
-          onChangePage("sharingAdd", AppContext_master.MateriForm = formData, AppContext_master.count += 1, AppContext_master.dataIdSection, AppContext_test.activeUser);
-        } else {
-          setIsError(prevError => ({
-            ...prevError,
-            error: true,
-            message: "Terjadi kesalahan: Gagal menyimpan data Materi."
-          }));
-        }
-      })
-      .catch(error => {
-        console.error('Terjadi kesalahan:', error);
-        setIsError(prevError => ({
-          ...prevError,
-          error: true,
-          message: "Terjadi kesalahan: " + error.message
-        }));
-      })
-      .finally(() => setIsLoading(false));
-    } catch (error) {
-      setIsError({
-        error: true,
-        message: "Failed to save forum data: " + error.message,
-      });
-      setIsLoading(false);
-    }
-    onChangePage("sharingAdd", AppContext_master.MateriForm = formData);
-  };
-
-
-  const handleConfirmNoSection = () => {
-    setShowConfirmationSection(false);  
-    onChangePage("index");
-  };
-
 
 
   const [resetStepper, setResetStepper] = useState(0);
@@ -214,6 +97,11 @@ export default function MasterForumAdd({ onChangePage }) {
     setResetStepper((prev) => !prev + 1);
   });
 
+  const storedSteps = sessionStorage.getItem("steps");
+  const steps = storedSteps ? JSON.parse(storedSteps) : initialSteps;
+
+  console.log("langkah forum", steps);
+
   const handleAdd = async (e) => {
     e.preventDefault();
 
@@ -240,12 +128,63 @@ export default function MasterForumAdd({ onChangePage }) {
       if (response === "ERROR") {
         setIsError({ error: true, message: "Terjadi kesalahan: Gagal menyimpan data Sharing." });
       } else {
+        if(steps.length == 3){
         SweetAlert("Sukses", "Data Forum berhasil disimpan", "success");
-        setIsFormDisabled(true);
+        setIsFormDisabled(false);
         setResetStepper((prev) => !prev + 1);
         AppContext_test.formSavedForum = true;
         setResetStepper((prev) => !prev + 1);
-        handleSection();
+        window.location.reload();
+        } else {
+          SweetAlert("Sukses", "Data Forum berhasil disimpan", "success");
+          setIsFormDisabled(false);
+          setResetStepper((prev) => !prev + 1);
+          AppContext_test.formSavedForum = true;
+          setResetStepper((prev) => !prev + 1);
+          try {
+            axios.post(API_LINK + "Section/CreateSection", dataSection)
+            .then(response => {
+              const data = response.data;
+              console.log("data section", dataSection);
+              if (data[0].hasil === "OK") {
+                AppContext_master.dataIdSection = data[0].newID;
+                console.log("data section new", data[0]);
+                console.log("id section", AppContext_master.dataIdSection);
+                SweetAlert("Sukses", "Data Section berhasil ditambahkan", "success");
+                setIsFormDisabled(true);
+                AppContext_master.formSavedMateri = true;
+                SweetAlert(
+                  "Sukses",
+                  "Data Section berhasil disimpan",
+                  "success"
+                );
+                console.log("step keempat", stepPage[3]);
+                onChangePage(steps[3], AppContext_master.MateriForm = formData, AppContext_master.dataSection = dataSection);
+              } else {
+                setIsError(prevError => ({
+                  ...prevError,
+                  error: true,
+                  message: "Terjadi kesalahan: Gagal menyimpan data Materi."
+                }));
+              }
+            })
+            .catch(error => {
+              console.error('Terjadi kesalahan:', error);
+              setIsError(prevError => ({
+                ...prevError,
+                error: true,
+                message: "Terjadi kesalahan: " + error.message
+              }));
+            })
+            .finally(() => setIsLoading(false));
+          } catch (error) {
+            setIsError({
+              error: true,
+              message: "Failed to save forum data: " + error.message,
+            });
+            setIsLoading(false);
+          }
+        }
       }
     } catch (error) {
       setIsError({
@@ -284,6 +223,38 @@ export default function MasterForumAdd({ onChangePage }) {
     onChangePage(content);
   };
 
+  const initialSteps = ["Pengenalan", "Materi", "Forum"];
+  const additionalSteps = ["Sharing Expert", "Pre-Test", "Post-Test"];
+
+  const handleStepChanges = (index) => {
+    console.log("Step aktif:", index);
+  };
+
+  const handleStepAdded = (stepName) => {
+    console.log("Step ditambahkan:", stepName);
+  };
+
+  const handleStepRemoved = (stepName) => {
+    console.log("Step dihapus:", stepName);
+  };
+
+  const handleStepChange = (stepContent) => {
+    onChangePage(stepContent);
+    };
+
+  const [stepPage, setStepPage] = useState([]);
+  const handleAllStepContents = (allSteps) => {
+      setStepPage(allSteps);
+      //console.log("Semua Step Contents:", allSteps);
+  };
+
+  const [stepCount, setStepCount] = useState(0);
+
+  const handleStepCountChange = (count) => {
+      setStepCount(count);
+      console.log("step",count);
+  };
+
   // if (isLoading) return <Loading />;
 
   return (
@@ -296,7 +267,7 @@ export default function MasterForumAdd({ onChangePage }) {
         <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
             <div className="back-and-title" style={{display:"flex"}}>
               <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
-                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Materi Baru</h4>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Forum</h4>
               </div>
                 <div className="ket-draft">
                 <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
@@ -306,13 +277,16 @@ export default function MasterForumAdd({ onChangePage }) {
       <form onSubmit={handleAdd} style={{margin:"20px 100px"}}>
         <div className="mb-4">
         <CustomStepper
-      activeStep={2}
-      steps={steps}
-      onChangePage={handlePageChange}
-      getStepContent={getStepContent}
-    />
+        initialSteps={initialSteps}
+        additionalSteps={additionalSteps}
+        onChangeStep={2}
+        onStepAdded={handleStepAdded}
+        onStepRemoved={handleStepRemoved}
+        onChangePage={handleStepChange}
+        onStepCountChanged={handleStepCountChange}
+        onAllStepContents={handleAllStepContents}
+      />
         </div>
-
         <div className="card mb-4">
           <div className="card-body p-4">
             <div className="row">
@@ -362,11 +336,11 @@ export default function MasterForumAdd({ onChangePage }) {
           </div>
           <div className="d-flex justify-content-between my-4 mx-1 mt-0">
           <div className="ml-4">
-          <Button
+          {/* <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Sebelumnya"
             onClick={() => onChangePage("materiAdd", AppContext_test.ForumForm = formData)}
-          />
+          /> */}
           </div>
           <div className="d-flex mr-4" >
           <Button
@@ -391,14 +365,6 @@ export default function MasterForumAdd({ onChangePage }) {
           pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
           onYes={handleConfirmYes}
           onNo={handleConfirmNo}
-        />
-        )}
-        {showConfirmationSection && (
-        <Konfirmasi
-          title={isSectionAction ? "Tambah Section" : "Tambah Section"}
-          pesan={isSectionAction ? "Apakah anda ingin menambah section?" : "Anda yakin ingin simpan data?"}
-          onYes={handleConfirmYesSection}
-          onNo={handleConfirmNoSection}
         />
         )}
     </>

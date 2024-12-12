@@ -59,7 +59,7 @@ const CardKK = ({ kk, onChangePage }) => {
               </div>
             </div>
             <p
-              className="lh-sm mb-0"
+              className=" mb-0"
               style={{
                 width: "95%",
                 WebkitLineClamp: 2,
@@ -68,7 +68,7 @@ const CardKK = ({ kk, onChangePage }) => {
                 maxHeight: expandDeskripsi ? "none" : "75px",
                 overflow: "hidden",
                 textAlign:'justify',
-                lineHeight:"10px"
+                lineHeight:"25px"
               }}  
             >
               {kk.Deskripsi.length > MAX_DESCRIPTION_LENGTH && !expandDeskripsi[kk.Key] ? (

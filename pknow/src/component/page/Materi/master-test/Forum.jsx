@@ -6,7 +6,19 @@ import Input from "../../../part/Input";
 import { object, string } from "yup";
 import AppContext_test from "./TestContext";
 import { PAGE_SIZE, API_LINK, ROOT_LINK } from "../../../util/Constants";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../util/Encryptor";
+import Search from "../../../part/Search";
+import he from "he";
+import maskotPknow from "../../../../assets/pknowmaskot.png";
+
 export default function Forum({ onChangePage, isOpen }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
+  AppContext_test.activeUser = activeUser;
+
   const [isError, setIsError] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -16,25 +28,35 @@ export default function Forum({ onChangePage, isOpen }) {
   const [replyMessage, setReplyMessage] = useState("");
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [tempItem, setTempItem] = useState([]);
+  const stripHTMLTags = (htmlContent) => {
+    const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
+    return doc.body.textContent || "";
+  };
+
+  const descForum = stripHTMLTags();
+  
   const formDataRef = useRef({
     forumId:currentData[0]?.Key,
     karyawanId: AppContext_test.activeUser, 
     isiDetailForum: "",
     statusDetailForum: "Aktif",
-    createdBy: AppContext_test.displayName,
+    createdBy: AppContext_test.activeUser,
     detailId: currentData[0]?.Key,
+    isiBalasan: "",
   });
+
   const handleReply = (item) => {
     formDataRef.current = {
       forumId: item.Key,
       karyawanId: AppContext_test.activeUser,
       isiDetailForum: "",
       statusDetailForum: "Aktif",
-      createdBy: AppContext_test.displayName,
+      createdBy: AppContext_test.activeUser,
       detailId: item.DetailId,
       isiBalasan: item.IsiDetailForum,
     };
     setReplyMessage(`Membalas: ${item.IsiDetailForum}`); 
+    console.log("isi forum", item.IsiDetailForum)
     setShowReplyInput(true); 
   };
   const handleReplySub = (item) => {
@@ -43,7 +65,7 @@ export default function Forum({ onChangePage, isOpen }) {
       karyawanId: AppContext_test.activeUser,
       isiDetailForum: "",
       statusDetailForum: "Aktif",
-      createdBy: AppContext_test.displayName,
+      createdBy: AppContext_test.activeUser,
       detailId: item.ChildDetailId,
       isiBalasan: item.IsiDetailForum,
     };
@@ -61,7 +83,7 @@ export default function Forum({ onChangePage, isOpen }) {
       karyawanId: AppContext_test.activeUser, 
       isiDetailForum: "",
       statusDetailForum: "Aktif",
-      createdBy: AppContext_test.displayName,
+      createdBy: AppContext_test.activeUser,
       detailId: currentData[0]?.Key,
     };
     setShowReplyInput(false); 
@@ -101,9 +123,14 @@ export default function Forum({ onChangePage, isOpen }) {
         API_LINK + "Forum/SaveTransaksiForum",
         formDataRef.current
       );
+
+      console.log("kiriman",formDataRef.current);
       console.log(response.data)
+      console.log("showReplyInput:", showReplyInput);
+
       const updatedForumData = await fetchDataWithRetry();
       setCurrentData(updatedForumData); 
+      console.log("data update",updatedForumData)
       formDataRef.current.isiDetailForum = "";
       handleCancelReply()
       } catch (error) {
@@ -167,7 +194,9 @@ export default function Forum({ onChangePage, isOpen }) {
           const response = await axios.post(API_LINK + "Forum/GetDataForum", {
             materiId: AppContext_test.materiId,
           });
+          console.log(response.data)
           if (response.data.length != 0) {
+            console.log("ayam",response.data);
             setCurrentData(response.data)
             return response.data;
           }
@@ -182,6 +211,7 @@ export default function Forum({ onChangePage, isOpen }) {
       }
     };
 
+  
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
     const validationError = await validateInput(name, value, userSchema);
@@ -206,27 +236,14 @@ export default function Forum({ onChangePage, isOpen }) {
         <div key={item.DetailId} className="text-right">
           <div className="card p-3 mb-3">
             <div className="d-flex align-items-center mb-3">
-              <div
-                className="rounded-circle overflow-hidden d-flex justify-content-center align-items-center"
-                style={{ ...circleStyle, ...profileStyle }}
-              >
-                {/* <img
-                  alt="Profile Picture"
-                  className="align-self-start"
-                  style={{
-                    width: "680%",
-                    height: "auto",
-                    position: "relative",
-                    right: "25px",
-                    bottom: "40px",
-                  }}
-                /> */}
-              </div>
               <div>
-                <h6 className="mb-0" style={{ fontSize: "16px", style:"bold"}}>
-                  {item.CreatedByDetailForum} - {formatDate(item.CreatedDateDetailForum)}
-                </h6>
-                
+                <img src={maskotPknow} alt="" width="50px" className="mr-3"/>
+              </div>
+              <div className="">
+                <h6 style={{ fontSize: "16px", style:"bold", textAlign:"left"}}>
+                  {item.Nama}
+                </h6> 
+                <h6 style={{fontSize:"12px", color:'grey'}}>{formatDate(item.CreatedDateDetailForum)}</h6> 
               </div>
             </div>
             <div>
@@ -236,7 +253,7 @@ export default function Forum({ onChangePage, isOpen }) {
                   maxWidth: "1500px",
                   marginBottom: "0px",
                   fontSize: "14px",
-                  textAlign: "left",
+                  textAlign: "righ",
                   marginLeft: "10px",
                   flex: 1
                 }}
@@ -245,7 +262,6 @@ export default function Forum({ onChangePage, isOpen }) {
             </div>
             <div>
               {item.IsiDetailForum}
-
             </div>
             <div style={{ display: "flex", justifyContent: "flex-start", marginLeft: "10px", paddingTop:"10px", paddingBottom:"10px" }}>
               <button
@@ -262,22 +278,11 @@ export default function Forum({ onChangePage, isOpen }) {
                 <div key={reply.DetailId} style={{ marginLeft: "30px"}}>
                   {visibleReplies.includes(reply.DetailId) && (
                     <div style={{paddingBottom:"20px" }}>
-                      <div className="d-flex align-items-center " >
+                      <div className="d-flex align-items-center mt-4" >
                         <div
-                          className="rounded-circle overflow-hidden d-flex justify-content-center align-items-center"
-                          style={{ ...circleStyle, ...profileStyle }}
+                         
                         >
-                          {/* <img
-                            alt="Profile Picture"
-                            className="align-self-start"
-                            style={{
-                              width: "680%",
-                              height: "auto",
-                              position: "relative",
-                              right: "25px",
-                              bottom: "40px",
-                            }}
-                          /> */}
+                         <img src={maskotPknow} alt="" width="50px" className="mr-3"/>
                         </div>
                         <div>
                           {/* <h6 className="mb-1" style={{ fontSize: "14px" }}>
@@ -288,8 +293,8 @@ export default function Forum({ onChangePage, isOpen }) {
                             {reply.CreatedByDetailForum} - {formatDate(reply.CreatedDateDetailForum)}
                           </h6> */}
                           <div>
-                            <h6 className="mb-1" style={{ fontSize: "14px", fontWeight: "bold" }}>
-                              {reply.CreatedByDetailForum} - {formatDate(reply.CreatedDateDetailForum)}
+                            <h6 className="mb-1" style={{ fontSize: "14px", fontWeight: "500" }}>
+                              {reply.Nama} - {formatDate(reply.CreatedDateDetailForum)}
                             </h6>
                             <p className="mb-2" style={{ fontSize: "13px", color: "#666" }}>
                               Membalas: {reply.IsiBalasanForum}
@@ -308,16 +313,16 @@ export default function Forum({ onChangePage, isOpen }) {
                         }}
                       >
                         <div>
-                          <div dangerouslySetInnerHTML={{ __html: reply.IsiDetailForum }} />
+                          <div className="mt-4" style={{marginLeft:"60px"}} dangerouslySetInnerHTML={{ __html: reply.IsiDetailForum }} />
                         </div>
                       </div>
 
-                      <i
+                      <span
                         className="btn btn-outline-primary btn-sm mt-2" 
                         onClick={() => handleReplySub(reply)}
                       >
-                        Balas
-                      </i>
+                      Balas
+                      </span>
                     </div>
                   )}
                 </div>
@@ -365,57 +370,49 @@ const handleHideReplies = (detailId) => {
   );
 };
 
-  const renderJudulForum = () => {
-    return currentData.slice(0,1).map((item) => (
-      <div key={item.DetailId} className="text-right">
-        <div className="card p-3 mb-3" style={{position:"sticky"}}>
-          <div className="d-flex align-items-center mb-3">
-            <div
-              className="rounded-circle overflow-hidden d-flex justify-content-center align-items-center"
-              style={{ ...circleStyle, ...profileStyle }}
-            >
-              {/* <img
-                src=""
-                alt="Profile Picture"
-                className="align-self-start"
-                style={{
-                  width: "680%",
-                  height: "auto",
-                  position: "relative",
-                  right: "25px",
-                  bottom: "40px",
-                }}
-              /> */}
-            </div>
-            <div>
-              <h6 className="mb-0" style={{ fontSize: "24px" }}>
-                
-                <div dangerouslySetInnerHTML={{ __html: item.JudulForum }} />
-              </h6>
-              <h6 className="mb-0" style={nameStyle}>
-                {item.CreatedByForum} - {formatDate(item.CreatedDateForum)}
-              </h6>
-            </div>
-          </div>
+const removeHtmlTags = (str) => {
+  return str.replace(/<\/?[^>]+(>|$)/g, ''); // Menghapus semua tag HTML
+};
+
+
+const renderJudulForum = () => {
+  return currentData.slice(0, 1).map((item) => (
+    <div key={item.DetailId} className="text-right">
+      <div className="card p-3 mb-3" style={{ position: "sticky" }}>
+        <div className="d-flex align-items-center mb-3 ml-2 ">
           <div
-            className="mb-0"
-            style={{
-              maxWidth: "1500px",
-              marginBottom: "0px",
-              fontSize: "14px",
-              textAlign: "left",
-              marginLeft: "10px",
-            }}
           >
-            <div>
-              <div dangerouslySetInnerHTML={{ __html: item.IsiForum }} />
-            </div>
+            <img src={maskotPknow} alt="" width="50px" className="mr-3"/>
+            {/* Profile Picture */}
+          </div>
+          <div>
+            <h6 style={{ fontSize: "22px", textAlign: "left" }}>
+              <div dangerouslySetInnerHTML={{ __html: he.decode(item.JudulForum) }} />
+            </h6>
+            <h6 className="mb-0" style={nameStyle}>
+              {item.CreatedByForum} - {formatDate(item.CreatedDateForum)}
+            </h6>
+          </div>
+        </div>
+        <div
+          className="mb-0"
+          style={{
+            maxWidth: "1500px",
+            marginBottom: "0px",
+            fontSize: "14px",
+            textAlign: "justify",
+            marginLeft: "10px",
+          }}
+        >
+          <div>
+            {/* Menghapus tag HTML dan menampilkan teks */}
+            <p>{removeHtmlTags(he.decode(item.IsiForum))}</p> {/* Cleaned and Decoded Text */}
           </div>
         </div>
       </div>
-    ));
-  };
-
+    </div>
+  ));
+};
 
   const circleStyle = {
     width: "30px",
@@ -431,6 +428,7 @@ const handleHideReplies = (detailId) => {
   };
 
   const nameStyle = {
+    textAlign:"left",
     fontSize: "12px",
     marginBottom: "15px",
     color:'grey',
@@ -446,7 +444,7 @@ const handleHideReplies = (detailId) => {
   };
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
+    document.documentElement.style.setProperty('--responsiveContainer-margin-right', '10vw');
     const sidebarMenuElement = document.querySelector('.sidebarMenu');
     if (sidebarMenuElement) {
       sidebarMenuElement.classList.add('sidebarMenu-hidden');
@@ -469,19 +467,34 @@ const handleHideReplies = (detailId) => {
 
   return (
     <>
-      <div className="d-flex flex-column">
-        <KMS_Rightbar
-          handlePreTestClick_close={handlePreTestClick_close}
-          handlePreTestClick_open={handlePreTestClick_open}
-        />
-        <div className="mt-3 ">
+      <div className="d-flex">
+    <div className="">
+      <KMS_Rightbar
+       isActivePengenalan={false}
+       isActiveForum={true}
+       isActiveSharing={false}
+       isActiveSharingPDF={false}
+       isActiveSharingVideo={false}
+       isActiveMateri={false}
+       isActiveMateriPDF={false}
+       isActiveMateriVideo={false}
+       isActivePreTest={false}
+       isActivePostTest={false}
+        isOpen={true}
+        onChangePage={onChangePage}
+        // refreshKey={refreshKey}
+        // setRefreshKey={setRefreshKey}
+    />
+    </div>
+      <div className="d-flex flex-column" style={{width:"100%"}}>
+        <div className="" style={{marginTop:"100px"}}> 
           <>
               <div style={{ marginRight: marginRight }}>
                 {renderJudulForum()}
                 {renderMessages()}
-                <div style={{marginTop:'100px'}}></div>
+                <div style={{marginTop:'20px'}}></div>
                 {showReplyInput && (
-                  <div className="reply-batal input-group mb-3" style={{ position: 'fixed', bottom: '60px', left: '15px', zIndex: '999', maxWidth:widthReply, boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)', borderRadius: '8px', backgroundColor: '#ffffff', padding: '10px', display: 'flex', alignItems: 'center' }}>
+                  <div className="reply-batal" style={{ bottom: '60px', left: '15px', zIndex: '999', maxWidth:"100%", boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)', borderRadius: '8px', backgroundColor: '#ffffff', padding: '10px', display: 'flex', alignItems: 'center' }}>
                     <p style={{ marginBottom: '20px', color: 'gray', flex:'1' }}>
                       <div dangerouslySetInnerHTML={{ __html: replyMessage }} />  
                     </p>
@@ -498,7 +511,7 @@ const handleHideReplies = (detailId) => {
                     </div>
                   </div>
                 )}
-                <div className="reply input-group mb-3" style={{ position: 'fixed', bottom: '20px', left: '15px', zIndex: '999', maxWidth:widthReply, boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)', borderRadius: '8px', backgroundColor: '#ffffff', padding: '10px', display: 'flex', alignItems: 'center' }}>
+                <div className="mb-4" style={{  bottom: '40px', left: '15px', zIndex: '999', maxWidth:"100%", boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)', borderRadius: '8px', backgroundColor: '#ffffff', padding: '10px', display: 'flex', alignItems: 'center' }}>
                   <Input
                     type="text"
                     forInput="isiDetailForum"
@@ -509,7 +522,7 @@ const handleHideReplies = (detailId) => {
                     onChange={handleInputChange}
                     style={{ flex: '1', marginRight: '10px' }}
                   />
-                  <div className="input-group-append">
+                  <div className="">
                     <button
                       className="btn btn-primary"
                       type="button"
@@ -524,6 +537,8 @@ const handleHideReplies = (detailId) => {
           </>
         </div>
       </div>
+      </div>
     </>
   );
+
 }

@@ -6,13 +6,13 @@ import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
 import SweetAlert from "../../../util/SweetAlert";
 import UseFetch from "../../../util/UseFetch";
 import UploadFile from "../../../util/UploadFile";
-import Button from "../../../part/Button";
+import Button from "../../../part/Button copy";
 import DropDown from "../../../part/Dropdown";
 import Input from "../../../part/Input";
 import FileUpload from "../../../part/FileUpload";
 import Loading from "../../../part/Loading";
 import Alert from "../../../part/Alert";
-// import KMS_Sidebar from '../../part/KMS_SideBar';
+import KMS_Sidebar from '../../../part/KMS_SideBar';
 // import Sidebar from '../../.backbone/SideBar';
 import styled from 'styled-components';
 import KMS_Uploader from "../../../part/KMS_Uploader";
@@ -20,16 +20,15 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 import AppContext_test from "./TestContext";
 import { RFC_2822 } from "moment/moment";
+import he from "he";
 
 const ButtonContainer = styled.div`
-  position: fixed;
   bottom: 35px;
-  left: 30%;
-  transform: translateX(-37%);
-  z-index: 999;
+  display: flex;
+  justify-content: space-between;
 `;
 
-export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
+export default function PengerjaanTest({ onChangePage, quizType, materiId, quizId, durasi }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -39,17 +38,21 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
   const [timeRemaining, setTimeRemaining] = useState(false);
   const formDataRef = useRef({
     karyawanId:AppContext_test.activeUser,
-    quizId: AppContext_test.quizId,
+    quizId: quizId,
     nilai: "", 
     status: "Not Reviewed",
     answers: [],
     createdBy: AppContext_test.displayName,
     jumlahBenar: "",
   });
+  console.log("idd quizz", quizId)
   const [formDataRef2, setFormData2] = useState([]);
-  
+  console.log("durasi", durasi);
+
   useEffect(() => {
   }, [quizType, materiId]);
+
+
   const formUpdate = useRef({
     idMateri:AppContext_test.materiId,
     karyawanId: AppContext_test.activeUser,
@@ -92,6 +95,8 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
     });
   };
 
+   useEffect(() => {
+  }, [quizType, materiId]);
   
   useEffect(() => {
     if (timeRemaining == true){
@@ -293,10 +298,9 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
       setIsLoading(true);
       try {
         const response = await axios.post(API_LINK + "Quiz/GetDataQuestion", {
-          idMateri: AppContext_test.materiId,
-          status: 'Aktif',
-          quizType: quizType,
+          idQuiz: quizId
         });
+        console.log("questio", response)
         const checkIsDone = await axios.post(API_LINK + "Quiz/GetDataResultQuiz", {
           materiId: AppContext_test.materiId,
           karyawanId: AppContext_test.activeUser,
@@ -394,21 +398,15 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
     }
   }, []);
 
-  
+  const removeHtmlTags = (str) => {
+    return str.replace(/<\/?[^>]+(>|$)/g, ''); // Menghapus semua tag HTML
+  };
 
   return (
   <>
-    <div className="d-flex">
-      <KMS_Sidebar
-        questionNumbers={questionNumbers}
-        selectedQuestion={selectedQuestion}
-        setSelectedQuestion={setSelectedQuestion}
-        answerStatus={answerStatus}
-        checkMainContent="test"
-        setTimeRemaining={setTimeRemaining}
-      />
-      <div className="flex-fill p-3 d-flex flex-column" style={{ marginLeft: "21vw" }}>
-        <div className="mb-3 d-flex flex-wrap" style={{ overflowX: 'auto' }}>
+    <div className="d-flex" style={{marginTop:"100px"}}>
+      <div className=" p-3 d-flex ">
+        <div className="mb-3 d-flex" style={{ overflowX: 'auto' }}>
           {currentData.map((item, index) => {
             const key = `${item.question}_${index}`;
             if (index + 1 !== selectedQuestion) return null;
@@ -418,7 +416,9 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
                 {/* Soal */}
                 <div className="mb-3">
                   <h4 style={{ wordWrap: 'break-word', overflowWrap: 'break-word', textAlign:'justify' }}>
-                    <div dangerouslySetInnerHTML={{ __html: item.question }} /> 
+                    <div className="">        
+                        {removeHtmlTags(he.decode(item.question))}
+                    </div>
                   </h4>
                 {(item.type === "Essay" || item.type === "Praktikum") && item.gambar && (
                   <div>
@@ -445,7 +445,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
                     label="Jawaban (.zip)"
                     formatFile=".zip"
                     onChange={(event) => handleFileChange(fileInputRef, "zip", event, index + 1, item.id)}
-                    style={{ width: '145vh' }}
+                    style={{ width: '120vh' }}
                   />
                 ) : item.type === "Essay" ? (
                   <Input
@@ -454,7 +454,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
                     label="Jawaban Anda:"
                     value={getSubmittedAnswer(item.id)}
                     onChange={(event) => handleTextareaChange(event, index + 1, item.id)}
-                    style={{ width: '145vh' }}
+                    style={{ width: '120vh' }}
                   />
                 ) : (
                   <div className="d-flex flex-column">
@@ -480,7 +480,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
                           <input
                             type="radio"
                             id={`option-${option.urutan}`}
-                            name={`question-${selectedQuestion}`}
+                            name={ `question-${selectedQuestion}`}
                             onChange={() => handleValueAnswer(option.urutan, option.nomorSoal, option.value, option.nilai, currentIndex)}
                             checked={isSelected}
                             style={{ display: "none" }}
@@ -504,13 +504,8 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
                     })}
                   </div>
                 )}
-              </div>
-            );
-          })}
-        </div>
-
-        <form onSubmit={handleAdd}>
-          <div className="float-start my-4 mx-1">
+                  <form onSubmit={handleAdd}>
+          <div className="">
             <ButtonContainer>
               <Button
                 classType="secondary me-2 px-4 py-2"
@@ -525,7 +520,22 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
             </ButtonContainer>
           </div>
         </form>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ height: '100%', width: '1px', backgroundColor: '#E4E4E4', margin: '0 auto' }} />
       </div>
+     
+      <KMS_Sidebar
+        questionNumbers={questionNumbers}
+        selectedQuestion={selectedQuestion}
+        setSelectedQuestion={setSelectedQuestion}
+        answerStatus={answerStatus}
+        checkMainContent="test"
+        setTimeRemaining={setTimeRemaining}
+        timeRemaining={durasi}
+      />
     </div>
   </>
 );

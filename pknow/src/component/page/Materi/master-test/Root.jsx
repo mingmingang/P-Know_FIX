@@ -4,15 +4,18 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import KMS_Rightbar from "../../../part/RightBar"
 import MasterTestIndex from "./Index";
 // import MasterTestPostTest from "./PostTest";
-// import MasterTestPreTest from "./PreTest";
-// import MasterTestPengerjaanTest from "./Test";
+import MasterTestPreTest from "./PreTest";
+import MasterTestPengerjaanTest from "./Test";
 // import MasterTestHasilTest from "./HasilTest";
 // import MasterTestDetailTest from "./DetailTest";
-// import MasterTestForum from "./Forum";
-// import MasterTestMateriPDF from "./MateriPDF";
-// import MasterTestMateriVideo from "./MateriVideo";
+import MasterTestForum from "./Forum";
+import MasterTestMateriPDF from "./MateriPDF";
+import MasterTestMateriVideo from "./MateriVideo";
 import MasterTestPengenalan from "./Pengenalan";
+import MasterSharing from "./SharingPDF";
 // import AppContext_test from "./TestContext";
+import MasterTestSharingPDF from "./SharingPDF";
+import MasterTestSharingVideo from "./SharingVideo";
 
 export default function MasterTest() {
   
@@ -20,6 +23,7 @@ export default function MasterTest() {
   const [marginRight, setMarginRight] = useState("40vh");
   const [isDataReady, setIsDataReady] = useState(false); 
   const [materiId, setMateriId] = useState("");
+  const [durasi, setDurasi] = useState("");
   const [quizId, setQuizId] = useState("");
   const [quizType, setQuizType] = useState("");
   const [isOpen, setIsOpen] = useState();
@@ -62,15 +66,15 @@ export default function MasterTest() {
             isOpen={isOpen}
           />
         );
-      // case "pretest":
-      //   return (
-      //     <MasterTestPreTest
-      //       onChangePage={handleSetPageMode}
-      //       CheckDataReady={isDataReady}
-      //       materiId={materiId}
-      //       isOpen={isOpen}
-      //     />
-      //   );
+      case "pretest":
+        return (
+          <MasterTestPreTest
+            onChangePage={handleSetPageMode}
+            CheckDataReady={isDataReady}
+            materiId={materiId}
+            isOpen={isOpen}
+          />
+        );
       // case "posttest":
       //     return <MasterTestPostTest onChangePage={handleSetPageMode} />;
       // case "pengerjaantest":
@@ -79,6 +83,14 @@ export default function MasterTest() {
       //     quizType={quizType}
       //     materiId={materiId}
       //   />;
+      case "pengerjaantest":
+        return <MasterTestPengerjaanTest 
+          onChangePage={handleSetPageMode} 
+          quizId={quizId}
+          materiId={materiId}
+          quizType={quizType}
+          durasi={durasi}
+        />;
       // case "detailtest":
       //   return (
       //     <MasterTestDetailTest 
@@ -96,17 +108,64 @@ export default function MasterTest() {
       //       materiId={materiId}
       //     />
       //   );
-      // case "forum":
-      //   return (
-      //     <MasterTestForum 
-      //       onChangePage={handleSetPageMode} 
-      //       isOpen={isOpen}
-      //     />
-      //   );
+      case "forum":
+        return (
+          <MasterTestForum 
+            onChangePage={handleSetPageMode} 
+            isOpen={isOpen}
+          />
+        );
       // case "materipdf":
       //   return <MasterTestMateriPDF onChangePage={handleSetPageMode} key={key}/>;
       // case "materivideo":
       //   return <MasterTestMateriVideo onChangePage={handleSetPageMode} key={key}/>;
+      // case "sharing":
+      //   return (
+      //     <MasterSharing
+      //       onChangePage={handleSetPageMode}
+      //       CheckDataReady={isDataReady}
+      //       materiId={materiId}
+      //       isOpen={isOpen}
+      //     />
+      //   );
+      case "materipdf":
+        return (
+          <MasterTestMateriPDF
+            onChangePage={handleSetPageMode}
+            CheckDataReady={isDataReady}
+            materiId={materiId}
+            isOpen={isOpen}
+          />
+        );
+
+        case "materivideo":
+          return (
+            <MasterTestMateriVideo
+              onChangePage={handleSetPageMode}
+              CheckDataReady={isDataReady}
+              materiId={materiId}
+              isOpen={isOpen}
+            />
+          );
+
+      case "sharingPDF":
+        return (
+          <MasterTestSharingPDF
+            onChangePage={handleSetPageMode}
+            CheckDataReady={isDataReady}
+            materiId={materiId}
+            isOpen={isOpen}
+          />
+        );
+      case "sharingVideo":
+        return (
+          <MasterTestSharingVideo
+            onChangePage={handleSetPageMode}
+            CheckDataReady={isDataReady}
+            materiId={materiId}
+            isOpen={isOpen}
+        />
+      );
     }
   }
 
@@ -117,16 +176,18 @@ export default function MasterTest() {
     setIsOpen(isOpen);
     setQuizType(quizType);
   }
-  function handleSetPageMode(newPageMode, quizType = "", key = "", quizKey = "") {
+
+  function handleSetPageMode(newPageMode, quizType = "", key = "", quizKey = "", durasi = "") {
     setPageMode(newPageMode);
     setQuizType(quizType);
     setMateriId(key);
     setQuizId(quizKey);
+    setDurasi(durasi)
   }
 
   return (
-  <div style={{ marginRight: marginRight }}>
-    <KMS_Rightbar
+  <div style={{ marginRight: "0" }}>
+    {/* <KMS_Rightbar
       handlePreTestClick_close={handlePreTestClick_close}
       handlePreTestClick_open={handlePreTestClick_open}
       isOpen={isOpen}
@@ -134,7 +195,7 @@ export default function MasterTest() {
       materiId={materiId}
       refreshKey={refreshKey}
       setRefreshKey={setRefreshKey}
-    />
+    /> */}
     {getPageMode()}
   </div>
   );

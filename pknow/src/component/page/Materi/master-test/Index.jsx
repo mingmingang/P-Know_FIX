@@ -9,7 +9,7 @@ import Alert from "../../../part/Alert";
 import Loading from "../../../part/Loading";
 import CardMateri from "../../../part/CardMateri2";
 import UseFetch from "../../../util/UseFetch";
-import { API_LINK } from "../../../util/Constants";
+import { API_LINK, PAGE_SIZE } from "../../../util/Constants";
 import "@fortawesome/fontawesome-free/css/all.css";
 import axios from "axios";
 // import "../../../../index.css";
@@ -325,13 +325,13 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
               <Loading />
             ) : (
               <div className="">
-              {currentData.length === 1 && (
+              {currentData.length === 0 && (
                 <div className="alert alert-warning mt-0 mb-4" style={{margin:"80px"}}>
                   Tidak ada data Materi yang tersedia.
                 </div>
               )}
             
-              {currentFilter.status === "Semua" && currentData.length > 1 && (
+              {currentFilter.status === "Semua" && currentData.length > 0 && (
                 <CardMateri
                   materis={currentData.filter(
                     (materi) => materi.Status === "Aktif"
@@ -346,15 +346,25 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
               )}
             </div>
             )}
-            {currentData.length > 0 && currentData[0].Count > 20 && (
+            {/* {currentData.length > 0 && currentData[0].Count > 10 && (
               <Paging
                 totalItems={currentData[0].Count}
-                itemsPerPage={20}
+                itemsPerPage={10}
                 currentPage={currentFilter.page}
                 onPageChange={handleSetCurrentPage}
                 className="mt-3"
               />
-            )}
+            )} */}
+             <div className="mb-4 d-flex justify-content-center">
+            <div className="d-flex flex-column ">
+              <Paging
+                pageSize={PAGE_SIZE}
+                pageCurrent={currentFilter.page}
+                totalData={currentData[0]?.Count || 0}
+                navigation={handleSetCurrentPage}
+              />
+            </div>
+          </div>
           </div>
         </div>
       </div>

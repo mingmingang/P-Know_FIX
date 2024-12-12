@@ -15,6 +15,9 @@ import AppContext_master from "../master-proses/MasterContext";
 import AppContext_test from "./TestContext";
 import maskotPknow from "../../../../assets/pknowmaskot.png";
 import he from "he";
+import KMS_Rightbar from "../../../part/RightBar";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../util/Encryptor";
 
 
 export default function MasterTestIndex({  onChangePage, CheckDataReady, materiId  }) {
@@ -25,13 +28,13 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
 
   AppContext_test.refreshPage = "pengenalan";
 
-  useEffect(() => {
-    document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
-    const sidebarMenuElement = document.querySelector('.sidebarMenu');
-    if (sidebarMenuElement) {
-      sidebarMenuElement.classList.add('sidebarMenu-hidden');
-    }
-  }, []);
+  // useEffect(() => {
+  //   document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
+  //   const sidebarMenuElement = document.querySelector('.sidebarMenu');
+  //   if (sidebarMenuElement) {
+  //     sidebarMenuElement.classList.add('sidebarMenu-hidden');
+  //   }
+  // }, []);
 
   const decodeHTML = (input) => {
     const doc = new DOMParser().parseFromString(input, "text/html");
@@ -108,6 +111,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
         try {
           const response = await axios.post(API_LINK + "Materi/GetDataMateriById", {
             materiId: AppContext_test.materiId,
+
           });
           if (response.data.length !== 0) {
             return response.data;
@@ -130,10 +134,11 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
     };
   }, [AppContext_test.materiId]);
 
-
   useEffect(() => {
     updateProgres();
   }, [currentData]);
+
+
 
 
   const circleStyle = {
@@ -151,6 +156,26 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
 
   return (
     <>
+    <div className="d-flex">
+    <div className="">
+      <KMS_Rightbar
+      isActivePengenalan={true}
+      isActiveForum={false}
+      isActiveSharing={false}
+      isActiveSharingPDF={false}
+      isActiveSharingVideo={false}
+      isActiveMateri={false}
+      isActiveMateriPDF={false}
+      isActiveMateriVideo={false}
+      isActivePreTest={false}
+      isActivePostTest={false}
+      isOpen={true}
+      onChangePage={onChangePage}
+      materiId={materiId}
+      // refreshKey={refreshKey}
+      // setRefreshKey={setRefreshKey}
+    />
+    </div>
       <div className="d-flex flex-column">
         {/* <KMS_Rightbar handleposttestClick_close={handleposttestClick_close} handleposttestClick_open={handleposttestClick_open}/> */}
         {isError && (
@@ -161,26 +186,19 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
             />
           </div>
         )}
-        <div className="flex-fill">
-          
-        </div>
         <div className="mt-3">
           {isLoading ? (
             <Loading />
           ) : (
             <>
-            <div style={{ marginRight: "marginRight", marginTop:"100px", marginLeft:"100px", marginBottom:"80px" }}>
+            <div style={{ marginRight: "40px", marginTop:"100px", marginLeft:"50px", marginBottom:"40px", height:"600px" }} className="overflow-y-auto">
                <div
-                  className="d-flex align-items-center mb-4"
+                  className="align-items-center mb-3"
                   >
-                  <div
-                  
-                  >
-                    <img src={maskotPknow} alt="" width="50px" />
-                  </div>    
-                  <h6 className="mb-0 ml-4">{currentData[0].Uploader} - {formatDate(currentData[0].Creadate)}</h6>
+                  <h1 style={{color:"#002B6C"}} className="mb-0"> {currentData[0].Judul}</h1><br />
+                  <h6 className="mb-0" style={{color:"#002B6C"}}>Oleh {currentData[0].Nama} - {formatDate(currentData[0].Creadate)}</h6>
                 </div>
-              <div className="text-left" style={{marginLeft:"6%", marginRight:"6%"}}>
+              <div className="text-justify" style={{ marginRight:"6%"}}>
                 <div dangerouslySetInnerHTML={{
                   __html: he.decode(currentData[0].Pengenalan),
                 }} />
@@ -191,6 +209,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
           </>
           )} 
         </div>
+      </div>
       </div>
     </>
   );

@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { Stepper } from 'react-form-stepper';
-import Loading from "../../../part/Loading";
-import Icon from "../../../part/Icon";
+import Loading from "../../../../part/Loading";
+import Icon from "../../../../part/Icon";
 import { Card, ListGroup, Button, Badge, Form } from "react-bootstrap";
-import LocalButton from "../../../part/Button";
+import LocalButton from "../../../../part/Button";
 import axios from "axios";
 import AppContext_test from "../../master-test/TestContext";
-import { API_LINK } from "../../../util/Constants";
+import { API_LINK } from "../../../../util/Constants";
 import Swal from 'sweetalert2';
-import Alert from "../../../part/Alert";
-import SweetAlert from "../../../util/SweetAlert";
+import Alert from "../../../../part/Alert";
+import SweetAlert from "../../../../util/SweetAlert";
+
 export default function MasterMateriReviewJawaban({ onChangePage, status, withID }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,7 +83,6 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
               return;
             } else {
               setCurrentData(data);
-              // Initialize badges array
               setBadges(Array(data.length).fill(null).map(() => Array(0).fill(0)));
               setReviewStatus(Array(data.length).fill(null).map(() => Array(0).fill(false)));
               await fetchQuestions(data[0].qui_tipe);
@@ -135,6 +135,8 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     };
   }, [AppContext_test.materiId, AppContext_test.refresh]);
 
+
+
   const fetchQuestions = async (questionType, retries = 10, delay = 1000) => {
     for (let i = 0; i < retries; i++) {
       try {
@@ -160,6 +162,8 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
       }
     }
   };
+
+
 
   const fetchAnswers = async (questionType, karyawanId, retries = 10, delay = 1000) => {
     for (let i = 0; i < retries; i++) {
@@ -188,6 +192,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     }
   };
 
+
   useEffect(() => {
     if (currentData.length > 0) {
       fetchQuestions(currentData[currentRespondentIndex].qui_tipe);
@@ -210,6 +215,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     console.log('badges: ', badges)
     console.log('review status: ', reviewStatus)
   }, [badges, reviewStatus]);
+
   const handleReview = (idSoal, isCorrect, karyawanId, quizId, transaksiId) => {
     const updatedRespondent = { ...currentData[currentRespondentIndex] };
     const updatedReviewStatus = [...reviewStatus];
@@ -265,20 +271,19 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
 
   if (isError) {
     return (
-    <div className="flex-fill">
-        <Alert
-        type="warning"
-        message="Belum terdapat peserta yang mengerjakan test"
-        />
-        <div className="float my-4 mx-1">
-        <LocalButton
-          classType="outline-secondary me-2 px-4 py-2"
-          label="Kembali"
-          onClick={() => onChangePage("index")}
-        />
+      <div className="flex-fill mb-0" style={{margin:"100px"}}>
+          <Alert
+          type="warning"
+          message="Belum terdapat peserta yang mengerjakan test"
+          />
+          <div className="float my-4 mx-1">
+          <LocalButton
+            classType="outline-secondary me-2 px-4 py-2"
+            label="Kembali"
+            onClick={() => onChangePage("index")}
+          />
+      </div>
     </div>
-    </div>
-    
     );
   }
 
@@ -295,6 +300,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     }
     return item;
 });
+
   const validJawabanPengguna = processedJawaban.filter(item => item.length === 3);
 
   const formattedAnswers = validJawabanPengguna.map(item => ({
@@ -459,7 +465,6 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
           })}
         </Card.Body>
       </Card>
-      {/* )} */}
     <div className="float my-4 mx-1">
       <LocalButton
         classType="outline-secondary me-2 px-4 py-2"

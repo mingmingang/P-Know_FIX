@@ -1,28 +1,32 @@
 import { useEffect, useRef, useState, useContext } from "react";
-import { PAGE_SIZE, API_LINK, ROOT_LINK } from "../../util/Constants";
-import SweetAlert from "../../util/SweetAlert";
-import UseFetch from "../../util/UseFetch";
-import Button from "../../part/Button";
-import Input from "../../part/Input";
-import Table from "../../part/Table";
-import Paging from "../../part/Paging";
-import Filter from "../../part/Filter";
-import DropDown from "../../part/Dropdown";
-import Alert from "../../part/Alert";
-import Loading from "../../part/Loading";
-import profilePicture from "../../../assets/tes.jpg";
-import KMS_Rightbar from "../../part/KMS_RightBar";
-import SideBar from "../../backbone/SideBar";
+import { PAGE_SIZE, API_LINK, ROOT_LINK } from "../../../util/Constants";
+import SweetAlert from "../../../util/SweetAlert";
+import UseFetch from "../../../util/UseFetch";
+import Button from "../../../part/Button copy";
+import Input from "../../../part/Input";
+import Table from "../../../part/Table";
+import Paging from "../../../part/Paging";
+import Filter from "../../../part/Filter";
+import DropDown from "../../../part/Dropdown";
+import Alert from "../../../part/Alert";
+import Loading from "../../../part/Loading";
+// import profilePicture from "../../../../assets/test.jpg";
+import KMS_Rightbar from "../../../part/RightBar";
+// import SideBar from "../../../backbone/SideBar";
+import maskot from "../../../../assets/pknowmaskot.png";
 import axios from "axios";
 import AppContext_test from "./TestContext";
 export default function MasterTestPreTest({ onChangePage, CheckDataReady, materiId }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [marginRight, setMarginRight] = useState("0vh");
-  const [currentData, setCurrentData] = useState();
+  const [currentData, setCurrentData] = useState(null);
   const [receivedMateriId, setReceivedMateriId] = useState();
+  const [sectionData, setSectionData] = useState([]);
   function onStartTest() {
-    onChangePage("pengerjaantest", "Pretest", materiId);
+    console.log("id quiiizz", currentData.quizId)
+    console.log("durasi", currentData.timer);
+    onChangePage("pengerjaantest","Pretest" , materiId,currentData.quizId, currentData.timer);
   }
 
   useEffect(() => {
@@ -32,6 +36,8 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
       sidebarMenuElement.classList.add('sidebarMenu-hidden');
     }
   }, []);
+
+  let idSection;
     
   useEffect(() => {
     let isMounted = true;
@@ -40,26 +46,26 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
       for (let i = 0; i < retries; i++) {
         setIsLoading(true);
         try {
-          const [data, dataQuiz] = await Promise.all([
-            fetchDataWithRetry_pretest(),
+          const [dataQuiz] = await Promise.all([
+            // fetchDataWithRetry_pretest(),
+            getListSection(),
             getQuiz_pretest()
           ]);
 
           if (isMounted) {
-            setCurrentData(dataQuiz);
 
-            if (data) {
-              if (Array.isArray(data)) {
-                if (data.length !== 0) {
-                  onChangePage("hasiltest", "Pretest", data[0].IdQuiz);
-                  AppContext_test.quizType = "Pretest";
-                  break;
-                }
-              } else {
-                console.error("Data is not an array:", data);
-              }
-            } else {
-            }
+            // if (data) {
+            //   if (Array.isArray(data)) {
+            //     if (data.length !== 0) {
+            //       onChangePage("hasiltest", "Pretest", data[0].IdQuiz);
+            //       AppContext_test.quizType = "Pretest";
+            //       break;
+            //     }
+            //   } else {
+            //     console.error("Data is not an array:", data);
+            //   }
+            // } else {
+            // }
           }
         } catch (error) {
           if (isMounted) {
@@ -88,6 +94,7 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
             tipeQuiz: "Pretest",
           });
           if (response.data.length !== 0) {
+   
             return response.data;
           }
         } catch (error) {
@@ -101,28 +108,73 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
       }
     };
 
+    
+
+    const getListSection = async (retries = 10, delay = 2000) => {
+      for (let i = 0; i < retries; i++) {
+          try {
+              const response = await axios.post(API_LINK + "Section/GetDataSectionByMateri", {
+                  mat_id: AppContext_test.materiId,
+                  sec_type: "Pre-Test",
+                  sec_status: "Aktif"
+              });
+              
+              if (response.data.length !== 0) {
+                idSection = response.data[0].SectionId;
+                  return response.data;
+              }
+          } catch (e) {
+              console.error("Error fetching materi data: ", error);
+              if (i < retries - 1) {
+                  await new Promise((resolve) => setTimeout(resolve, delay))
+              } else {
+                  throw error;
+              }
+          }
+      }
+  };
+
+    // const getQuizData = async () => {
+    //     try {
+    //       const sectionData = await getSectionData();
+    //       const data = await UseFetch(API_LINK + "Quiz/GetDataQuizByIdSection", {
+    //         section: sectionData.SectionId
+    //       });
+    //       if (data === "ERROR" || data.length === 0) throw new Error("Gagal mengambil data quiz.");
+    //       return data[0];
+    //     } catch (error) {
+    //       console.error("Error fetching quiz data:", error);
+    //       throw error;
+    //     }
+    //   };
+
+
+
     const getQuiz_pretest = async (retries = 10, delay = 500) => {
       for (let i = 0; i < retries; i++) {
         try {
-          const response = await axios.post(API_LINK + "Quiz/GetDataQuiz", {
-            quizId: AppContext_test.materiId,
-            tipeQuiz: "Pretest",
+          const quizResponse = await axios.post(API_LINK + "Quiz/GetDataQuizByIdSection", {
+            section: idSection,
           });
-          if (response.data.length !== 0) {
-            return response.data;
-          }
+          if (quizResponse.data && quizResponse.data.length > 0) {
+            setCurrentData(quizResponse.data[0]); // Hanya set data pertama
+            console.log("data quiz", quizResponse.data[0]); // Debugging
+            break;
+          } 
         } catch (error) {
           console.error("Error fetching quiz data:", error);
           if (i < retries - 1) {
             await new Promise((resolve) => setTimeout(resolve, delay));
           } else {
-            throw error; // Throw error if max retries reached
+            throw error;
           }
         }
       }
     };
+    
 
     fetchData_pretest();
+    
 
     return () => {
       isMounted = false;
@@ -150,62 +202,80 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
 
   return (
     <>
-      <div className="d-flex flex-column">
-        {/* <KMS_Rightbar handlePreTestClick_close={handlePreTestClick_close} handlePreTestClick_open={handlePreTestClick_open}/> */}
-        {isError && (
-          <div className="flex-fill">
-            <Alert
-              type="warning"
-              message="Terjadi kesalahan: Gagal mengambil data Test."
+    <div className="d-flex">
+    <div className="">
+    <KMS_Rightbar
+    isActivePengenalan={false}
+    isActiveForum={false}
+    isActiveSharing={false}
+    isActiveSharingPDF={false}
+    isActiveSharingVideo={false}
+    isActiveMateri={false}
+    isActiveMateriPDF={false}
+    isActiveMateriVideo={false}
+    isActivePreTest={true}
+    isActivePostTest={false}
+    isOpen={true}
+    onChangePage={onChangePage}
+    materiId={materiId}
+    // refreshKey={refreshKey}
+    // setRefreshKey={setRefreshKey}
+  />
+  </div>
+    <div className="">
+      {isError && (
+        <Alert
+          type="warning"
+          message="Terjadi kesalahan: Gagal mengambil data Test."
+        />
+      )}
+      {isLoading ? (
+        <Loading message="Sedang memuat data..." />
+      ) : currentData ? ( // Periksa currentData ada atau tidak
+        <div style={{ marginRight: marginRight }}>
+          <div className=" align-items-center mb-5">
+            <div style={{marginTop:"100px"}}>
+              <div className="d-flex">
+              <img
+                className=""
+                src={maskot}
+                style={{
+                  width: "8%",
+                  height: "auto",
+                  position: "relative",
+                  right:"10px"
+               
+                }}
+              />
+              <div className="mt-2">
+              <h6 className="mb-0">
+                {currentData.createdby}
+              </h6>
+              <h6>{formatDate(currentData.createdDate)}</h6>
+              </div>
+
+              </div>
+              <h2 className="font-weight-bold mb-4 primary mt-4">
+                {currentData.quizDeskripsi}
+              </h2>
+              <p className="mb-3">
+                Tes ini terdiri dari {currentData.jumlahSoal} soal. Anda hanya memiliki waktu {convertToMinutes(currentData.timer)} menit untuk mengerjakan semua soal.
+              </p>
+            </div>
+            
+            <Button
+              classType="primary mt-2"
+              label="Mulai Pre-Test"
+              onClick={onStartTest}
             />
           </div>
-        )}
-        <div className="flex-fill"></div>
-        <div className="mt-3">
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <>
-              <div style={{ marginRight: marginRight }}>
-               <div
-                  className="d-flex align-items-center mb-5"
-                  >
-                  <div
-                    className="rounded-circle overflow-hidden d-flex justify-content-center align-items-center"
-                    style={circleStyle}
-                  >
-                    <img
-                      className="align-self-start"
-                      style={{
-                        width: "450%",
-                        height: "auto",
-                        position: "relative",
-                        right: "30px",
-                        bottom: "40px",
-                      }}
-                    />
-                  </div>
-                
-                  <h6 className="mb-0">{currentData[0].CreatedBy} - {formatDate(currentData[0].CreatedDate)}</h6>
-                </div>
-              <div className="text-center" style={{marginBottom: '100px'}}>
-                <h2 className="font-weight-bold mb-4 primary">Pre Test - {currentData[0].JudulQuiz}</h2>
-                <p className="mb-5" style={{ maxWidth: '600px', margin: '0 auto', marginBottom: '60px' }}>
-                Tes ini terdiri dari {currentData[0].JumlahSoal} soal Anda hanya memiliki waktu {convertToMinutes(currentData[0].Durasi)} menit untuk mengerjakan semua soal, dimulai saat Anda mengklik tombol
-                    "Mulai Post Test" di bawah ini.
-                </p>
-                  <Button
-                    classType="primary ms-2 px-4 py-2"
-                    label="Mulai Pre-Test"
-                    onClick={onStartTest}
-                  />
-                  <div></div>
-                </div>
-              </div>
-            </>
-           )}
         </div>
-      </div>
+      ) : (
+        <Alert type="info" message="Tidak ada data pre-test tersedia." />
+      )}
+    </div>
+    </div>
     </>
   );
+  
 }

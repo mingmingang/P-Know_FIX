@@ -11,6 +11,7 @@ import "../../style/KelompokKeahlian.css";
 function CardMateri({ 
   materis, 
   onStatus,
+  onDelete,
   onEdit,
   onReviewJawaban,
   onBacaMateri,
@@ -30,6 +31,11 @@ function CardMateri({
   const handleStatusChange = (book) => {
     console.log(`Status buku ${book.Key} diubah`);
     onStatus(book.Key);
+  };
+
+  const handleDeleteMateri = (book) => {
+    console.log(`Materi ${book.Key} dihapus`);
+    onDelete(book.Key);
   };
 
   const handleBacaMateri = (book) => {
@@ -58,10 +64,10 @@ function CardMateri({
             <div className="col-md-4 mb-4"  key={book.Key}>
               <div
                 className="bg-white-kk"
-                style={{ borderColor: book.Status === "Aktif" ? "blue" : "grey", width:"374px" }}
+                style={{ borderColor: book.Status === "Aktif" ? "blue" : "grey"}}
               >
-                <div>
-                  <img  className="mr-0" src={book.Gambar} alt="gambar" />
+                <div className="">
+                  <img  className="cover-daftar-kk" src={book.Gambar} alt="gambar" />
                   <div>
                     <h3
                       className="text-xl font-bold text-blue-600 mt-3"
@@ -99,7 +105,7 @@ function CardMateri({
                       <span>{book.Uploader} • {book.Creadate?.slice(0, 10)}</span>
                     </div>
                     <p
-                      className="card-text p-0 mt-3 mb-3"
+                      className="card-text p-0 mt-3 mb-1"
                       style={{
                         fontSize: "15px",
                         
@@ -169,9 +175,16 @@ function CardMateri({
                       <button
                         className="btn btn-sm text-primary"
                         title="Review Jawaban"
-                        onClick={() => handleReviewJawaban(book)}
-                      >
+                        onClick={() => handleReviewJawaban(book)}>
                         <i className="fas fa-file" style={{fontSize:"20px"}} ></i>
+                      </button>
+                      <button
+                        className="btn btn-sm"
+                        style={{color:"red"}}
+                        title="Review Jawaban"
+                        onClick={() => handleDeleteMateri(book)}
+                      >
+                        <i className="fas fa-trash" style={{fontSize:"20px"}} ></i>
                       </button>
                     </>
                   ) : (

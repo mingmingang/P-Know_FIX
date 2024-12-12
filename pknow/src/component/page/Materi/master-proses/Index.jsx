@@ -115,6 +115,42 @@ export default function MasterProsesIndex({ onChangePage }) {
     });
   }
 
+
+  function handleDelete(id) {
+    console.log("id delete", id);
+    setIsError(false);
+
+    SweetAlert(
+      "Konfirmasi",
+      "Apakah Anda yakin ingin menghapus Materi dari Kategori ini?",
+      "warning",
+      "Ya",
+    ).then((confirmed) => {
+      if (confirmed) {
+        UseFetch(API_LINK + "Materi/DeleteMateri", {
+          mat_id: id,
+        })
+          .then((data) => {
+            console.log(data);
+            if (data === null) SweetAlert(
+              "Gagal",
+              "Materi ini berelasi dengan data yang lain",
+              "error"
+            );
+            else {
+              SweetAlert(
+                "Sukses",
+                "Status data Materi berhasil dihapus",
+                "success"
+              );
+              handleSetCurrentPage(currentFilter.page);
+            }
+          })
+          .then(() => setIsLoading(false));
+      } 
+    });
+  }
+
   const kategori = AppContext_test.KategoriIdByKK;
 
   const fetchDataKategori = async (retries = 3, delay = 1000) => {
@@ -220,11 +256,6 @@ export default function MasterProsesIndex({ onChangePage }) {
                 API_LINK + "Materi/GetDataMateriByKategori",
                 currentFilter
             );
-
-            console.log("tes",currentData.length)
-            
-            console.log("materi",data);
-
             if (data === "ERROR") {
                 setIsError(true);
             } else if (data.length === 0) {
@@ -482,12 +513,13 @@ export default function MasterProsesIndex({ onChangePage }) {
                 /> */}
                         <div className="mt-1">
                 {currentFilter.status === "Semua" ? (
-                  currentData.length > 0 ? (
+                  currentData.length >= 1 ? (
                     <CardMateri
                       materis={currentData}
                       onDetail={onChangePage}
                       onEdit={onChangePage}
                       onStatus={handleSetStatus}
+                      onDelete={handleDelete}
                       isNonEdit={false}
                       onReviewJawaban={onChangePage}
                     />

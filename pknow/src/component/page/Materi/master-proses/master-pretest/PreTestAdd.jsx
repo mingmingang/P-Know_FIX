@@ -18,66 +18,15 @@ import AppContext_test from "../../master-test/TestContext";
 import Konfirmasi from "../../../../part/Konfirmasi";
 import BackPage from "../../../../../assets/backPage.png";
 import UploadFile from "../../../../util/UploadFile";
-
-const steps = ['Sharing Expert', 'Pretest', 'Post Test'];
-
-function getStepContent(stepIndex) {
-  switch (stepIndex) {
-    // case 0:
-    //   return 'materiAdd';
-    case 0:
-      return 'sharingAdd';
-    case 1:
-      return 'pretestAdd';
-    case 2:
-      return 'posttestAdd';
-    default:
-      return 'Unknown stepIndex';
-  }
-}
-
-function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
-  return (
-    <Box sx={{ width: "100%", mt: 2 }}>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label, index) => (
-          <Step
-            key={label}
-            onClick={() => onChangePage(getStepContent(index))} // Tambahkan onClick di sini
-            sx={{
-              cursor: "pointer", // Menambahkan pointer untuk memberikan indikasi klik
-              "& .MuiStepIcon-root": {
-                fontSize: "2rem",
-                color: index <= activeStep ? "primary.main" : "grey.300",
-                "&.Mui-active": {
-                  color: "primary.main",
-                },
-                "& .MuiStepIcon-text": {
-                  fill: "#fff",
-                  fontSize: "1rem",
-                },
-              },
-            }}
-          >
-            <StepLabel
-              sx={{
-                "& .MuiStepLabel-label": {
-                  typography: "body1",
-                  color: index <= activeStep ? "primary.main" : "grey.500",
-                },
-              }}
-            >
-              {label}
-            </StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-    </Box>
-  );
-}
-
+import Cookies from "js-cookie";
+import { decryptId } from "../../../../util/Encryptor";
+import CustomStepper from "../../../../part/Stepp";
 
 export default function MasterPreTestAdd({ onChangePage }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
   const [formContent, setFormContent] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [errors, setErrors] = useState({});
@@ -96,8 +45,12 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const [dataSection, setDataSection] = useState({
     materiId: AppContext_master.dataIDMateri,
     secJudul: "Section Materi " + AppContext_master.dataIDMateri,
-    createdby: AppContext_test.activeUser
+    createdby: AppContext_test.activeUser,
+    secType:""
   });
+
+  const storedSteps = sessionStorage.getItem("steps");
+  const steps = storedSteps ? JSON.parse(storedSteps) : initialSteps;
 
   const handleConfirmYesSection = () => {
     setShowConfirmationSection(false); 
@@ -109,7 +62,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
         if (data[0].hasil === "OK") {
           AppContext_master.dataIdSection = data[0].newID;
           console.log("id section", AppContext_master.dataIdSection);
-          SweetAlert("Sukses", "Data Section Pretest berhasil ditambahkan", "success");
+          SweetAlert("Sukses", "Data Section berhasil ditambahkan", "success");
           // setIsFormDisabled(true);
           AppContext_master.formSavedMateri = true;
           SweetAlert(
@@ -142,6 +95,19 @@ export default function MasterPreTestAdd({ onChangePage }) {
       });
       setIsLoading(false);
     }
+  };
+
+  const [stepPage, setStepPage] = useState([]);
+  const handleAllStepContents = (allSteps) => {
+      setStepPage(allSteps);
+      //console.log("Semua Step Contents:", allSteps);
+  };
+
+  const [stepCount, setStepCount] = useState(0);
+
+  const handleStepCountChange = (count) => {
+      setStepCount(count);
+      console.log("step",count);
   };
 
 
@@ -181,7 +147,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
     tanggalAkhir: '',
     timer: '',
     status: 'Aktif',
-    createdby: AppContext_test.displayName,
+    createdby: activeUser,
+    type:'Pre-Test',
   });
 
   // useEffect(() => {
@@ -248,6 +215,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
     timer: string().required('Durasi harus diisi'),
     status: string(),
     createdby: string(),
+    type: string(),
   });
 
   const initialFormQuestion = {
@@ -509,7 +477,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
               }
             }
           }
-          
           setResetStepper((prev) => !prev + 1);
         } catch (error) {
           console.error('Gagal menyimpan pertanyaan:', error);
@@ -521,8 +488,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
           });
         }
       }
-  
-      // Tampilkan pesan sukses atau lakukan tindakan lain yang diperlukan setelah semua data berhasil disimpan
       Swal.fire({
         title: 'Berhasil!',
         text: 'Pretest berhasil ditambahkan',
@@ -536,7 +501,128 @@ export default function MasterPreTestAdd({ onChangePage }) {
           setSelectedFile(null);
           setTimer('');
           setIsButtonDisabled(true);
-          handleSection();
+          // handleSection();
+          if (steps.length == 4) {
+            window.location.reload();
+          } else {
+            if (pretest == 3 && steps.length > 4) {
+                try {
+                  axios
+                    .post(API_LINK + "Section/CreateSection", dataSection)
+                    .then((response) => {
+                      const data = response.data;
+                      console.log("data section", dataSection);
+                      if (data[0].hasil === "OK") {
+                        AppContext_master.dataIdSection = data[0].newID;
+                        console.log(
+                          "id section",
+                          AppContext_master.dataIdSection
+                        );
+                        SweetAlert(
+                          "Sukses",
+                          "Data Section berhasil ditambahkan",
+                          "success"
+                        );
+                        // setIsFormDisabled(true);
+                        AppContext_master.formSavedMateri = true;
+                        SweetAlert(
+                          "Sukses",
+                          "Data section berhasil disimpan",
+                          "success"
+                        );
+                        onChangePage(
+                          steps[4],
+                          (AppContext_master.MateriForm = formData),
+                          (AppContext_master.count += 1),
+                          AppContext_master.dataIdSection
+                        );
+                      } else {
+                        setIsError((prevError) => ({
+                          ...prevError,
+                          error: true,
+                          message:
+                            "Terjadi kesalahan: Gagal menyimpan data Materi.",
+                        }));
+                      }
+                    })
+                    .catch((error) => {
+                      console.error("Terjadi kesalahan:", error);
+                      setIsError((prevError) => ({
+                        ...prevError,
+                        error: true,
+                        message: "Terjadi kesalahan: " + error.message,
+                      }));
+                    })
+                    .finally(() => setIsLoading(false));
+                } catch (error) {
+                  setIsError({
+                    error: true,
+                    message: "Failed to save forum data: " + error.message,
+                  });
+                  setIsLoading(false);
+                }
+            } else if (pretest == 4 && steps.length > 5) {
+              try {
+                axios
+                  .post(API_LINK + "Section/CreateSection", dataSection)
+                  .then((response) => {
+                    const data = response.data;
+                    console.log("data section", dataSection);
+                    if (data[0].hasil === "OK") {
+                      AppContext_master.dataIdSection = data[0].newID;
+                      console.log(
+                        "id section",
+                        AppContext_master.dataIdSection
+                      );
+                      SweetAlert(
+                        "Sukses",
+                        "Data Section berhasil ditambahkan",
+                        "success"
+                      );
+                      // setIsFormDisabled(true);
+                      AppContext_master.formSavedMateri = true;
+                      SweetAlert(
+                        "Sukses",
+                        "Data section berhasil disimpan",
+                        "success"
+                      );
+                      onChangePage(
+                        steps[5],
+                        (AppContext_master.MateriForm = formData),
+                        (AppContext_master.count += 1),
+                        AppContext_master.dataIdSection
+                      );
+                    } else {
+                      setIsError((prevError) => ({
+                        ...prevError,
+                        error: true,
+                        message:
+                          "Terjadi kesalahan: Gagal menyimpan data Materi.",
+                      }));
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Terjadi kesalahan:", error);
+                    setIsError((prevError) => ({
+                      ...prevError,
+                      error: true,
+                      message: "Terjadi kesalahan: " + error.message,
+                    }));
+                  })
+                  .finally(() => setIsLoading(false));
+              } catch (error) {
+                setIsError({
+                  error: true,
+                  message: "Failed to save forum data: " + error.message,
+                });
+                setIsLoading(false);
+              }
+            } else if (pretest == 5) {
+              window.location.reload();
+            } else {
+              window.location.reload();
+            }
+          }
         }
       });
   
@@ -757,7 +843,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
     const updatedFormContent = [...formContent];
 
     updatedFormContent[questionIndex].options[optionIndex].point = parseInt(value);
-
     // Update the formContent state
     setFormContent(updatedFormContent);
   };
@@ -800,6 +885,9 @@ export default function MasterPreTestAdd({ onChangePage }) {
       return `${formatHours}:${formatMinutes}`;
   };
 
+
+
+  const pretest = steps.findIndex((step) => step === "Pre-Test");
   
   const [activeStep, setActiveStep] = useState(1);
 
@@ -819,8 +907,27 @@ export default function MasterPreTestAdd({ onChangePage }) {
     onChangePage(content);
   };
 
-
   if (isLoading) return <Loading />;
+  const initialSteps = ["Pengenalan", "Materi", "Forum"];
+  const additionalSteps = ["Sharing Expert", "Pre-Test", "Post-Test"];
+
+  const handleStepChanges = (index) => {
+    console.log("Step aktif:", index);
+    return index;
+  };
+
+  const handleStepAdded = (stepName) => {
+    console.log("Step ditambahkan:", stepName);
+  };
+
+  const handleStepRemoved = (stepName) => {
+    console.log("Step dihapus:", stepName);
+  };
+
+  const handleStepChange = (stepContent) => {
+    onChangePage(stepContent);
+    };
+  
 
   return (
     <>
@@ -860,20 +967,22 @@ export default function MasterPreTestAdd({ onChangePage }) {
       <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
             <div className="back-and-title" style={{display:"flex"}}>
               <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
-                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Materi Baru</h4>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Pre-Test</h4>
               </div>
                 <div className="ket-draft">
                 <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
                 </div>
               </div>
       <form id="myForm" onSubmit={handleAdd}>
-        <div>
+        <div style={{margin:"20px 100px"}}>
         <CustomStepper
-      activeStep={1}
-      steps={steps}
-      onChangePage={handlePageChange}
-      getStepContent={getStepContent}
-    />
+        initialSteps={initialSteps}
+        additionalSteps={additionalSteps}
+        onChangeStep={pretest}
+        onStepAdded={handleStepAdded}
+        onStepRemoved={handleStepRemoved}
+        onChangePage={handleStepChange}
+      />
         </div>
         <div className="card mt-4"  style={{margin:"100px"}}>
           <div className="card-body p-4">
@@ -1250,11 +1359,11 @@ export default function MasterPreTestAdd({ onChangePage }) {
           </div>
           <div className="d-flex justify-content-between my-4 mx-1 mt-0">
           <div className="ml-4">
-          <Button
+          {/* <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Kembali"
             onClick={() => onChangePage("sharingAdd")}
-          />
+          /> */}
           </div>
           <div className="d-flex mr-4" >
             <div className="mr-2">
@@ -1265,11 +1374,11 @@ export default function MasterPreTestAdd({ onChangePage }) {
             disabled={isButtonDisabled}
           />
           </div>
-          <Button
+          {/* <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
             onClick={() => onChangePage("posttestAdd")}
-          />
+          /> */}
           </div>
         </div>
         </div>

@@ -15,7 +15,7 @@ import MasterPreTestDetail from "./master-pretest/PreTestDetail";
 import MasterMateriAdd from "./master-materi/MateriAdd";
 import MasterMateriEdit from "./master-materi/MateriEdit";
 // import MasterMateriDetail from "./master-materi/MateriDetail";
-// import MasterMateriReviewJawaban from "./master-materi/MateriReviewJawaban";
+import MasterMateriReviewJawaban from "./master-materi/MateriReviewJawaban";
 // // Sharing Expert
 import MasterSharingAdd from "./master-sharing/SharingAdd";
 // import MasterSharingDetailNot from "./master-sharing/SharingDetailNot";
@@ -56,11 +56,11 @@ export default function MasterProses() {
         return <MasterProsesIndex 
                 onChangePage={handleSetPageMode} 
                 withID={dataID}/>;
-      // case "reviewjawaban":
-      //   return <MasterMateriReviewJawaban
-      //           onChangePage={handleSetPageMode} 
-      //           withID={dataID}/>;
-      case "pretestAdd":
+      case "reviewjawaban":
+        return <MasterMateriReviewJawaban
+                onChangePage={handleSetPageMode} 
+                withID={dataID}/>;
+      case "Pre-Test":
         return <MasterPreTestAdd 
                 onChangePage={handleSetPageMode} 
                 withID={dataID}/>;
@@ -96,7 +96,7 @@ export default function MasterProses() {
       //   return <MasterMateriDetail 
       //           onChangePage={handleSetPageMode}             
       //           withID={dataID}/>;
-      case "sharingAdd":
+      case "Sharing Expert":
         return <MasterSharingAdd 
                 onChangePage={handleSetPageMode}
                 withID={dataID}
@@ -139,7 +139,7 @@ export default function MasterProses() {
       //   return <MasterForumDetail 
       //           onChangePage={handleSetPageMode} 
       //           withID={dataID}/>;
-      case "posttestAdd":
+      case "Post-Test":
         return <MasterPostTestAdd 
                 onChangePage={handleSetPageMode} 
                 withID={dataID}/>;

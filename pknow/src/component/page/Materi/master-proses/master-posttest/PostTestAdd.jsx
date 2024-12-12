@@ -17,69 +17,21 @@ import { Stepper, Step, StepLabel,Box } from '@mui/material';
 import Konfirmasi from "../../../../part/Konfirmasi";
 import BackPage from "../../../../../assets/backPage.png";
 import UploadFile from "../../../../util/UploadFile";
-
-const steps = ['Sharing Expert', 'Pretest', 'Post Test'];
-
-function getStepContent(stepIndex) {
-  switch (stepIndex) {
-    // case 0:
-    //   return 'materiAdd';
-    case 0:
-      return 'sharingAdd';
-    case 1:
-      return 'pretestAdd';
-    case 2:
-      return 'posttestAdd';
-    default:
-      return 'Unknown stepIndex';
-  }
-}
-
-function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
-  return (
-    <Box sx={{ width: "100%", mt: 2 }}>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label, index) => (
-          <Step
-            key={label}
-            onClick={() => onChangePage(getStepContent(index))} // Tambahkan onClick di sini
-            sx={{
-              cursor: "pointer", // Menambahkan pointer untuk memberikan indikasi klik
-              "& .MuiStepIcon-root": {
-                fontSize: "2rem",
-                color: index <= activeStep ? "primary.main" : "grey.300",
-                "&.Mui-active": {
-                  color: "primary.main",
-                },
-                "& .MuiStepIcon-text": {
-                  fill: "#fff",
-                  fontSize: "1rem",
-                },
-              },
-            }}
-          >
-            <StepLabel
-              sx={{
-                "& .MuiStepLabel-label": {
-                  typography: "body1",
-                  color: index <= activeStep ? "primary.main" : "grey.500",
-                },
-              }}
-            >
-              {label}
-            </StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-    </Box>
-  );
-}
-
+import CustomStepper from "../../../../part/Stepp";
+import SweetAlert from "../../../../util/SweetAlert";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../../util/Encryptor";
 
 export default function MasterPostTestAdd({ onChangePage }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
+  AppContext_test.activeUser = activeUser;
   const [formContent, setFormContent] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [errors, setErrors] = useState({});
+  const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
@@ -89,6 +41,13 @@ export default function MasterPostTestAdd({ onChangePage }) {
   const gambarInputRef = useRef(null);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [resetStepper, setResetStepper] = useState(0);
+
+  const [dataSection, setDataSection] = useState({
+    materiId: AppContext_master.dataIDMateri,
+    secJudul: "Section Materi " + AppContext_master.dataIDMateri,
+    createdby: AppContext_test.activeUser,
+    secType:""
+  });
 
   const handleChange = (name, value) => {
     setFormData((prevFormData) => ({
@@ -150,7 +109,8 @@ export default function MasterPostTestAdd({ onChangePage }) {
     tanggalAkhir: '',
     timer: '',
     status: 'Aktif',
-    createdby: AppContext_test.displayName,
+    createdby: activeUser,
+    type:'Pre-Test',
   });
 
   const [formQuestion, setFormQuestion] = useState({
@@ -160,9 +120,8 @@ export default function MasterPostTestAdd({ onChangePage }) {
     gambar: null,
     //questionDeskripsi: '',
     status: 'Aktif',
-    quecreatedby: AppContext_test.displayName,
+    quecreatedby: activeUser,
   });
-
   formData.timer = timer;
 
   const [formChoice, setFormChoice] = useState({
@@ -170,7 +129,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
     isiChoice: '',
     questionId: '',
     nilaiChoice: '',
-    quecreatedby: AppContext_test.displayName,
+    quecreatedby: activeUser,
   });
 
   const userSchema = object({
@@ -184,6 +143,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
     timer: string().required('Durasi harus diisi'),
     status: string(),
     createdby: string(),
+    type: string(),
   });
 
   const initialFormQuestion = {
@@ -193,7 +153,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
     gambar: null,
     questionDeskripsi: '',
     status: 'Aktif',
-    quecreatedby: AppContext_test.displayName,
+    quecreatedby: activeUser,
   };
 
   const handleQuestionTypeChange = (e, index) => {
@@ -209,6 +169,11 @@ export default function MasterPostTestAdd({ onChangePage }) {
       setFormContent(updatedFormContent);
     }
   };
+
+  const storedSteps = sessionStorage.getItem("steps");
+  const steps = storedSteps ? JSON.parse(storedSteps) : initialSteps;
+  const posttest = steps.findIndex((step) => step === "Post-Test");
+
 const isStartDateBeforeEndDate = (startDate, endDate) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -342,7 +307,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
           tipeQuestion: question.type,
           gambar: question.gambar,
           status: 'Aktif',
-          quecreatedby: AppContext_test.displayName,
+          quecreatedby: activeUser,
         };
 
         const uploadPromises = [];
@@ -399,7 +364,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
               answerText: question.correctAnswer ? question.correctAnswer : "0", 
               questionId: questionId,
               nilaiChoice: question.point,
-              quecreatedby: AppContext_test.displayName,
+              quecreatedby: activeUser,
             };
   
             try {
@@ -420,7 +385,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                 answerText: option.label,
                 questionId: questionId,
                 nilaiChoice: option.point || 0,
-                quecreatedby: AppContext_test.displayName,
+                quecreatedby: activeUser,
               };
   
               try {
@@ -463,9 +428,130 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
           setSelectedFile(null);
           setTimer('');
           setIsButtonDisabled(true);
-          onChangePage("kk");
+          // onChangePage("kk");
           
-          setResetStepper((prev) => !prev);
+          // setResetStepper((prev) => !prev);
+          if (steps.length == 4) {
+            window.location.reload();
+          } else {
+            if (posttest == 3 && steps.length > 4) {
+                try {
+                  axios
+                    .post(API_LINK + "Section/CreateSection", dataSection)
+                    .then((response) => {
+                      const data = response.data;
+                      console.log("data section", dataSection);
+                      if (data[0].hasil === "OK") {
+                        AppContext_master.dataIdSection = data[0].newID;
+                        console.log(
+                          "id section",
+                          AppContext_master.dataIdSection
+                        );
+                        SweetAlert(
+                          "Sukses",
+                          "Data Section berhasil ditambahkan",
+                          "success"
+                        );
+                        // setIsFormDisabled(true);
+                        AppContext_master.formSavedMateri = true;
+                        SweetAlert(
+                          "Sukses",
+                          "Data section berhasil disimpan",
+                          "success"
+                        );
+                        onChangePage(
+                          steps[4],
+                          (AppContext_master.MateriForm = formData),
+                          (AppContext_master.count += 1),
+                          AppContext_master.dataIdSection
+                        );
+                      } else {
+                        setIsError((prevError) => ({
+                          ...prevError,
+                          error: true,
+                          message:
+                            "Terjadi kesalahan: Gagal menyimpan data Materi.",
+                        }));
+                      }
+                    })
+                    .catch((error) => {
+                      console.error("Terjadi kesalahan:", error);
+                      setIsError((prevError) => ({
+                        ...prevError,
+                        error: true,
+                        message: "Terjadi kesalahan: " + error.message,
+                      }));
+                    })
+                    .finally(() => setIsLoading(false));
+                } catch (error) {
+                  setIsError({
+                    error: true,
+                    message: "Failed to save forum data: " + error.message,
+                  });
+                  setIsLoading(false);
+                }
+            } else if (posttest == 4 && steps.length > 5) {
+              try {
+                axios
+                  .post(API_LINK + "Section/CreateSection", dataSection)
+                  .then((response) => {
+                    const data = response.data;
+                    console.log("data section", dataSection);
+                    if (data[0].hasil === "OK") {
+                      AppContext_master.dataIdSection = data[0].newID;
+                      console.log(
+                        "id section",
+                        AppContext_master.dataIdSection
+                      );
+                      SweetAlert(
+                        "Sukses",
+                        "Data Section berhasil ditambahkan",
+                        "success"
+                      );
+                      // setIsFormDisabled(true);
+                      AppContext_master.formSavedMateri = true;
+                      SweetAlert(
+                        "Sukses",
+                        "Data section berhasil disimpan",
+                        "success"
+                      );
+                      onChangePage(
+                        steps[5],
+                        (AppContext_master.MateriForm = formData),
+                        (AppContext_master.count += 1),
+                        AppContext_master.dataIdSection
+                      );
+                    } else {
+                      setIsError((prevError) => ({
+                        ...prevError,
+                        error: true,
+                        message:
+                          "Terjadi kesalahan: Gagal menyimpan data Materi.",
+                      }));
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Terjadi kesalahan:", error);
+                    setIsError((prevError) => ({
+                      ...prevError,
+                      error: true,
+                      message: "Terjadi kesalahan: " + error.message,
+                    }));
+                  })
+                  .finally(() => setIsLoading(false));
+              } catch (error) {
+                setIsError({
+                  error: true,
+                  message: "Failed to save forum data: " + error.message,
+                });
+                setIsLoading(false);
+              }
+            } else if (posttest == 5) {
+              window.location.reload();
+            } else {
+              window.location.reload();
+            }
+          }
         }
       });
   
@@ -770,6 +856,26 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
     onChangePage(content);
   };
 
+  const initialSteps = ["Pengenalan", "Materi", "Forum"];
+  const additionalSteps = ["Sharing Expert", "Pre-Test", "Post-Test"];
+
+  const handleStepChanges = (index) => {
+    console.log("Step aktif:", index);
+  };
+
+  const handleStepAdded = (stepName) => {
+    console.log("Step ditambahkan:", stepName);
+  };
+
+  const handleStepRemoved = (stepName) => {
+    console.log("Step dihapus:", stepName);
+  };
+
+  const handleStepChange = (stepContent) => {
+    onChangePage(stepContent);
+    };
+  
+
 
   if (isLoading) return <Loading />;
 
@@ -811,7 +917,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
       <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
             <div className="back-and-title" style={{display:"flex"}}>
               <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
-                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Materi Baru</h4>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Post Test</h4>
               </div>
                 <div className="ket-draft">
                 <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
@@ -819,13 +925,15 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
               </div>
       <form id="myForm" onSubmit={handleAdd}>
         <div>
-        <div>
+        <div style={{margin:"20px 100px"}}>
         <CustomStepper
-      activeStep={2}
-      steps={steps}
-      onChangePage={handlePageChange}
-      getStepContent={getStepContent}
-    />
+        initialSteps={initialSteps}
+        additionalSteps={additionalSteps}
+        onChangeStep={posttest}
+        onStepAdded={handleStepAdded}
+        onStepRemoved={handleStepRemoved}
+        onChangePage={handleStepChange}
+      />
         </div>
         </div>
         <div className="card mt-4 " style={{margin:"100px"}}>
@@ -1121,14 +1229,14 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                       {(question.type === "Essay" || question.type === "Praktikum") && (
                         
                         <div className="d-flex flex-column w-100">
-                           <FileUpload
-                        forInput="gambarMateri"
-                        label="Gambar Soal Essay (.jpg, .png)"
-                        formatFile=".jpg,.png"
-                        ref={fileGambarRef}
-                        onChange={() => handleFileChangeGambar(fileGambarRef, "jpg, png")}
-                        hasExisting={question.gambar}
-                      />
+                          <FileUpload
+                            forInput="gambarMateri"
+                            label="Gambar Soal Essay (.jpg, .png)"
+                            formatFile=".jpg, .png"  // Format file yang diperbolehkan
+                            ref={fileGambarRef}
+                            onChange={() => handleFileChangeGambar(fileGambarRef, "jpg, png")}
+                            hasExisting={question.gambar}
+                          />
                           {/* Tampilkan preview gambar jika ada gambar yang dipilih */}
                           {question.selectedFile && (
                             <div style={{

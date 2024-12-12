@@ -21,9 +21,8 @@ import BackPage from "../../../../../assets/backPage.png";
 import Konfirmasi from "../../../../part/Konfirmasi";
 import NoImage from "../../../../../assets/NoImage.png";
 import DOMPurify from "dompurify";
-
-// Define the steps
-const steps = ["Pengenalan", "Materi", "Forum"];
+import CustomStepper from "../../../../part/Stepp";
+const steps2 = ["Pengenalan", "Materi", "Forum", "Tambah Section"];
 
 function getStepContent(stepIndex) {
   switch (stepIndex) {
@@ -33,50 +32,53 @@ function getStepContent(stepIndex) {
       return 'materiAdd';
     case 2:
       return 'forumAdd';
+      case 3:
+        return 'addSection';
     default:
       return 'Unknown stepIndex';
   }
 }
 
-function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
-  return (
-    <Box sx={{ width: "100%", mt: 2 }}>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label, index) => (
-          <Step
-            key={label}
-            onClick={() => onChangePage(getStepContent(index))} // Tambahkan onClick di sini
-            sx={{
-              cursor: "pointer", // Menambahkan pointer untuk memberikan indikasi klik
-              "& .MuiStepIcon-root": {
-                fontSize: "2rem",
-                color: index <= activeStep ? "primary.main" : "grey.300",
-                "&.Mui-active": {
-                  color: "primary.main",
-                },
-                "& .MuiStepIcon-text": {
-                  fill: "#fff",
-                  fontSize: "1rem",
-                },
-              },
-            }}
-          >
-            <StepLabel
-              sx={{
-                "& .MuiStepLabel-label": {
-                  typography: "body1",
-                  color: index <= activeStep ? "primary.main" : "grey.500",
-                },
-              }}
-            >
-              {label}
-            </StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-    </Box>
-  );
-}
+// function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
+//   return (
+//     <Box sx={{ width: "100%", mt: 2 }}>
+//       <Stepper activeStep={activeStep} alternativeLabel>
+//         {steps.map((label, index) => (
+//           <Step
+//           key={label}
+//           onClick={() => onChangePage(getStepContent(index))}
+//           sx={{
+//             cursor: "pointer", // Indikasi klik
+//             "& .MuiStepIcon-root": {
+//               fontSize: "2rem",
+//               color: index <= activeStep ? "primary.main" : "grey.300",
+//               "&.Mui-active": {
+//                 color: "primary.main",
+//               },
+//               "& .MuiStepIcon-text": {
+//                 fill: "#fff",
+//                 fontSize: "1rem",
+//               },
+//             },
+//           }}
+//         >
+//             <StepLabel
+//               sx={{
+//                 "& .MuiStepLabel-label": {
+//                   typography: "body1",
+//                   color: index <= activeStep ? "primary.main" : "grey.500",
+//                 },
+//               }}
+//             >
+//               {label}
+//             </StepLabel>
+//           </Step>
+//         ))}
+//       </Stepper>
+//     </Box>
+//   );
+// }
+
 
 
 export default function Pengenalan({ onChangePage }) {
@@ -263,12 +265,12 @@ export default function Pengenalan({ onChangePage }) {
             console.log("new materi",formDataRef.current);
             AppContext_master.dataIDMateri = data[0].newID;
             console.log("id materi", AppContext_master.dataIDMateri);
-            SweetAlert("Sukses", "Data Materi berhasil disimpan", "success");
+            SweetAlert("Sukses", "Pengenalan Materi berhasil disimpan", "success");
             setIsFormDisabled(true);
             AppContext_master.formSavedMateri = true;
             SweetAlert(
               "Sukses",
-              "Data materi berhasil disimpan",
+              "Pengenalan Materi berhasil disimpan",
               "success"
             );
             onChangePage("materiAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1);
@@ -367,26 +369,47 @@ export default function Pengenalan({ onChangePage }) {
   // Render form
   const dataSaved = AppContext_master.formSavedMateri; 
 
+  // const [activeStep, setActiveStep] = useState(0);
+
+  // const handleNext = () => {
+  //   setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  // };
+
+  // const handleBack = () => {
+  //   setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  // };
+
+  // const handleReset = () => {
+  //   setActiveStep(0);
+  // };
+
+  // const handlePageChange = (content) => {
+  //   onChangePage(content);
+  // };
+
   const [activeStep, setActiveStep] = useState(0);
+  const [steps, setSteps] = useState(steps2);
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
-  const handlePageChange = (content) => {
-    onChangePage(content);
-  };
-
+  const handleStepChange = (stepContent) => {
+    onChangePage(stepContent);
+    };
+  
 
   // if (isLoading) return <Loading />;
+  const initialSteps = ["Pengenalan", "Materi", "Forum"];
+  const additionalSteps = ["Sharing Expert", "Pre-Test", "Post-Test"];
+
+  const handleStepChanges = (index) => {
+    console.log("Step aktif:", index);
+  };
+
+  const handleStepAdded = (stepName) => {
+    console.log("Step ditambahkan:", stepName);
+  };
+
+  const handleStepRemoved = (stepName) => {
+    console.log("Step dihapus:", stepName);
+  };
 
 
   return (
@@ -414,12 +437,20 @@ export default function Pengenalan({ onChangePage }) {
               </div>
       <form onSubmit={handleAdd} style={{margin:"20px 100px"}}>
         <div className="mb-4">
-         <CustomStepper
+         {/* <CustomStepper
       activeStep={0}
       steps={steps}
-      onChangePage={handlePageChange}
+      onChangePage={handleStepChange}
       getStepContent={getStepContent}
-    />
+    /> */}
+          <CustomStepper
+            initialSteps={initialSteps}
+            additionalSteps={additionalSteps}
+            onChangeStep={handleStepChanges}
+            onStepAdded={handleStepAdded}
+            onStepRemoved={handleStepRemoved}
+            onChangePage={handleStepChange}
+          />
         </div>
 
         <div className="card mb-4">
@@ -577,17 +608,17 @@ export default function Pengenalan({ onChangePage }) {
           <Button
             classType="primary ms-2 px-4 py-2"
             type="submit"
-            label="Simpan"
+            label="Berikutnya"
             isDisabled={isFormDisabled || dataSaved}
             style={{marginRight:"10px"}}
             // onClick={() => onChangePage("materiAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
           />
-          <Button
+          {/* <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
             onClick={() => onChangePage("materiAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
             // isDisabled={!isFormSubmitted}
-          />
+          /> */}
           </div>
         </div>
         </div>

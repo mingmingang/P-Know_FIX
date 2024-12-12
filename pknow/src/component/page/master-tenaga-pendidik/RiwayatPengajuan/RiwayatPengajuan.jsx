@@ -149,6 +149,7 @@ export default function RiwayatPengajuan({onChangePage}) {
           API_LINK + "PengajuanKK/GetRiwayat",
           currentFilter
         );
+        console.log("current filter", currentFilter)
         console.log("data riwayat", data)
 
         if (data === "ERROR") {
@@ -227,17 +228,6 @@ export default function RiwayatPengajuan({onChangePage}) {
             <div className="status">
               <table>
                 <tbody>
-                  <tr>
-                    <td>
-                      <i
-                        className="fas fa-circle"
-                        style={{ color: "#4a90e2" }}
-                      ></i>
-                    </td>
-                    <td>
-                      <p>Aktif/Sudah Publikasi</p>
-                    </td>
-                  </tr>
                   <tr>
                     <td>
                       <i

@@ -7,7 +7,7 @@ import "../../style/PDF_Viewer.css";
 import Loading from "./Loading";
 import { API_LINK } from "../util/Constants";
 
-export default function PDF_Viewer({ pdfFileName }) {
+export default function PDF_Viewer({ pdfFileName, width = "1080px", height="1050px"}) {
   const [isLoading, setIsLoading] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
@@ -30,7 +30,7 @@ export default function PDF_Viewer({ pdfFileName }) {
       <div className="mt-3">
         {pdfUrl && (
           <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
-            <div style={{ height: '1050px', borderRadius:'20px' }}>
+            <div style={{ height: height, borderRadius:'20px', width:width }}>
               <Viewer fileUrl={pdfUrl} plugins={[defaultLayoutPluginInstance]} />
             </div>
           </Worker>

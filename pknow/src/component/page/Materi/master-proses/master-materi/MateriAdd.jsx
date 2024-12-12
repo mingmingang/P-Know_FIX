@@ -19,63 +19,64 @@ import { Editor } from "@tinymce/tinymce-react";
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import BackPage from "../../../../../assets/backPage.png";
 import Konfirmasi from "../../../../part/Konfirmasi";
+import CustomStepper from "../../../../part/Stepp";
 
-const steps = ["Pengenalan", "Materi", "Forum"];
+// const steps = ["Pengenalan", "Materi", "Forum"];
 
-function getStepContent(stepIndex) {
-  switch (stepIndex) {
-    case 0:
-      return 'pengenalanAdd';
-    case 1:
-      return 'materiAdd';
-    case 2:
-      return 'forumAdd';
-    default:
-      return 'Unknown stepIndex';
-  }
-}
+// function getStepContent(stepIndex) {
+//   switch (stepIndex) {
+//     case 0:
+//       return 'pengenalanAdd';
+//     case 1:
+//       return 'materiAdd';
+//     case 2:
+//       return 'forumAdd';
+//     default:
+//       return 'Unknown stepIndex';
+//   }
+// }
 
-function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
-  return (
-    <Box sx={{ width: "100%", mt: 2 }}>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label, index) => (
-          <Step
-            key={label}
-            onClick={() => onChangePage(getStepContent(index))} 
-            sx={{
-              cursor: "pointer", 
-              "& .MuiStepIcon-root": {
-                fontSize: "2rem",
-                color: index <= activeStep ? "primary.main" : "grey.300",
-                "&.Mui-active": {
-                  color: "primary.main",
-                },
-                "& .MuiStepIcon-text": {
-                  fill: "#fff",
-                  fontSize: "1rem",
-                },
-              },
-            }}
-          >
-            <StepLabel
-              sx={{
-                "& .MuiStepLabel-label": {
-                  typography: "body1",
-                  color: index <= activeStep ? "primary.main" : "grey.500",
-                },
-              }}
-            >
-              {label}
-            </StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-    </Box>
-  );
-}
+// function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
+//   return (
+//     <Box sx={{ width: "100%", mt: 2 }}>
+//       <Stepper activeStep={activeStep} alternativeLabel>
+//         {steps.map((label, index) => (
+//           <Step
+//             key={label}
+//             onClick={() => onChangePage(getStepContent(index))} 
+//             sx={{
+//               cursor: "pointer", 
+//               "& .MuiStepIcon-root": {
+//                 fontSize: "2rem",
+//                 color: index <= activeStep ? "primary.main" : "grey.300",
+//                 "&.Mui-active": {
+//                   color: "primary.main",
+//                 },
+//                 "& .MuiStepIcon-text": {
+//                   fill: "#fff",
+//                   fontSize: "1rem",
+//                 },
+//               },
+//             }}
+//           >
+//             <StepLabel
+//               sx={{
+//                 "& .MuiStepLabel-label": {
+//                   typography: "body1",
+//                   color: index <= activeStep ? "primary.main" : "grey.500",
+//                 },
+//               }}
+//             >
+//               {label}
+//             </StepLabel>
+//           </Step>
+//         ))}
+//       </Stepper>
+//     </Box>
+//   );
+// }
 
-export default function MastermateriAdd({ onChangePage}) {
+export default function MastermateriAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -253,7 +254,7 @@ export default function MastermateriAdd({ onChangePage}) {
           .then(response => {
             const data = response.data;
             if (data[0].hasil === "OK") {
-              SweetAlert("Sukses", "Data Materi berhasil disimpan", "success");
+              SweetAlert("Sukses", "File Materi berhasil disimpan", "success");
               setIsFileDisabled(true);
               AppContext_master.formSavedMateriFile = true;
               onChangePage("forumAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1);
@@ -356,10 +357,26 @@ export default function MastermateriAdd({ onChangePage}) {
     setActiveStep(0);
   };
 
-  const handlePageChange = (content) => {
-    onChangePage(content);
+
+  const initialSteps = ["Pengenalan", "Materi", "Forum"];
+  const additionalSteps = ["Sharing Expert", "Pre-Test", "Post-Test"];
+
+  const handleStepChanges = (index) => {
+    console.log("Step aktif:", index);
   };
 
+  const handleStepAdded = (stepName) => {
+    console.log("Step ditambahkan:", stepName);
+  };
+
+  const handleStepRemoved = (stepName) => {
+    console.log("Step dihapus:", stepName);
+  };
+
+  const handleStepChange = (stepContent) => {
+    onChangePage(stepContent);
+    };
+  
 
   // if (isLoading) return <Loading />;
 
@@ -389,12 +406,21 @@ export default function MastermateriAdd({ onChangePage}) {
               </div>
       <form onSubmit={handleAdd} style={{margin:"20px 100px"}}>
       <div className="mb-4">
-        <CustomStepper
+        {/* <CustomStepper
       activeStep={1}
       steps={steps}
       onChangePage={handlePageChange}
       getStepContent={getStepContent}
-    />
+    /> */}
+      <CustomStepper
+        initialSteps={initialSteps}
+        additionalSteps={additionalSteps}
+        onChangeStep={1}
+        onStepAdded={handleStepAdded}
+        onStepRemoved={handleStepRemoved}
+        onChangePage={handleStepChange}
+      />
+
         </div>
 
         <div className="card mb-4">
@@ -479,26 +505,26 @@ export default function MastermateriAdd({ onChangePage}) {
             // isDisabled={!isFormSubmitted}
           /> */}
             <div className="ml-4">
-          <Button
+          {/* <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Sebelumnya"
             onClick={() => onChangePage("pengenalanAdd")}
-          />
+          /> */}
           </div>
           <div className="d-flex mr-4" >
           <Button
             classType="primary ms-2 px-4 py-2"
             type="submit"
-            label="Simpan"
+            label="Berikutnya"
             isDisabled={isFileDisabled || dataSimpan}
             style={{marginRight:"10px"}}
           />
-          <Button
+          {/* <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
             onClick={() => onChangePage("forumAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
             // isDisabled={!isFormSubmitted}
-          />
+          /> */}
           </div>
         </div>
         </div>

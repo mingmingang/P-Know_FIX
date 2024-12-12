@@ -155,7 +155,7 @@ function CardPengajuanBaru({ data, onChangePage, isShow }) {
               >
                 {data.Deskripsi}
               </p>
-              <div className="d-flex justify-content-between align-items-center" style={{marginTop:"30px"}}>
+              <div className="d-flex justify-content-between align-items-center" style={{marginTop:"30px", marginBottom:"20px"}}>
                 <a
                   href="#"
                   className="text-decoration-none"
