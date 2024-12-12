@@ -260,7 +260,9 @@ export default function Pengenalan({ onChangePage }) {
         await Promise.all(uploadPromises);
         axios.post(API_LINK + "Materi/SaveDataMateri", formDataRef.current)
         .then(response => {
+          console.log(formDataRef.current)
           const data = response.data;
+          console.log(data)
           if (data[0].hasil === "OK") {
             console.log("new materi",formDataRef.current);
             AppContext_master.dataIDMateri = data[0].newID;
@@ -292,7 +294,6 @@ export default function Pengenalan({ onChangePage }) {
         })
         .finally(() => setIsLoading(false));
 
-        console.log("isian form",formDataRef.current);
       } catch (error) {
         window.scrollTo(0, 0);
         setIsError((prevError) => ({
@@ -493,15 +494,15 @@ export default function Pengenalan({ onChangePage }) {
                       )}
                     </div>
                     <div className="file-upload">
-                      <FileUpload
-                        forInput="gambarMateri"
-                        label="Gambar Materi (.png)"
-                        formatFile=".png"
-                        ref={fileGambarRef}
-                        onChange={() => handleFileChange(fileGambarRef, "png")}
-                        errorMessage={errors.gambar}
-                        isRequired={true}
-                      />
+                    <FileUpload
+                      forInput="gambarMateri"
+                      label="Gambar Materi (.jpg, .png)"
+                      formatFile=".jpg,.png"
+                      ref={fileGambarRef}
+                      onChange={() => handleFileChange(fileGambarRef, "png,jpg")}
+                      errorMessage={errors.gambar}
+                      isRequired={true}
+                    />
                     </div>
                   </div>
           <div className="card-body pl-4 pr-4">

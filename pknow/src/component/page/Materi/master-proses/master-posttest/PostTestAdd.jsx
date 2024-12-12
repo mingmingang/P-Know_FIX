@@ -8,7 +8,6 @@ import axios from 'axios';
 import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
 import { API_LINK } from "../../../../util/Constants";
 import FileUpload from "../../../../part/FileUpload";
-import uploadFile from "../../../../util/UploadImageQuiz";
 import Swal from 'sweetalert2';
 import { Editor } from '@tinymce/tinymce-react';
 import AppContext_master from "../MasterContext";
@@ -21,13 +20,14 @@ import CustomStepper from "../../../../part/Stepp";
 import SweetAlert from "../../../../util/SweetAlert";
 import Cookies from "js-cookie";
 import { decryptId } from "../../../../util/Encryptor";
+import NoImage from "../../../../../assets/NoImage.png";
+
 
 export default function MasterPostTestAdd({ onChangePage }) {
   let activeUser = "";
   const cookie = Cookies.get("activeUser");
   if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
 
-  AppContext_test.activeUser = activeUser;
   const [formContent, setFormContent] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [errors, setErrors] = useState({});
@@ -41,11 +41,12 @@ export default function MasterPostTestAdd({ onChangePage }) {
   const gambarInputRef = useRef(null);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [resetStepper, setResetStepper] = useState(0);
+  const [filePreview, setFilePreview] = useState(false);
 
   const [dataSection, setDataSection] = useState({
     materiId: AppContext_master.dataIDMateri,
     secJudul: "Section Materi " + AppContext_master.dataIDMateri,
-    createdby: AppContext_test.activeUser,
+    createdby: activeUser,
     secType:""
   });
 
@@ -110,7 +111,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
     timer: '',
     status: 'Aktif',
     createdby: activeUser,
-    type:'Pre-Test',
+    type:'Post-Test',
   });
 
   const [formQuestion, setFormQuestion] = useState({
@@ -201,7 +202,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
       if (file && file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          //setFilePreview(reader.result); // Set the preview
+          setFilePreview(reader.result); // Set the preview
         };
         reader.readAsDataURL(file);
       }
@@ -1229,12 +1230,49 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                       {(question.type === "Essay" || question.type === "Praktikum") && (
                         
                         <div className="d-flex flex-column w-100">
+                          <div className="preview-img">
+                      {filePreview ? (
+                        <div
+                          style={{
+                            marginTop: "10px",
+                            marginRight: "30px"
+                          }}
+                        >
+                          <img
+                            src={filePreview}
+                            alt="Preview"
+                            style={{
+                              width: "200px",
+                              height: "auto",
+                              borderRadius: "20px",
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            marginTop: "10px",
+                            marginRight: "30px"
+                          }}
+                        >
+                          <img
+                            src={NoImage} 
+                            alt="No Preview Available"
+                            style={{
+                              width: "200px",
+                              height: "auto",
+                              borderRadius: "20px",
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
                           <FileUpload
                             forInput="gambarMateri"
                             label="Gambar Soal Essay (.jpg, .png)"
-                            formatFile=".jpg, .png"  // Format file yang diperbolehkan
+                            formatFile=".jpg,.png"
                             ref={fileGambarRef}
-                            onChange={() => handleFileChangeGambar(fileGambarRef, "jpg, png")}
+                            onChange={() => handleFileChangeGambar(fileGambarRef, "jpg,png")}
                             hasExisting={question.gambar}
                           />
                           {/* Tampilkan preview gambar jika ada gambar yang dipilih */}

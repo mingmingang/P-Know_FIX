@@ -21,6 +21,7 @@ import UploadFile from "../../../../util/UploadFile";
 import Cookies from "js-cookie";
 import { decryptId } from "../../../../util/Encryptor";
 import CustomStepper from "../../../../part/Stepp";
+import NoImage from "../../../../../assets/NoImage.png";
 
 export default function MasterPreTestAdd({ onChangePage }) {
   let activeUser = "";
@@ -39,8 +40,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const [resetStepper, setResetStepper] = useState(0);
   const [isBackAction, setIsBackAction] = useState(false); 
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [isSectionAction, setIsSectionAction] = useState(false); 
-  const [showConfirmationSection, setShowConfirmationSection] = useState(false);
+  const [filePreview, setFilePreview] = useState(false);
 
   const [dataSection, setDataSection] = useState({
     materiId: AppContext_master.dataIDMateri,
@@ -52,50 +52,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const storedSteps = sessionStorage.getItem("steps");
   const steps = storedSteps ? JSON.parse(storedSteps) : initialSteps;
 
-  const handleConfirmYesSection = () => {
-    setShowConfirmationSection(false); 
-    try {
-      axios.post(API_LINK + "Section/CreateSection", dataSection)
-      .then(response => {
-        const data = response.data;
-        console.log("data section", dataSection);
-        if (data[0].hasil === "OK") {
-          AppContext_master.dataIdSection = data[0].newID;
-          console.log("id section", AppContext_master.dataIdSection);
-          SweetAlert("Sukses", "Data Section berhasil ditambahkan", "success");
-          // setIsFormDisabled(true);
-          AppContext_master.formSavedMateri = true;
-          SweetAlert(
-            "Sukses",
-            "Data section berhasil disimpan",
-            "success"
-          );
-          onChangePage("posttestAdd", AppContext_master.MateriForm = formData, AppContext_master.count += 1, AppContext_master.dataIdSection);
-        } else {
-          setIsError(prevError => ({
-            ...prevError,
-            error: true,
-            message: "Terjadi kesalahan: Gagal menyimpan data Materi."
-          }));
-        }
-      })
-      .catch(error => {
-        console.error('Terjadi kesalahan:', error);
-        setIsError(prevError => ({
-          ...prevError,
-          error: true,
-          message: "Terjadi kesalahan: " + error.message
-        }));
-      })
-      .finally(() => setIsLoading(false));
-    } catch (error) {
-      setIsError({
-        error: true,
-        message: "Failed to save forum data: " + error.message,
-      });
-      setIsLoading(false);
-    }
-  };
 
   const [stepPage, setStepPage] = useState([]);
   const handleAllStepContents = (allSteps) => {
@@ -108,12 +64,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const handleStepCountChange = (count) => {
       setStepCount(count);
       console.log("step",count);
-  };
-
-
-  const handleConfirmNoSection = () => {
-    setShowConfirmationSection(false);  
-    window.location.reload();
   };
 
   const handleChange = (name, value) => {
@@ -191,7 +141,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
     gambar: null,
     // questionDeskripsi: '',
     status: 'Aktif',
-    quecreatedby: AppContext_test.displayName,
+    quecreatedby: activeUser,
   });
 
   formData.timer = timer;
@@ -201,7 +151,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
     isiChoice: '',
     questionId: '',
     nilaiChoice: '',
-    quecreatedby: AppContext_test.displayName,
+    quecreatedby: activeUser,
   });
 
    const userSchema = object({
@@ -225,7 +175,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
     gambar: null,
     questionDeskripsi: '',
     status: 'Aktif',
-    quecreatedby: AppContext_test.displayName,
+    quecreatedby: activeUser,
   };
 
   const handleQuestionTypeChange = (e, index) => {
@@ -271,7 +221,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
       if (file && file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          //setFilePreview(reader.result); // Set the preview
+          setFilePreview(reader.result); // Set the preview
         };
         reader.readAsDataURL(file);
       }
@@ -302,6 +252,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
         icon: 'error',
         confirmButtonText: 'OK'
       });
+      
       return;
     }
 
@@ -314,6 +265,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
       });
       return;
     }
+
     for (let question of formContent) {
       if (question.type === 'Pilgan' && question.options.length < 2) {
           Swal.fire({
@@ -378,7 +330,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
           tipeQuestion: question.type,
           gambar: question.gambar,
           status: 'Aktif',
-          quecreatedby: AppContext_test.displayName,
+          quecreatedby: activeUser,
         };
         const uploadPromises = [];
         if (question.type === 'Essay' || question.type === 'Praktikum') {
@@ -438,7 +390,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
               answerText: question.correctAnswer ? question.correctAnswer : "0", 
               questionId: questionId,
               nilaiChoice: question.point,
-              quecreatedby: AppContext_test.displayName,
+              quecreatedby: activeUser,
             };
 
             try {
@@ -460,7 +412,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
                 answerText: option.label,
                 questionId: questionId,
                 nilaiChoice: option.point || 0,
-                quecreatedby: AppContext_test.displayName,
+                quecreatedby: activeUser,
               };
   
               try {
@@ -637,10 +589,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
     }
   };
 
-  const handleSection = () => {
-    setIsSectionAction(true);  
-    setShowConfirmationSection(true);  
-  };
 
 
   const handleOptionLabelChange = (e, questionIndex, optionIndex) => {
@@ -884,8 +832,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
       setMinutes(formatMinutes);
       return `${formatHours}:${formatMinutes}`;
   };
-
-
 
   const pretest = steps.findIndex((step) => step === "Pre-Test");
   
@@ -1156,7 +1102,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
                             const updatedFormContent = [...formContent];
                             updatedFormContent[index].text = e.target.value;
                             setFormContent(updatedFormContent);
-                            // Update formQuestion with the new question text
                             updateFormQuestion('soal', e.target.value);
                           }}
                           isRequired={true}
@@ -1236,6 +1181,43 @@ export default function MasterPreTestAdd({ onChangePage }) {
                       {(question.type === "Essay" || question.type === "Praktikum") && (
                         
                         <div className="d-flex flex-column w-100">
+                          <div className="preview-img">
+                      {filePreview ? (
+                        <div
+                          style={{
+                            marginTop: "10px",
+                            marginRight: "30px"
+                          }}
+                        >
+                          <img
+                            src={filePreview}
+                            alt="Preview"
+                            style={{
+                              width: "200px",
+                              height: "auto",
+                              borderRadius: "20px",
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            marginTop: "10px",
+                            marginRight: "30px"
+                          }}
+                        >
+                          <img
+                            src={NoImage} 
+                            alt="No Preview Available"
+                            style={{
+                              width: "200px",
+                              height: "auto",
+                              borderRadius: "20px",
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
                           {/* <FileUpload
                             forInput={`fileInput_${index}`}
                             formatFile=".jpg,.png"
@@ -1244,14 +1226,14 @@ export default function MasterPreTestAdd({ onChangePage }) {
                             hasExisting={question.gambar}
                             style={{ fontSize: '12px' }}
                           /> */}
-                           <FileUpload
-                        forInput="gambarMateri"
-                        label="Gambar Soal Essay (.jpg, .png)"
-                        formatFile=".jpg,.png"
-                        ref={fileGambarRef}
-                        onChange={() => handleFileChangeGambar(fileGambarRef, "jpg, png")}
-                        hasExisting={question.gambar}
-                      />
+                          <FileUpload
+                            forInput="gambarMateri"
+                            label="Gambar Soal Essay (.jpg, .png)"
+                            formatFile=".jpg,.png"
+                            ref={fileGambarRef}
+                            onChange={() => handleFileChangeGambar(fileGambarRef, "jpg,png")}
+                            hasExisting={question.gambar}
+                          />
                           {/* Tampilkan preview gambar jika ada gambar yang dipilih */}
                           {question.selectedFile && (
                             <div style={{
@@ -1261,7 +1243,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
                               marginLeft: '10px'
                             }}>
                               <img
-                                src={URL.createObjectURL(question.selectedFile)}
+                                src={question.selectedFile}
                                 alt="Preview Gambar"
                                 style={{
                                   width: '100%', // Ensure image occupies full width of container
@@ -1389,14 +1371,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
           pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
           onYes={handleConfirmYes}
           onNo={handleConfirmNo}
-        />
-        )}
-         {showConfirmationSection && (
-        <Konfirmasi
-          title={isSectionAction ? "Tambah Section" : "Tambah Section"}
-          pesan={isSectionAction ? "Apakah anda ingin menambah PostTest?" : "Anda yakin ingin simpan data?"}
-          onYes={handleConfirmYesSection}
-          onNo={handleConfirmNoSection}
         />
         )}
     </>

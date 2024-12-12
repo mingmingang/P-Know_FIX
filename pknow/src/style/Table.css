@@ -1,7 +1,6 @@
 /* Styling for the table */
 .table-container {
-    width: 80%;
-    margin: 20px auto;
+    width: 98%;
     overflow-x: auto; /* Enables horizontal scroll for large tables */
 }
 
@@ -13,7 +12,7 @@
 
 .dynamic-table th, .dynamic-table td {
     padding: 12px;
-    border: 1px solid #ddd;
+    border: 1px solid white;
     text-align: center;
 }
 
@@ -23,7 +22,7 @@
 }
 
 .dynamic-table tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: #ddd;
 }
 
 .dynamic-table tbody tr:hover {
@@ -40,7 +39,7 @@
 .pagination button {
     padding: 8px 12px;
     margin: 0 3px;
-    border: 1px solid #ddd;
+    border: 1px solid white;
     background-color: #f2f2f2;
     cursor: pointer;
     border-radius: 5px;
@@ -108,3 +107,28 @@
     color: white;
 }
 
+.dynamic-table {
+    width: 100%;
+    border-collapse: separate; /* Pisahkan border agar border-radius bisa diterapkan */
+    border-spacing: 0; /* Hilangkan jarak antar border */
+    border: 1px solid white; /* Garis luar tabel */
+    border-radius: 10px; /* Atur radius untuk curve */
+    overflow: hidden; /* Hindari isi tabel keluar dari border-radius */
+  }
+  
+  .dynamic-table th:first-child {
+    border-top-left-radius: 10px; /* Lengkung kiri atas */
+  }
+  
+  .dynamic-table th:last-child {
+    border-top-right-radius: 10px; /* Lengkung kanan atas */
+  }
+  
+  .dynamic-table tr:last-child td:first-child {
+    border-bottom-left-radius: 10px; /* Lengkung kiri bawah */
+  }
+  
+  .dynamic-table tr:last-child td:last-child {
+    border-bottom-right-radius: 10px; /* Lengkung kanan bawah */
+  }
+  

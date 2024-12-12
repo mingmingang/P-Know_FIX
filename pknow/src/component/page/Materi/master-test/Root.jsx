@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 // import KMS_Rightbar from "../../backbone/KMS_RightBar";
 import KMS_Rightbar from "../../../part/RightBar"
 import MasterTestIndex from "./Index";
-// import MasterTestPostTest from "./PostTest";
+import MasterTestPostTest from "./PostTest";
 import MasterTestPreTest from "./PreTest";
 import MasterTestPengerjaanTest from "./Test";
 // import MasterTestHasilTest from "./HasilTest";
@@ -75,14 +75,14 @@ export default function MasterTest() {
             isOpen={isOpen}
           />
         );
-      // case "posttest":
-      //     return <MasterTestPostTest onChangePage={handleSetPageMode} />;
-      // case "pengerjaantest":
-      //   return <MasterTestPengerjaanTest 
-      //     onChangePage={handleSetPageMode} 
-      //     quizType={quizType}
-      //     materiId={materiId}
-      //   />;
+      case "posttest":
+          return <MasterTestPostTest 
+          onChangePage={handleSetPageMode}
+          CheckDataReady={isDataReady}
+          materiId={materiId}
+          isOpen={isOpen}
+           />;
+     
       case "pengerjaantest":
         return <MasterTestPengerjaanTest 
           onChangePage={handleSetPageMode} 

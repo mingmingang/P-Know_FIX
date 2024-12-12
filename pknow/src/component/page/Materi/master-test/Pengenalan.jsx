@@ -191,7 +191,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
             <Loading />
           ) : (
             <>
-            <div style={{ marginRight: "40px", marginTop:"100px", marginLeft:"50px", marginBottom:"40px", height:"600px" }} className="overflow-y-auto">
+            <div style={{ marginRight: "40px", marginTop:"100px", marginLeft:"40px", marginBottom:"40px", height:"600px" }} className="overflow-y-auto">
                <div
                   className="align-items-center mb-3"
                   >

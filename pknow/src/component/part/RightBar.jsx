@@ -477,6 +477,11 @@ export default function KMS_Rightbar({
     AppContext_test.refreshPage += 1;
   }
 
+  function onClick_Posttest() {
+    onChangePage("posttest");
+    AppContext_test.refreshPage += 1;
+  }
+
   function onClick_sharing() {
     onChangePage("sharing");
     AppContext_test.refreshPage += 1;
@@ -721,7 +726,7 @@ export default function KMS_Rightbar({
                   color: isActivePostTest ? "white" : "black",
                 }}
                 label="Post-Test"
-                onClick={onClick_exit}
+                onClick={onClick_Posttest}
               >
                 Post-Test
               </button>

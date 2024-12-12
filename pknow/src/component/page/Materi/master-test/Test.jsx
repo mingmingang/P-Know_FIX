@@ -21,6 +21,8 @@ import Swal from 'sweetalert2';
 import AppContext_test from "./TestContext";
 import { RFC_2822 } from "moment/moment";
 import he from "he";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../util/Encryptor";
 
 const ButtonContainer = styled.div`
   bottom: 35px;
@@ -29,6 +31,10 @@ const ButtonContainer = styled.div`
 `;
 
 export default function PengerjaanTest({ onChangePage, quizType, materiId, quizId, durasi }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -37,31 +43,31 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
   const [nilai, setNilai] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(false);
   const formDataRef = useRef({
-    karyawanId:AppContext_test.activeUser,
+    trqId: AppContext_test.dataIdTrQuiz,
     quizId: quizId,
-    nilai: "", 
     status: "Not Reviewed",
-    answers: [],
-    createdBy: AppContext_test.displayName,
-    jumlahBenar: "",
+    karyawanId:activeUser,
+    // nilai: "", 
+    // answers: [],
+    // createdBy: AppContext_test.displayName,
+    keterangan: "",
   });
-  console.log("idd quizz", quizId)
-  const [formDataRef2, setFormData2] = useState([]);
-  console.log("durasi", durasi);
 
+  const [formDataRef2, setFormData2] = useState([]);
+  console.log("id tr quiz di test", AppContext_test.dataIdTrQuiz)
   useEffect(() => {
   }, [quizType, materiId]);
 
 
   const formUpdate = useRef({
     idMateri:AppContext_test.materiId,
-    karyawanId: AppContext_test.activeUser,
+    karyawanId: activeUser,
     totalProgress: "0", 
     statusMateri_PDF: "",
     statusMateri_Video: "",
     statusSharingExpert_PDF: "",
     statusSharingExpert_Video: "",
-    createdBy: AppContext_test.activeUser,
+    createdBy: activeUser,
   });
   function convertEmptyToNull(obj) {
     const newObj = {};
@@ -144,36 +150,59 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
     checkStatus();
   }, [currentData]);
 
+
   const handleAdd = async (e) => {
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
       setErrors
     );
+
+    
+
     let countBenar = 0;
     const totalNilai = answers.reduce((accumulator, currentValue) => {
+      console.log("value",currentValue.nilaiSelected);
       const nilaiSelected = parseFloat(currentValue.nilaiSelected) || 0;
       if (nilaiSelected !== 0) {
-        countBenar += 1;
+        countBenar += currentValue.nilaiSelected;
+        console.log("totalPoin", countBenar)
       }
       return accumulator + nilaiSelected;
     }, 0);
-    formDataRef.current.nilai = totalNilai;
-    formDataRef.current.answers = submittedAnswers;
-    formDataRef.current.jumlahBenar = countBenar;
+    if(formDataRef.current.status === "Reviewed"){
+    if(countBenar < 80){
+      formDataRef.current.keterangan = "Tidak Lulus Quiz";
+    } else {
+      formDataRef.current.keterangan = "Lulus Quiz";
+    }
+  } else {
+    formDataRef.current.keterangan = "Sedang Direview";
+  }
+
+    // formDataRef.current.nilai = totalNilai;
+    // formDataRef.current.answers = submittedAnswers;
+    // formDataRef.current.jumlahBenar = countBenar;
     let responseSave = false;
     let maxRetries = 10; 
     let retryCount = 0;
 
     while ((!responseSave)) {
       try {
-        const response = await axios.post(API_LINK + 'Quiz/SaveTransaksiQuiz', formDataRef.current);
-        // const [response1] = await Promise.all([
-        //   UseFetch(API_LINK + "Quiz/SaveTransaksiQuiz", formDataRef.current)
-        // ]);
+        const response = await axios.post(API_LINK + 'Quiz/SaveDetailTransaksiQuiz', formDataRef.current);
         if (response.data.length != 0){
-          console.log('return: ', response.data)
           responseSave = true;
+          try {
+            const response = await axios.post(API_LINK + 'Quiz/UpdateNilaiQuiz', {
+              idTrQuiz: AppContext_test.dataIdTrQuiz,
+              nilai: countBenar
+            });
+            if (response.data.length != 0){
+              responseSave = true;
+            }
+          } catch (error) {
+            console.error("Error:", error);
+          }
         }
       } catch (error) {
         console.error("Error:", error);
@@ -211,7 +240,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
       setSelectedQuestion(selectedQuestion + 1);
     } else {
       handleSubmitConfirmation();
-
     }
   };
 
@@ -256,6 +284,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
           }
         })
       )
+
     }else{
       if (existingAnswerIndex !== -1) {
         updatedAnswers[existingAnswerIndex] = {urutan,idSoal,answer,nilaiSelected};
@@ -294,16 +323,17 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
 
   const [gambar, setGambar] = useState();
   useEffect(() => {
+    
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const response = await axios.post(API_LINK + "Quiz/GetDataQuestion", {
           idQuiz: quizId
         });
-        console.log("questio", response)
+        console.log("question", response)
         const checkIsDone = await axios.post(API_LINK + "Quiz/GetDataResultQuiz", {
           materiId: AppContext_test.materiId,
-          karyawanId: AppContext_test.activeUser,
+          karyawanId: activeUser,
         });
         if (checkIsDone.data && Array.isArray(checkIsDone.data)) {
           if (checkIsDone.data.length == 0) {
@@ -330,15 +360,9 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
             };
 
             if (Gambar) {
-              const gambarPromise = fetch(API_LINK + `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(Gambar)}`)
-                .then((response) => response.blob())
-                .then((blob) => {
-                  const url = URL.createObjectURL(blob);
-                  question.gambar = url;
-                })
-                .catch((error) => {
-                  console.error("Error fetching gambar:", error);
-                });
+             
+              const gambarPromise = API_LINK + `Upload/GetFile/${Gambar}`;
+              question.gambar = gambarPromise; 
               filePromises.push(gambarPromise);
             }
 
@@ -346,14 +370,13 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
               question.options = response.data
                 .filter(choice => choice.Key === item.Key)
                 .map(choice => ({
-                  value: choice.Jawaban,
+                  value: choice.JawabanBenar,
                   urutan: choice.UrutanJawaban,
                   nomorSoal: choice.Key,
-                  nilai: choice.NilaiJawaban,
+                  nilai: choice.Skor,
                 }));
               question.correctAnswer = question.options.find(option => option.value === Jawaban && option.nilai !== "0");
             }
-
             return question;
           }
           return null;
@@ -404,7 +427,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
 
   return (
   <>
-    <div className="d-flex" style={{marginTop:"100px"}}>
+    <div className="d-flex" style={{marginTop:"100px", marginLeft:"100px", marginRight:"100px"}}>
       <div className=" p-3 d-flex ">
         <div className="mb-3 d-flex" style={{ overflowX: 'auto' }}>
           {currentData.map((item, index) => {
@@ -412,10 +435,10 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
             if (index + 1 !== selectedQuestion) return null;
             const currentIndex = index + 1;
             return (
-              <div key={key} className="mb-3" style={{ display: 'block', minWidth: '300px', marginRight: '20px' }}>
+              <div key={key} className="mb-3" style={{ display: 'block', minWidth: '910px', marginRight: '20px' }}>
                 {/* Soal */}
                 <div className="mb-3">
-                  <h4 style={{ wordWrap: 'break-word', overflowWrap: 'break-word', textAlign:'justify' }}>
+                  <h4 style={{ wordWrap: 'break-word', overflowWrap: 'break-word', textAlign:'justify', color:"#002B6C" }}>
                     <div className="">        
                         {removeHtmlTags(he.decode(item.question))}
                     </div>
@@ -428,10 +451,10 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
                       alt="gambar"
                       className="img-fluid"
                       style={{
-                        maxWidth: '300px',
-                        maxHeight: '300px',
+                        maxWidth: '500px',
+                        maxHeight: '500px',
                         overflow: 'hidden',
-                        marginLeft: '10px'
+                        borderRadius:"20px"
                       }}
                     />
                   </div>
@@ -445,7 +468,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
                     label="Jawaban (.zip)"
                     formatFile=".zip"
                     onChange={(event) => handleFileChange(fileInputRef, "zip", event, index + 1, item.id)}
-                    style={{ width: '120vh' }}
+                    style={{ width: '105vh' }}
                   />
                 ) : item.type === "Essay" ? (
                   <Input
@@ -454,7 +477,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
                     label="Jawaban Anda:"
                     value={getSubmittedAnswer(item.id)}
                     onChange={(event) => handleTextareaChange(event, index + 1, item.id)}
-                    style={{ width: '120vh' }}
+                    style={{ width: '105vh' }}
                   />
                 ) : (
                   <div className="d-flex flex-column">
@@ -504,11 +527,11 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
                     })}
                   </div>
                 )}
-                  <form onSubmit={handleAdd}>
+          <form onSubmit={handleAdd}>
           <div className="">
             <ButtonContainer>
               <Button
-                classType="secondary me-2 px-4 py-2"
+                style={{backgroundColor:"grey"}}
                 label="Sebelumnya"
                 onClick={selectPreviousQuestion}
               />
