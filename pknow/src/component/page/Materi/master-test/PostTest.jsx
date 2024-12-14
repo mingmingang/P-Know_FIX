@@ -400,9 +400,7 @@ export default function MasterTestPreTest({
       
       )}
     </div>
-   
             </div>
-            
           ) : (
             <div className="" style={{marginTop:"110px", }}>
             <Alert type="info" message="Saat ini belum tersedia Post Test pada Materi ini." />

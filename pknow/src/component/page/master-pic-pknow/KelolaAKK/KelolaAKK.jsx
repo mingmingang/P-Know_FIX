@@ -3,18 +3,13 @@ import { PAGE_SIZE, API_LINK } from "../../../util/Constants";
 import SweetAlert from "../../../util/SweetAlert";
 import UseFetch from "../../../util/UseFetch";
 import "../../../../style/Beranda.css";
-import Search from "../../../part/Search";
-import Button from "../../../part/Button";
 import Button2 from "../../../part/Button copy";
 import "../../../../../src/index.css";
-import ButtonPro from "../../../part/Button copy"; 
 import CardKK from "../../../part/CardKelompokKeahlian";
 import Alert from "../../../part/Alert";
 import Loading from "../../../part/Loading";
 import Paging from "../../../part/Paging";
 import Input from "../../../part/Input";
-import Filter from "../../../part/Filter";
-import DropDown from "../../../part/Dropdown";
 import "../../../../style/Search.css";
 
 const dataFilterSort = [
@@ -216,7 +211,7 @@ export default function KelolaAKK({ onChangePage }) {
               </div>
         {currentData.length === 0 ? (
           <div className="ml-3">
-          <Alert type="warning" message="Tidak ada data! Silahkan klik tombol tambah kelompok keahlian diatas.." />
+          <Alert type="warning" message="Tidak ada data!" />
           </div>
         ) : (
           <div className="row mt-0 gx-4">
@@ -244,16 +239,17 @@ export default function KelolaAKK({ onChangePage }) {
             ))}
           </div>
         )}
-
-        <div className="col-md-4 mb-4">
-            <div className="d-flex flex-column">
+     <div className="mb-4 d-flex justify-content-center">
+      
+      
               <Paging
                 pageSize={PAGE_SIZE}
                 pageCurrent={currentFilter.page}
                 totalData={currentData[0]?.Count || 0}
                 navigation={handleSetCurrentPage}
               />
-            </div>
+        
+       
         </div>
       </div>
       </main>

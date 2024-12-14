@@ -50,7 +50,7 @@ const CardProgram = ({
         <div className="">
         <p
           className="fw-medium"
-          style={{ width: "50%", borderRight: "solid grey 1px", backgroundColor:"#ABCCFF", borderRadius:"10px", padding:"5px 5px" }}
+          style={{ width: "100%", borderRight: "solid grey 1px", backgroundColor:"#ABCCFF", borderRadius:"10px", padding:"5px 5px" }}
         >
           {index}
           {". "}
@@ -70,7 +70,12 @@ const CardProgram = ({
           {data.Deskripsi}
         </p>
         </div>
-        {data.Status === "Draft" ? (
+        
+        <div
+          className="d-flex ps-3"
+        ><div className="d-flex">
+          <div className="mt-3">
+          {data.Status === "Draft" ? (
           <div
             className="d-flex justify-content-between align-items-center mt-1"
             style={{
@@ -141,10 +146,8 @@ const CardProgram = ({
             </div>
           </div>
         )}
-        <div
-          className="ps-3"
-
-        >
+        </div>
+        <div className="">
           <Button
             iconName={isActive ? "caret-up" : "caret-down"}
             classType="outline-primary btn-sm px-3"
@@ -152,6 +155,8 @@ const CardProgram = ({
             title="Detail Kelompok Keahlian"
             style={{background:"white", color:"#0A5EA8",  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", fontSize:"25px", padding:"5px 10px" }}
           />
+          </div>
+          </div>
         </div>
       </div>
       <div

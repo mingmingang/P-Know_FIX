@@ -16,12 +16,18 @@ import Filter from "./Filter";
 import Icon from "./Icon";
 import SweetAlert from "../util/SweetAlert";
 import pknowmaskot from "../../assets/pknowmaskot.png";
+import Cookies from "js-cookie";
+import { decryptId } from "../util/Encryptor";
 
 export default function DetailAKK({
   prodi,
   onChangePage,
   withID
 }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+  
   const [konfirmasi, setKonfirmasi] = useState("");
   const [pesanKonfirmasi, setPesanKonfirmasi] = useState("");
   const [actionType, setActionType] = useState(null);
@@ -271,6 +277,33 @@ export default function DetailAKK({
             console.log(data);
             if (data === "ERROR" || data.length === 0) setIsError(true);
             else {
+              console.log("simiii")
+              UseFetch(API_LINK + "Utilities/createNotifikasi", {
+                p1 : 'SENTTOTENAGAPENDIDIK',
+                p2 : 'ID12346',
+                p3 : 'APP59',
+                p4 : 'PIC P-KNOW',
+                p5 :  activeUser,
+                p6 : 'Anda terpilih sebagai anggota Kelompok Keahlian yang dipilih langsung oleh PIC P-KNOW',
+                p7 : 'Notifikasi Anggota Kelompok Keahlian',
+                p8 : 'Dimohon kepada pihak program studi untuk memilih salah satu PIC KK yang dapat mengampu kelompok keahlian',
+                p9 : 'Dari PIC P-KNOW',
+                p10 : '0',
+                p11 : 'Jenis Lain',
+                p12 :  activeUser,
+                p13 : 'ROL03',
+                p14:  id,
+              }).then((data) => {
+                console.log("notidikasi",data)
+                if (data === "ERROR" || data.length === 0) setIsError(true);
+                else{
+                  SweetAlert(
+                    "Berhasil",
+                    "Notifikasi telah dikirimkan ke Tenaga Pendidik bersangkutan.",
+                    "success"
+                  );
+                }
+              }); 
               SweetAlert(
                 "Berhasil",
                 "Karyawan telah ditambahkan ke Anggota Keahlian.",

@@ -69,6 +69,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
   };
 
   useEffect(() => {
+    console.log("ayaaamm")
     let isMounted = true;
     const fetchData = async () => {
       setIsError(false);
@@ -103,6 +104,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
         }
       }
     };
+
 
   const fetchDataWithRetry = async (retries = 10, delay = 1000) => {
     for (let i = 0; i < retries; i++) {
@@ -163,8 +165,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     }
   };
 
-
-
+  
   const fetchAnswers = async (questionType, karyawanId, retries = 10, delay = 1000) => {
     for (let i = 0; i < retries; i++) {
       try {

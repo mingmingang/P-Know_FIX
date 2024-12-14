@@ -44,7 +44,7 @@ export default function MasterTestPreTest({
           karyawanId: activeUser,
           status: "Aktif",
           quizId: activeUser,
-          // nilai: "", 
+          // nilai: "",
           // answers: [],
           // createdBy: AppContext_test.displayName,
           jumlahBenar: "",
@@ -65,8 +65,7 @@ export default function MasterTestPreTest({
             setIsError((prevError) => ({
               ...prevError,
               error: true,
-              message:
-                "Terjadi kesalahan: Gagal menyimpan data Materi.",
+              message: "Terjadi kesalahan: Gagal menyimpan data Materi.",
             }));
           }
         })
@@ -116,37 +115,50 @@ export default function MasterTestPreTest({
             if (data != "") {
               if (Array.isArray(data)) {
                 if (data.length != 0) {
-                  setTableData(data.map((item, index) => ({
-                    Key: item.IdQuiz,
-                    No: index + 1,
-                    ['Tanggal Ujian']:   new Intl.DateTimeFormat("id-ID", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    }).format(new Date(item["Tanggal Quiz"])),
-                    Nilai: item.Status == "Reviewed" ? item.Nilai : "",
-                    Keterangan: item.Status == "Reviewed" ? item.JumlahBenar + " / " + totalSoal : "Sedang direview oleh Tenaga Pendidik",
-                    Aksi: item.Status == "Reviewed" ? ['Detail'] : [''],
-                    Alignment: ['center', 'center', 'center', 'center', 'center'],
-                  })));
+                  setTableData(
+                    data.map((item, index) => ({
+                      Key: item.IdTrq,
+                      No: index + 1,
+                      ["Tanggal Ujian"]: new Intl.DateTimeFormat("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      }).format(new Date(item["Tanggal Quiz"])),
+                      Nilai: item.Status == "Reviewed" ? item.Nilai : "",
+                      Keterangan:
+                        item.Status == "Reviewed"
+                          ? item.JumlahBenar + " Benar / " + totalSoal + " Soal"
+                          : "Sedang direview oleh Tenaga Pendidik",
+                      Aksi: item.Status == "Reviewed" ? ["Detail"] : [""],
+                      Alignment: [
+                        "center",
+                        "center",
+                        "center",
+                        "center",
+                        "center",
+                      ],
+                    }))
+                  );
                 }
               } else {
                 console.error("Data is not an array:", data);
               }
             } else {
-              setTableData([{
-                Key: '',
-                No:'',
-                ['Tanggal Ujian']:'',
-                Nilai: '',
-                Keterangan: '',
-                Aksi:'',
-                
-                Alignment: ['center', 'center', 'center', 'center', 'center'], 
-              }]); 
+              setTableData([
+                {
+                  Key: "",
+                  No: "",
+                  ["Tanggal Ujian"]: "",
+                  Nilai: "",
+                  Keterangan: "",
+                  Aksi: "",
+
+                  Alignment: ["center", "center", "center", "center", "center"],
+                },
+              ]);
             }
           }
         } catch (error) {
@@ -228,6 +240,8 @@ export default function MasterTestPreTest({
             }
           );
           if (quizResponse.data && quizResponse.data.length > 0) {
+            console.log("[retests", quizResponse.data[0]);
+            AppContext_test.IdQuiz = quizResponse.data[0].quizId;
             setCurrentData(quizResponse.data[0]); // Hanya set data pertama
             return quizResponse.data[0];
           }
@@ -245,20 +259,16 @@ export default function MasterTestPreTest({
     const initializeData = async () => {
       try {
         setIsLoading(true);
-  
-        // Ambil data quiz terlebih dahulu untuk mendapatkan jumlah soal
         await getListSection(); // Pastikan ID Section diambil
         const quizData = await getQuiz_pretest();
-       
-  
+
         if (quizData) {
           totalSoal = quizData.jumlahSoal;
           setCurrentData(quizData); // Set currentData lebih awal
         }
-  
+
         // Setelah currentData tersedia, panggil fetchData_pretest
         await fetchData_pretest();
-  
       } catch (error) {
         console.error("Error initializing data:", error);
         setIsError(true);
@@ -266,7 +276,7 @@ export default function MasterTestPreTest({
         setIsLoading(false);
       }
     };
-  
+
     initializeData();
 
     return () => {
@@ -291,16 +301,14 @@ export default function MasterTestPreTest({
     return Math.floor(duration / 60);
   };
 
-
   const [tableData, setTableData] = useState([]);
 
   function handleDetailAction(action, key) {
     if (action === "detail") {
-      onChangePage("detailtest", "Pretest", AppContext_test.materiId, key);
+      onChangePage("detailtest", "Pretest", AppContext_test.IdQuiz, key);
       AppContext_test.QuizType = "Pretest";
     }
   }
-
 
   return (
     <>
@@ -333,8 +341,8 @@ export default function MasterTestPreTest({
           )}
           {isLoading ? (
             <Loading message="Sedang memuat data..." />
-          ) : currentData ? ( // Periksa currentData ada atau tidak
-            <div style={{ marginRight: marginRight, marginLeft:"40px" }}>
+          ) : currentData ? ( 
+            <div style={{ marginRight: marginRight, marginLeft: "40px" }}>
               <div className=" align-items-center mb-5">
                 <div style={{ marginTop: "80px" }}>
                   <div className="d-flex">
@@ -374,7 +382,7 @@ export default function MasterTestPreTest({
                   onClick={onStartTest}
                 />
               </div>
-              <hr style={{marginRight:"20px"}}/>
+              <hr style={{ marginRight: "20px" }} />
               {/* <div className="table-container">
       <h3>Riwayat</h3>
       {error ? (
@@ -428,20 +436,25 @@ export default function MasterTestPreTest({
       
       )}
     </div> */}
-    
-          <div className="">
-          <div className="mb-4">
-            <h3 className="" style={{fontWeight:"600", color:"#002B6C"}}>Riwayat</h3>
-              <Table
-                  data={tableData}
-                  onDetail={handleDetailAction}
-              />
-            </div>
-          </div>
+
+              <div className="">
+                <div className="mb-4">
+                  <h3
+                    className=""
+                    style={{ fontWeight: "600", color: "#002B6C" }}
+                  >
+                    Riwayat
+                  </h3>
+                  <Table data={tableData} onDetail={handleDetailAction} />
+                </div>
+              </div>
             </div>
           ) : (
-            <div className="" style={{marginTop:"110px", }}>
-            <Alert type="info" message="Saat ini belum tersedia Pre-Test Pada Materi ini." />
+            <div className="" style={{ marginTop: "110px" }}>
+              <Alert
+                type="info"
+                message="Saat ini belum tersedia Pre-Test Pada Materi ini."
+              />
             </div>
           )}
         </div>

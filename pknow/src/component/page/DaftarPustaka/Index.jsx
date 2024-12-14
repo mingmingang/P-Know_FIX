@@ -87,7 +87,7 @@ export default function DaftarPustaka({ onChangePage }) {
     setCurrentFilter((prevFilter) => {
       return {
         ...prevFilter,
-        page: 2,
+        page: 1,
         query: searchQuery.current.value,
         status: searchFilterStatus.current.value,
         sort: searchFilterSort.current.value,
@@ -144,6 +144,7 @@ export default function DaftarPustaka({ onChangePage }) {
           API_LINK + "Pustaka/GetDataPustaka",
           currentFilter
         );
+        console.log("pustakaa", data);
         if (data === "ERROR") {
           setIsError(true);
         } else if (data.length === 0) {
@@ -162,6 +163,7 @@ export default function DaftarPustaka({ onChangePage }) {
                 id: value.Key,
                 judul: value["Kelompok Keahlian"],
                 kk: { key: value["ID KK"] || "N/A", nama: value["Kelompok Keahlian"] },
+                pemilik: value.PemilikKK,
                 kataKunci: value["Kata Kunci"],
                 status: value.Status,
                 gambar: value.Gambar,
@@ -170,6 +172,7 @@ export default function DaftarPustaka({ onChangePage }) {
               },
             };
           });
+          console.log("data kk", formattedData);
           setCurrentData(formattedData);
           console.log(formattedData);
         }
@@ -361,15 +364,17 @@ export default function DaftarPustaka({ onChangePage }) {
                   />
                 </Filter>
               </div>
-              <div className="">
-                <ButtonPro
-                  style={{ marginLeft: "20px" }}
-                  iconName="add"
-                  classType="success"
-                  label="Tambah"
-                  onClick={() => onChangePage("add")}
-                />
-              </div>
+              {activerole !== "ROL05" && (
+          <div className="">
+            <ButtonPro
+              style={{ marginLeft: "20px" }}
+              iconName="add"
+              classType="success"
+              label="Tambah"
+              onClick={() => onChangePage("add")}
+            />
+          </div>
+        )}
             </div>
           </div>
         </div>
@@ -394,6 +399,7 @@ export default function DaftarPustaka({ onChangePage }) {
             </div>
             </>
           )}
+          <div className="mb-4 d-flex justify-content-center">
             <div className="d-flex flex-column" style={{marginLeft:"70px", marginBottom:"40px"}}>
               <Paging
                 pageSize={PAGE_SIZE}
@@ -401,6 +407,7 @@ export default function DaftarPustaka({ onChangePage }) {
                 totalData={currentData[0]?.Count || 0}
                 navigation={handleSetCurrentPage}
               />
+            </div>
             </div>
         </div>
        

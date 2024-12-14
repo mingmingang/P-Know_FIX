@@ -134,7 +134,7 @@ export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, mat
     />
             
                 <div className="file-preview" style={{ marginTop: "100px",color:"#002B6C" }}>
-                    <h1 className="ml-4" style={{fontWeight:"600", color: "#002B6C" }}>Sharing Expert PDF</h1>
+                    <h1 className="ml-4" style={{fontWeight:"600", color: "#002B6C" }}>Sharing Expert</h1>
                     {currentData ? (
                         <p className="ml-4">
                             Dibuat oleh {currentData.Nama} - {formatDate(currentData.CreatedDate)}
@@ -142,14 +142,54 @@ export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, mat
                     ) : (
                       <div className=""></div>
                     )}
-                   {fileData.file ? (
-                    <PDF_Viewer pdfFileName={fileData.file} width="1000px" height="800px" />
-                    ) : (
-                        <div className="alert alert-warning mt-4 mb-4 ml-4" >
-                        Tidak ada Sharing Expert PDF yang tersedia.
-                      </div>
-                    )}
-                </div>
+                    {fileData.file ? (
+                        <div>
+                      {fileExtension === "pdf" && (
+           <div className="">
+            <PDF_Viewer pdfFileName={fileData.file} width="1000px" height="800px" />
+           </div>
+          )}
+        
+          {/* Anda bisa menambahkan lebih banyak kondisi untuk file lain seperti .docx atau .xlsx */}
+          {fileExtension === "docx" && (
+            <div className="">
+            <p style={{marginLeft:"25px", marginTop:"20px"}}>
+              Dokumen Word tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
+              {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
+                unduh
+              </a>{" "} */}  
+            </p>
+            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
+            </div>
+          )}
+          {fileExtension === "pptx" && (
+            <div className="">
+            <p style={{marginLeft:"25px", marginTop:"20px"}}>
+              Dokumen Power Point tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
+              {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
+                unduh
+              </a>{" "} */}  
+            </p>
+            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
+            </div>
+          )}
+          {fileExtension === "xlsx" && (
+            <div className="">
+            <p style={{marginLeft:"25px", marginTop:"20px"}}>
+              Dokumen Excel tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
+              {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
+                unduh
+              </a>{" "} */}  
+            </p>
+            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
+            </div>
+          )}
+                </div>  ) : (
+                    <div className="alert alert-warning mt-4 mb-4 ml-4" >
+                    Tidak ada Sharing Expert File yang tersedia.
+                  </div>
+                )}
+              </div>
               </div>
         </>
     );

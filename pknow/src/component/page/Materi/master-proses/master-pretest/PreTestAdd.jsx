@@ -332,6 +332,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
           status: 'Aktif',
           quecreatedby: activeUser,
         };
+        console.log('question',formQuestion);
         const uploadPromises = [];
         if (question.type === 'Essay' || question.type === 'Praktikum') {
           if (fileGambarRef.current.files.length >= 0) {
@@ -1160,7 +1161,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
                             soal: content,
                           }));
                         }}
-                        apiKey="ci4fa00c13rk9erot37prff8jjekb93mdcwji9rtr2envzvi"
+                        apiKey="tmy3owot5w57uflfn2dtbss6kolqjiypl3nkdoi72g1vxl2u"
                         init={{
                           height: 300,
                           menubar: false,

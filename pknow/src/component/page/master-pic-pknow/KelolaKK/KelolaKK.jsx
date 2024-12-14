@@ -13,6 +13,8 @@ import Input from "../../../part/Input";
 import Filter from "../../../part/Filter";
 import DropDown from "../../../part/Dropdown";
 import "../../../../style/Search.css";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../util/Encryptor";
 
 const dataFilterSort = [
   { Value: "[Nama Kelompok Keahlian] asc", Text: "Nama Kelompok Keahlian [↑]" },
@@ -58,6 +60,10 @@ const inisialisasiData = [
 ];
 
 export default function KelolaKK({ onChangePage }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
@@ -119,6 +125,7 @@ export default function KelolaKK({ onChangePage }) {
 
   function handleSetCurrentPageMenunggu(newCurrentPage) {
     setIsLoading(true);
+    console.log(newCurrentPage);
     setCurrentFilterMenunggu((prevFilter) => ({
       ...prevFilter,
       page: newCurrentPage,
@@ -142,7 +149,28 @@ export default function KelolaKK({ onChangePage }) {
 
   function handleSearch() {
     setIsLoading(true);
-    setCurrentFilter((prevFilter) => ({
+    setCurrentFilterDraft((prevFilter) => ({
+      ...prevFilter,
+      page: 1,
+      query: searchQuery.current.value,
+      sort: searchFilterSort.current.value,
+      status: searchFilterStatus.current.value,
+    }));
+    setCurrentFilterAktif((prevFilter) => ({
+      ...prevFilter,
+      page: 1,
+      query: searchQuery.current.value,
+      sort: searchFilterSort.current.value,
+      status: searchFilterStatus.current.value,
+    }));
+    setCurrentFilterNonAktif((prevFilter) => ({
+      ...prevFilter,
+      page: 1,
+      query: searchQuery.current.value,
+      sort: searchFilterSort.current.value,
+      status: searchFilterStatus.current.value,
+    }));
+    setCurrentFilterMenunggu((prevFilter) => ({
       ...prevFilter,
       page: 1,
       query: searchQuery.current.value,
@@ -342,7 +370,11 @@ export default function KelolaKK({ onChangePage }) {
   };
 
   function handleSetStatus(data, status) {
+    let keyProdi = data.prodi.key;
+    console.log("keyProdi", keyProdi)
     console.log("pic id", data.pic.key);
+    console.log("prodi", data.prodi.key)
+    console.log("data kk", data);
     setIsError(false);
     let message;
     if (data.status === "Draft" && !data.pic.key)
@@ -366,8 +398,32 @@ export default function KelolaKK({ onChangePage }) {
           else {
             let messageResponse;
             if (status === "Menunggu") {
+              console.log("tesssss")
+              UseFetch(API_LINK + "Utilities/createNotifikasi", {
+                p1 : 'SENTTOPRODI',
+                p2 : 'ID12346',
+                p3 : 'APP59',
+                p4 : 'PIC P-KNOW',
+                p5 :  activeUser,
+                p6 : 'Kepada Program Studi dimohon untuk memilih salah satu Tenaga Pendidik untuk menjadi PIC Kelompok Keahlian',
+                p7 : 'Pemilihan PIC Kelompok Keahlian',
+                p8 : 'Dimohon kepada pihak program studi untuk memilih salah satu PIC KK yang dapat mengampu kelompok keahlian',
+                p9 : 'Dari PIC P-KNOW',
+                p10 : '0',
+                p11 : 'Jenis Lain',
+                p12 :  activeUser,
+                p13 : 'ROL02',
+                p14:  keyProdi,
+              }).then((data) => {
+                console.log("notidikasi",data)
+                if (data === "ERROR" || data.length === 0) setIsError(true);
+                else{
+                  messageResponse =
+              "Sukses! Data sudah dikirimkan ke Prodi. Menunggu Prodi menentukan PIC Kelompok Keahlian..";
+                }
+              }); 
               messageResponse =
-                "Sukses! Data sudah dikirimkan ke Prodi. Menunggu Prodi menentukan PIC Kelompok Keahlian..";
+              "Sukses! Data sudah dikirimkan ke Prodi. Menunggu Prodi menentukan PIC Kelompok Keahlian..";
             } else if (status === "Aktif") {
               messageResponse =
                 "Sukses! Data berhasil dipublikasi. PIC Kelompok Keahlian dapat menentukan kerangka Program Belajar..";
@@ -385,10 +441,10 @@ export default function KelolaKK({ onChangePage }) {
 
   useEffect(() => {
     getListKKAktif();
-  //   getListKKNonAktif();
+    getListKKNonAktif();
     getListKKMenunggu();
     getListKKDraft();
-  }, [currentFilterAktif], [currentFilterNonAktif], [currentFilterMenunggu], [currentFilterDraft] );
+  }, [currentFilterAktif, currentFilterNonAktif, currentFilterMenunggu, currentFilterDraft]);
   
 
   async function handleDelete(id) {
@@ -551,6 +607,11 @@ export default function KelolaKK({ onChangePage }) {
                 ↓ Data Aktif / Sudah Dipublikasikan
               </div>
               <div className="row mt-0 gx-4">
+              {currentDataAktif.length === 0 && (
+                <div className="" style={{margin:"5px 20px"}}>
+                <Alert type="warning" message="Tidak ada data!" />
+                </div>
+              )}
                 {currentDataAktif
                   .filter(
                     (value) =>
@@ -600,6 +661,11 @@ export default function KelolaKK({ onChangePage }) {
               </div>
 
               <div className="row mt-0 gx-4">
+              {currentDataMenunggu.length === 0 && (
+                <div className="" style={{margin:"5px 20px"}}>
+                <Alert type="warning" message="Tidak ada data!" />
+                </div>
+              )}
               {currentDataMenunggu
                   .filter((value) => value.config.footer === "Menunggu")
                   .map((value) => (
@@ -640,6 +706,11 @@ export default function KelolaKK({ onChangePage }) {
                 ↓ Data Draft / Belum dikirimkan ke Prodi / Belum dipublikasi
               </div>
               <div className="row mt-0 gx-4">
+              {currentDataDraft.length === 0 && (
+                <div className="" style={{margin:"5px 20px"}}>
+                <Alert type="warning" message="Tidak ada data!" />
+                </div>
+              )}
                   {currentDataDraft
                   .filter((value) => value.config.footer === "Draft")
                   .map((value) => (
@@ -655,7 +726,7 @@ export default function KelolaKK({ onChangePage }) {
                     </div>
                   ))}
                   </div>
-                  {/* <div className="mb-4 d-flex justify-content-center">
+                   <div className="mb-4 d-flex justify-content-center">
             <div className="d-flex flex-column ">
               <Paging
                 pageSize={PAGE_SIZE}
@@ -664,10 +735,10 @@ export default function KelolaKK({ onChangePage }) {
                 navigation={handleSetCurrentPageDraft}
               />
             </div>
-          </div> */}
+          </div> 
                 
 
-              <div
+          <div
                 className="card-keterangan"
                 style={{
                   background: "red",
@@ -683,6 +754,11 @@ export default function KelolaKK({ onChangePage }) {
                 ↓ Tidak Aktif/Dinonaktifkan
               </div>
               <div className="row mt-0 gx-4">
+              {currentDataNonAktif.length === 0 && (
+                <div className="" style={{margin:"5px 20px"}}>
+                <Alert type="warning" message="Tidak ada data!" />
+                </div>
+              )}
                 {currentDataNonAktif
                   .filter(
                     (value) =>

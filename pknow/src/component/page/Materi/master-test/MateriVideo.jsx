@@ -157,13 +157,14 @@ export default function MasterTestIndex({ onChangePage, materiId }) {
   // };
 
   
-  useEffect(() => {
-    document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
-    const sidebarMenuElement = document.querySelector('.sidebarMenu');
-    if (sidebarMenuElement) {
-      sidebarMenuElement.classList.add('sidebarMenu-hidden');
-    }
-  }, []);
+  // useEffect(() => {
+  //   document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
+  //   const sidebarMenuElement = document.querySelector('.sidebarMenu');
+  //   if (sidebarMenuElement) {
+  //     sidebarMenuElement.classList.add('sidebarMenu-hidden');
+  //   }
+  // }, []);
+
   useEffect(() => {
     saveProgress();
     // updateProgres();
@@ -190,7 +191,7 @@ export default function MasterTestIndex({ onChangePage, materiId }) {
       // refreshKey={refreshKey}
       // setRefreshKey={setRefreshKey}
     />
-        <div className="d-flex flex-column">
+        <div className="">
             {isError && (
                 <div className="flex-fill">
                     <Alert
@@ -200,12 +201,11 @@ export default function MasterTestIndex({ onChangePage, materiId }) {
                 </div>
             )}
             <div className=""></div>
-            
                 {isLoading ? (
                     <Loading />
                 ) : (
                     <>
-                       <div style={{ marginRight: "marginRight",marginTop:"100px", marginLeft:"20px", marginBottom:"80px" }}>
+                       <div style={{marginTop:"100px", marginLeft:"20px", marginBottom:"80px" }}>
                             <h1 style={{ fontWeight: 600, color: "#002B6C" }}>Materi Video {currentData.Judul}</h1>
                             <h6 style={{ color: "#002B6C" }}>
                                 Oleh {currentData.Nama} - {formatDate(currentData.Creadate)}
@@ -215,7 +215,8 @@ export default function MasterTestIndex({ onChangePage, materiId }) {
                                   url={`${API_LINK}Upload/GetFile/${currentData.File_video}`}
                                   playing={true}
                                   controls={true}
-                                  width="140%"
+                                  width="1000px"
+                                  maxwidth="1000px"
                                   height="90%"
                                   style={{
                                     borderRadius: "80px",

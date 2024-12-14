@@ -12,6 +12,7 @@ import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
 import Search from "../../part/Search";
+import Icon from "../../part/Icon";
 
 const inisialisasiData = [
   {
@@ -42,13 +43,17 @@ export default function NotifikasiIndex() {
     page: 1,
     query: "",
     sort: "[Waktu] desc",
-    status: "Belum Dibaca",
+    // status: "Belum Dibaca",
     app: APPLICATION_ID,
   });
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
+
+  function handleApproveNotificationAction() {
+  
+  }
 
   function handleSetCurrentPage(newCurrentPage) {
     setIsLoading(true);
@@ -129,7 +134,9 @@ export default function NotifikasiIndex() {
               ></div>
             ),
             Waktu: formatDate(value["Waktu"]),
-            Alignment: ["center", "left", "left", "center", "center"],
+            Status: value["Status"],
+            Aksi: value["Status"] === "Belum Dibaca" ? ["Approve"] : [],
+            Alignment: ["center", "left", "left", "center", "center","center"],
           }));
           setCurrentData(formattedData);
         }
@@ -194,18 +201,21 @@ export default function NotifikasiIndex() {
             />
           </div>
         </div>
-        <div className="mt-3">
+        <div className="mt-3" style={{margin:"10px 100px"}}>
           {isLoading ? (
             <Loading />
           ) : (
+            
             <div className="d-flex flex-column">
-              <Table data={currentData} />
+              <Table data={currentData} onApprove={handleApproveNotificationAction}/>
+              <div className="mb-4 d-flex justify-content-center">
               <Paging
                 pageSize={PAGE_SIZE}
                 pageCurrent={currentFilter.page}
                 totalData={currentData[0]["Count"]}
                 navigation={handleSetCurrentPage}
               />
+            </div>
             </div>
           )}
         </div>

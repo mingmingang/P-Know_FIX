@@ -43,6 +43,7 @@ export default function MasterTestIndex({ onChangePage,materiId }) {
   const [fileData, setFileData] = useState({
     file: "",
 });
+  const [fileExtension, setFileExtension] = useState("");
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
@@ -80,6 +81,8 @@ const getFileData = async (retries = 3, delay = 1000) => {
                   uploader: Nama || "Tidak ada uploader",
                   creadate: Creadate || "Tanggal tidak tersedia",
               });
+              const ext = File_pdf.split(".").pop().toLowerCase();
+              setFileExtension(ext);
               return;
           }
       } catch (error) {
@@ -212,17 +215,80 @@ return (
                         <h6 style={{ color: "#002B6C" }} className="ml-4">
                             Oleh {fileData.uploader} - {formatDate(fileData.creadate)}
                         </h6>
-                        {fileData.file ? (
-                        <PDF_Viewer 
-                          pdfFileName={fileData.file} 
-                          width="1000px" 
-                          height="800px" 
-                        />
-                      ) : (
-                        <div className="alert alert-warning mt-4 mb-4 ml-4" >
-                        Tidak ada Materi PDF yang tersedia.
-                        </div>
-                      )}
+                        {fileExtension === "pdf" && (
+           <div className="">{fileData.file ? (
+            <PDF_Viewer 
+              pdfFileName={fileData.file} 
+              width="1000px" 
+              height="800px" 
+            />
+          ) : (
+            <div className="alert alert-warning mt-4 mb-4 ml-4" >
+            Tidak ada Materi yang tersedia.
+            </div>
+          )}</div>
+          )}
+          {fileExtension === "mp4" && (
+            //   <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden", maxWidth: "100%" }}>
+            //   <iframe
+            //     src={`${API_LINK}Upload/GetFile/${fileData.file}`}
+            //     style={{
+            //       position: "absolute",
+            //       top: 0,
+            //       left: 0,
+            //       width: "100%",
+            //       height: "100%",
+            //       objectFit: "contain",
+            //       borderRadius:"20px"
+            //     }}
+            //     title="Video Frame"
+            //   ></iframe>
+            // </div>
+
+            <ReactPlayer
+              url={`${API_LINK}Upload/GetFile/${fileData.file}`}
+              playing={true}
+              controls={true}
+              width="100%"
+              height="100%"
+              style={{ borderRadius: "80px" }}
+            />
+          )}
+          {/* Anda bisa menambahkan lebih banyak kondisi untuk file lain seperti .docx atau .xlsx */}
+          {fileExtension === "docx" && (
+            <div className="">
+            <p style={{marginLeft:"25px", marginTop:"20px"}}>
+              Dokumen Word tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
+              {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
+                unduh
+              </a>{" "} */}  
+            </p>
+            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
+            </div>
+          )}
+          {fileExtension === "xlsx" && (
+            <div className="">
+            <p style={{marginLeft:"25px", marginTop:"20px"}}>
+              Dokumen Excel tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
+              {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
+                unduh
+              </a>{" "} */}  
+            </p>
+            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
+            </div>
+          )}
+           {fileExtension === "pptx" && (
+            <div className="">
+            <p style={{marginLeft:"25px", marginTop:"20px"}}>
+              Dokumen Power Point tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
+              {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
+                unduh
+              </a>{" "} */}  
+            </p>
+            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
+            </div>
+          )}
+                        
 
                         </div>
           </>

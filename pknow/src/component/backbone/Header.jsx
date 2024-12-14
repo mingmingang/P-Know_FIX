@@ -6,6 +6,8 @@ import Konfirmasi from "../part/Konfirmasi"; // Import your confirmation compone
 import Icon from "../part/Icon";
 let active_menu;
 const activeURL = location.protocol + "//" + location.host + location.pathname;
+import { API_LINK, APPLICATION_ID } from "../util/Constants";
+import UseFetch from "../util/UseFetch";
 
 function setActiveMenu(menu) {
   active_menu = menu;
@@ -22,19 +24,20 @@ export default function Header({
   const [activeMenu, setActiveMenu] = useState("beranda");
   const [isProfileDropdownVisible, setProfileDropdownVisible] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [countNotifikasi, setCountNotifikasi] = useState("");
 
   // Icon mapping for sub-menu items
   const iconMapping = {
     "Kelola Kelompok Keahlian": "fas fa-cogs",
     "Kelola Anggota": "fas fa-users",
     "Daftar Pustaka": "fas fa-book",
-    "Materi": "fas fa-graduation-cap",
+    Materi: "fas fa-graduation-cap",
     "PIC Kelompok Keahlian": "fas fa-users",
     "Persetujuan Anggota Keahlian": "fas fa-check",
     "Pengajuan Kelompok Keahlian": "fas fa-paper-plane",
     "Riwayat Pengajuan": "fas fa-history",
     "Kelola Program": "fas fa-tasks",
-    "Kelola Materi": "fas fa-book-open"
+    "Kelola Materi": "fas fa-book-open",
   };
 
   const handleConfirmYes = () => {
@@ -62,6 +65,27 @@ export default function Header({
       }
     }
   }, [activeURL, listMenu, showMenu]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await UseFetch(
+          API_LINK + "Utilities/GetDataCountingNotifikasi",
+          { application: APPLICATION_ID }
+        );
+
+        if (data === "ERROR") {
+          throw new Error();
+        } else {
+          setCountNotifikasi(data[0].counting);
+        }
+      } catch {
+        setCountNotifikasi("");
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div>
@@ -97,8 +121,11 @@ export default function Header({
                           <span>{menu.head}</span>
                           {/* Render a down-chevron icon if the menu is not "Beranda" */}
                           {menu.head !== "Beranda" && (
-                            <i className="fas fa-chevron-down" aria-hidden="true"></i>
-                          )}    
+                            <i
+                              className="fas fa-chevron-down"
+                              aria-hidden="true"
+                            ></i>
+                          )}
                         </div>
                       </a>
 
@@ -158,9 +185,25 @@ export default function Header({
             {isProfileDropdownVisible && (
               <ul className="profile-dropdown">
                 <li>
-                  <span  onClick={handleNotification} style={{ cursor: "pointer" }}>
-                  <i className="fas fa-bell" style={{ color: "#0A5EA8" }}></i>{" "}
-                  <span style={{ color: "#0A5EA8" }}>Notifikasi</span>
+                  <span
+                    onClick={handleNotification}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <i className="fas fa-bell" style={{ color: "#0A5EA8" }}></i>{" "}
+                    <span style={{ color: "#0A5EA8" }}>
+                      Notifikasi{" "}
+                      <span
+                        style={{
+                          background: "red",
+                          borderRadius: "50%",
+                          paddingLeft: "5px",
+                          paddingRight: "5px",
+                          color: "white",
+                        }}
+                      >
+                        {countNotifikasi}
+                      </span>
+                    </span>
                   </span>
                 </li>
                 <li>

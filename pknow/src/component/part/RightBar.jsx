@@ -647,7 +647,7 @@ export default function KMS_Rightbar({
                     label="Materi PDF"
                     onClick={onClick_materiPDF}
                   >
-                    Materi PDF
+                    Materi File
                   </button>
                 </div>
                 <div className="ml-3 mr-3 mt-3">
@@ -697,7 +697,7 @@ export default function KMS_Rightbar({
                     label="Sharing PDF"
                     onClick={onClick_sharingPDF}
                   >
-                    Sharing Expert PDF
+                    Sharing Expert File
                   </button>
                 </div>
                 <div className="ml-3 mr-3 mt-3">

@@ -153,12 +153,14 @@ export default function PICIndex({ onChangePage }) {
                     return value.data.status === "Menunggu";
                   })
                   .map((value) => (
+                    <div className="col-md-4 mb-4" key={value.data.id}>
                     <CardKK
                       key={value.data.id}
                       config={value.config}
                       data={value.data}
                       onChangePage={onChangePage}
                     />
+                    </div>
                   ))}
                 <div className="my-3">
                 <div

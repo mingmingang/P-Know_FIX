@@ -156,7 +156,7 @@ export default function MasterSharingAdd({ onChangePage }) {
     }));
   };
 
-  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf", 5);
+  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf,docx,xlsx,pptx", 10);
   const handleVideoChange = () =>
     handleFileChange(vidioInputRef, "mp4,mov", 100);
   const handleFileChange = async (ref, extAllowed, maxFileSize) => {
@@ -501,9 +501,9 @@ export default function MasterSharingAdd({ onChangePage }) {
                 <FileUpload
                   ref={fileInputRef}
                   forInput="mat_sharing_expert_pdf"
-                  label="File Sharing Expert (.pdf)"
-                  formatFile=".pdf"
-                  onChange={() => handlePdfChange(fileInputRef, "pdf")}
+                  label="File Sharing Expert (.pdf,.docx,.xlsx,.pptx,.mp4)"
+                  formatFile=".pdf,.docx,.xlsx,.pptx,.mp4"
+                  onChange={() => handlePdfChange(fileInputRef, "pdf,docx,xlsx,pptx")}
                   errorMessage={errors.mat_sharing_expert_pdf}
                   style={{ width: "195%" }}
                 />

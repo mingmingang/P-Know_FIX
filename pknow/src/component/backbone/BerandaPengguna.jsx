@@ -1,6 +1,13 @@
 import "../../style/BerandaPengguna.css";
 
-export default function BerandaPengguna({ backgroundPengguna, maskotUser, paddingTop, width, maskotHeight, marginLeft }) {
+export default function BerandaPengguna({
+  backgroundPengguna,
+  maskotUser,
+  paddingTop,
+  width,
+  maskotHeight,
+  marginLeft,
+}) {
   return (
     <div>
       <section
@@ -21,17 +28,17 @@ export default function BerandaPengguna({ backgroundPengguna, maskotUser, paddin
         <div
           className="imgDatang-maskot"
           style={{
-            paddingTop: paddingTop || '20vh', // Apply dynamic paddingTop, default is 20vh
-            width: width || '27%',            // Apply dynamic width, default is 27%
-            height: '100%',  
-            marginLeft: marginLeft || '0px'                  // Ensure full height
+            paddingTop: paddingTop || "20vh", // Apply dynamic paddingTop, default is 20vh
+            width: width || "27%", // Apply dynamic width, default is 27%
+            height: "100%",
+            marginLeft: marginLeft || "0px", // Ensure full height
           }}
         >
           <img
             className="maskot"
             src={maskotUser}
             alt="Ilustrasi Maskot User"
-            style={{ height: maskotHeight || '100%' }} // Apply dynamic maskot height, default is 100%
+            style={{ height: maskotHeight || "100%" }} // Apply dynamic maskot height, default is 100%
           />
         </div>
       </section>

@@ -196,6 +196,7 @@ export default function Forum({ onChangePage, isOpen }) {
           });
           console.log(response.data)
           if (response.data.length != 0) {
+            console.log("matId", AppContext_test.materiId)
             console.log("ayam",response.data);
             setCurrentData(response.data)
             return response.data;

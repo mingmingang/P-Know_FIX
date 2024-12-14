@@ -111,12 +111,12 @@ export default function KMS_Sidebar({ onChangePage, questionNumbers, selectedQue
       </div>
       {checkMainContent === 'detail_test' &&(
       <div
-        className="card mb-0 p-0 mx-auto"
+        className="mb-0 p-0 mx-auto"
         style={{ width: "90%" }}
       >
         <Button 
           classType="light py-2" 
-          label="Exit Review" 
+          label="Keluar Review" 
           onClick={exitReview} 
         />
       </div>
