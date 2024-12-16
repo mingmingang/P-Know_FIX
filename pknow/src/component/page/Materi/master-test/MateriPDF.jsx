@@ -16,6 +16,8 @@ import AppContext_test from "./TestContext";
 import ReactPlayer from 'react-player';
 import PDF_Viewer from "../../../part/PDF_Viewer";
 import KMS_Rightbar from "../../../part/RightBar";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../util/Encryptor";
 
   const inisialisasiData = [
     {
@@ -37,6 +39,10 @@ import KMS_Rightbar from "../../../part/RightBar";
   ];
 
 export default function MasterTestIndex({ onChangePage,materiId }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState(inisialisasiData);
@@ -124,55 +130,66 @@ useEffect(() => {
   }
   console.log("tes materi", AppContext_test.materiId);
 
- async function saveProgress() {
-    let success = false;
-    let retryCount = 0;
-    const maxRetries = 5; 
+//  async function saveProgress() {
+//     let success = false;
+//     let retryCount = 0;
+//     const maxRetries = 5; 
 
-    while (!success && retryCount < maxRetries) {
-      try {
-        const response = await axios.post(API_LINK + "Materis/SaveProgresMateri", formUpdate.current);
+//     while (!success && retryCount < maxRetries) {
+//       try {
+//         const response = await axios.post(API_LINK + "Materis/SaveProgresMateri", formUpdate.current);
         
-        if (response.data != 0){
-          success = true;
-          console.log(response.data)
-          AppContext_test.refreshPage += retryCount;
-          console.log(AppContext_test.refreshPage, "DS")
-          console.log('ds') 
+//         if (response.data != 0){
+//           success = true;
+//           console.log(response.data)
+//           AppContext_test.refreshPage += retryCount;
+//           console.log(AppContext_test.refreshPage, "DS")
+//           console.log('ds') 
+//         }
+//       } catch (error) {
+//         console.error("Failed to save progress:", error);
+//         retryCount += 1;
+//         if (retryCount >= maxRetries) {
+//           console.error("Max retries reached. Stopping attempts to save progress.");
+//         }
+//       }
+//     }
+//   }
+
+async function updateProgres() {
+  let success = false;
+  let retryCount = 0;
+  let maxRetries = 10;
+
+  while (!success && retryCount < maxRetries) {
+    try {
+      const response = await axios.post(
+        API_LINK + "Materi/UpdatePoinProgresMateri",
+        {
+          materiId: AppContext_test.materiId,
+          kry_user : activeUser,
+          tipe: 'Materi File'
         }
-      } catch (error) {
-        console.error("Failed to save progress:", error);
-        retryCount += 1;
-        if (retryCount >= maxRetries) {
-          console.error("Max retries reached. Stopping attempts to save progress.");
-        }
+      );
+      console.log("respon progres", response.status);
+      if (response.status === 200) {
+        success = true;
+      }
+    } catch (error) {
+      console.error("Failed to save progress:", error);
+      retryCount += 1;
+      if (retryCount >= maxRetries) {
+        console.error(
+          "Max retries reached. Stopping attempts to save progress."
+        );
       }
     }
   }
-
-  // async function updateProgres() {
-  //   let success = false;
-  //   let retryCount = 0;
-  //   const maxRetries = 5; 
-
-  //   while (!success && retryCount < maxRetries) {
-  //     try {
-  //       const response = await axios.post(API_LINK + "Materis/UpdatePoinProgresMateri", {
-  //         materiId: AppContext_test.materiId,
-  //       });
-  //     } catch (error) {
-  //       console.error("Failed to save progress:", error);
-  //       retryCount += 1;
-  //       if (retryCount >= maxRetries) {
-  //         console.error("Max retries reached. Stopping attempts to save progress.");
-  //       }
-  //     }
-  //   }
-  // };
+}
 
   useEffect(() => {
-    saveProgress();
-    // updateProgres();
+    //saveProgress();
+    updateProgres();
   }, []);
 
 
@@ -192,7 +209,7 @@ return (
      isActivePostTest={false}
       isOpen={true}
       onChangePage={onChangePage}
-      materiId={materiId}
+      materiId={AppContext_test.materiId}
       // refreshKey={refreshKey}
       // setRefreshKey={setRefreshKey}
     />
@@ -229,22 +246,6 @@ return (
           )}</div>
           )}
           {fileExtension === "mp4" && (
-            //   <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden", maxWidth: "100%" }}>
-            //   <iframe
-            //     src={`${API_LINK}Upload/GetFile/${fileData.file}`}
-            //     style={{
-            //       position: "absolute",
-            //       top: 0,
-            //       left: 0,
-            //       width: "100%",
-            //       height: "100%",
-            //       objectFit: "contain",
-            //       borderRadius:"20px"
-            //     }}
-            //     title="Video Frame"
-            //   ></iframe>
-            // </div>
-
             <ReactPlayer
               url={`${API_LINK}Upload/GetFile/${fileData.file}`}
               playing={true}

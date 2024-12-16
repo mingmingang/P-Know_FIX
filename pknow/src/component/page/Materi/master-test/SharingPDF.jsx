@@ -128,7 +128,7 @@ export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, mat
      isActivePostTest={false}
       isOpen={true}
       onChangePage={onChangePage}
-      materiId={materiId}
+      materiId={AppContext_test.materiId}
       // refreshKey={refreshKey}
       // setRefreshKey={setRefreshKey}
     />

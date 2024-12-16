@@ -483,6 +483,7 @@ const renderJudulForum = () => {
        isActivePostTest={false}
         isOpen={true}
         onChangePage={onChangePage}
+        materiId={AppContext_test.materiId}
         // refreshKey={refreshKey}
         // setRefreshKey={setRefreshKey}
     />

@@ -20,26 +20,26 @@ import BackPage from "../../../../../assets/backPage.png";
 import Konfirmasi from "../../../../part/Konfirmasi";
 import NoImage from "../../../../../assets/NoImage.png";
 
-const steps = ["Pengenalan", "Materi", "Forum"];
+const steps = ["Pengenalan", "Materi", "Forum", "Sharing Expert", "Pre Test", "Post Test"];
 
 function getStepContent(stepIndex) {
-    switch (stepIndex) {
-      case 0:
-        return 'pengenalanEdit';
-      case 1:
-        return 'materiEdit';
-      case 2:
-        return 'forumEdit';
-        case 3:
-        return 'sharingEdit';
-      case 4:
-        return 'pretestEdit';
-        case 5:
-        return 'posttestEdit';
-      default:
-        return 'Unknown stepIndex';
-    }
+  switch (stepIndex) {
+    case 0:
+      return 'pengenalanEdit';
+    case 1:
+      return 'materiEdit';
+    case 2:
+      return 'forumEdit';
+      case 3:
+      return 'sharingEdit';
+    case 4:
+      return 'pretestEdit';
+      case 5:
+      return 'posttestEdit';
+    default:
+      return 'Unknown stepIndex';
   }
+}
 
   function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
     return (
@@ -48,11 +48,11 @@ function getStepContent(stepIndex) {
           {steps.map((label, index) => (
             <Step
               key={label}
-              onClick={() => onChangePage(getStepContent(index))} // Tambahkan onClick di sini
+              //onClick={() => onChangePage(getStepContent(index))} // Tambahkan onClick di sini
               sx={{
                 cursor: "pointer", // Menambahkan pointer untuk memberikan indikasi klik
                 "& .MuiStepIcon-root": {
-                  fontSize: "2rem",
+                  fontSize: "1.5rem",
                   color: index <= activeStep ? "primary.main" : "grey.300",
                   "&.Mui-active": {
                     color: "primary.main",
@@ -98,6 +98,8 @@ function getStepContent(stepIndex) {
   
   const kategori = AppContext_test.KategoriIdByKK;
   const Materi = AppContext_test.DetailMateriEdit;
+
+  console.log("materii",AppContext_test.DetailMateriEdit )
 
   const stripHTMLTags = (htmlContent) => {
     const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
@@ -332,11 +334,9 @@ useEffect(() => {
     <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
             <div className="back-and-title" style={{display:"flex"}}>
               <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
-                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Edit Materi</h4>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Edit Pengenalan Materi</h4>
               </div>
-                <div className="ket-draft">
-                <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
-                </div>
+               
               </div>
       <form onSubmit={handleAdd} style={{margin:"20px 100px"}}>
         <div className="mb-4">

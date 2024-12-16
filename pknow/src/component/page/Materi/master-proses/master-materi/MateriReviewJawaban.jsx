@@ -3,13 +3,14 @@ import { Stepper } from 'react-form-stepper';
 import Loading from "../../../../part/Loading";
 import Icon from "../../../../part/Icon";
 import { Card, ListGroup, Button, Badge, Form } from "react-bootstrap";
-import LocalButton from "../../../../part/Button";
+import LocalButton from "../../../../part/Button copy";
 import axios from "axios";
 import AppContext_test from "../../master-test/TestContext";
 import { API_LINK } from "../../../../util/Constants";
 import Swal from 'sweetalert2';
 import Alert from "../../../../part/Alert";
 import SweetAlert from "../../../../util/SweetAlert";
+import he from "he";
 
 export default function MasterMateriReviewJawaban({ onChangePage, status, withID }) {
   const [isError, setIsError] = useState(false);
@@ -20,8 +21,8 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
   const [currentAnswers, setCurrentAnswers] = useState([]);
   const [badges, setBadges] = useState([]);
   const [reviewStatus, setReviewStatus] = useState([]);
-
   const [formDataReview, setFormDataReview] = useState([]);
+
 
   const handleSubmitAction = async () => {
     try {
@@ -69,13 +70,13 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
   };
 
   useEffect(() => {
-    console.log("ayaaamm")
     let isMounted = true;
     const fetchData = async () => {
       setIsError(false);
       setIsLoading(true);
       try {
         const data = await fetchDataWithRetry();
+        console.log("dataa", data)
         if (isMounted) {
           if (data && Array.isArray(data)) {
             if (!data || data.length === 0) {
@@ -86,8 +87,8 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
               setCurrentData(data);
               setBadges(Array(data.length).fill(null).map(() => Array(0).fill(0)));
               setReviewStatus(Array(data.length).fill(null).map(() => Array(0).fill(false)));
-              await fetchQuestions(data[0].qui_tipe);
-              await fetchAnswers(data[0].qui_tipe, data[0].kry_id);
+              await fetchQuestions(data[0].qui_id);
+              await fetchAnswers(data[0].qui_tipe, data[0].usr_id);
             }
           } else {
             throw new Error("Data format is incorrect");
@@ -113,6 +114,8 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
         const response = await axios.post(API_LINK + "Quiz/GetDataTransaksiReview", {
           quizId: AppContext_test.materiId,
         });
+        console.log("materi",  AppContext_test.materiId)
+        console.log("data review", response.data)
         if (response.data.length !== 0) {
           setIsLoading(false)
           const filteredTransaksi = response.data.filter(transaksi =>
@@ -130,6 +133,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
       }
     }
   };
+
   fetchData();
 
   return () => {
@@ -143,10 +147,9 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     for (let i = 0; i < retries; i++) {
       try {
         const response = await axios.post(API_LINK + "Quiz/GetDataQuestion", {
-          quizId: AppContext_test.materiId,
-          status: "Aktif",
-          questionType: questionType,
+          quizId: questionType,
         });
+        console.log("pertanyaan",response.data)
         if (response.data.length !== 0) {
           const filteredQuestions = response.data.filter(question =>
             question.TipeSoal === "Essay" || question.TipeSoal === "Praktikum"
@@ -172,9 +175,10 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
         setIsLoading(true);
         const response = await axios.post(API_LINK + "Quiz/GetDataResultQuiz", {
           quizId: AppContext_test.materiId,
-          idKaryawan: karyawanId,
           questionType: questionType,
+          idKaryawan: karyawanId,
         });
+        console.log("result quiz", response.data)
         if (response.data.length !== 0) {
           const filteredAnswer = response.data.filter(answer =>
             answer.Status === "Not Reviewed"
@@ -197,7 +201,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
   useEffect(() => {
     if (currentData.length > 0) {
       fetchQuestions(currentData[currentRespondentIndex].qui_tipe);
-      fetchAnswers(currentData[currentRespondentIndex].qui_tipe, currentData[currentRespondentIndex].kry_id);
+      fetchAnswers(currentData[currentRespondentIndex].qui_tipe, currentData[currentRespondentIndex].usr_id);
     }
   }, [currentRespondentIndex, currentData]);
   
@@ -235,6 +239,8 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
       idTransaksi: transaksiId,
     };
 
+    console.log("data dtelai", detail)
+
     setFormDataReview([...formDataReview, detail]);
 
     setCurrentData(
@@ -262,7 +268,6 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     if (index !== -1) {
       formDataReview.splice(index, 1); 
     }
-
     badges[idSoal] = null;
   };
 
@@ -289,7 +294,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
   }
 
   const currentRespondent = currentData[currentRespondentIndex];
-  const jawabanPenggunaStr = currentRespondent.trq_jawaban_pengguna;
+  const jawabanPenggunaStr = currentRespondent.ans_jawaban_pengguna;
 
   const jawabanPengguna = jawabanPenggunaStr
       .slice(1, -1)  
@@ -333,8 +338,13 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     }
   };
 
+  const removeHtmlTags = (str) => {
+    return str.replace(/<\/?[^>]+(>|$)/g, ''); // Menghapus semua tag HTML
+  };
+  
+
   return (
-    <div className="container mt-4">
+    <div className="container" style={{marginTop:'120px'}}>
       {/* {isLoading ? (
         <Loading />
       ) : ( */}
@@ -406,8 +416,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
                         </Badge>
                       }
                     </div>
-                    
-                    <div dangerouslySetInnerHTML={{ __html: question.Soal }} /> 
+                    <div className="">{removeHtmlTags(he.decode(question.Soal))}</div>
                     
                   </div>
                 </Card.Header>
@@ -419,7 +428,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
                         <Form.Control
                           as="textarea"
                           rows={3}
-                          value={matchedAnswer?.namaFile ? matchedAnswer.namaFile : "Tidak ada jawaban"}
+                          value={currentRespondent.ans_jawaban_pengguna}
                           onChange={(e) => handleAnswerChange(questionIndex, e.target.value)}
                           disabled={true}
                         />
@@ -466,7 +475,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
           })}
         </Card.Body>
       </Card>
-    <div className="float my-4 mx-1">
+    <div className="float my-4 mx-1 d-flex" style={{justifyContent:"space-between"}}>
       <LocalButton
         classType="outline-secondary me-2 px-4 py-2"
         label="Kembali"

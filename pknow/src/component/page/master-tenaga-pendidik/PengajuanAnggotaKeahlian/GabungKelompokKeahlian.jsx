@@ -58,6 +58,8 @@ export default function PengajuanAdd({ onChangePage, withID }) {
     lampirans: [],
   });
 
+  console.log("prodi", withID["Kode Prodi"]);
+
   const userSchema = object({
     kke_id: string(),
     kry_id: string(),
@@ -299,6 +301,39 @@ export default function PengajuanAdd({ onChangePage, withID }) {
                 "Data Pengajuan berhasil disimpan",
                 "success"
               );
+              UseFetch(API_LINK + "Utilities/createNotifikasi", {
+                p1: "SENTTOPRODI", // Penanda aksi
+                p2: "ID123458", // ID pengajuan
+                p3: "APP59", // Aplikasi
+                p4: "TENAGA PENDIDIK", // Pengirim
+                p5: formDataRef.current.creaby, // CC (not_cc)
+                p6: "Terdapat Pengajuan Anggota Kelompok Keahlian", // Pesan
+                p7: "Persetujuan Anggota KK", // Subjek
+                p8: "Tenaga Pendidik Menunggu Persetujuan Anggota Kelompok Keahlian", // Body Message
+                p9: "Dari Tenaga Pendidik", // Footer Pesan
+                p10: "0", // Tipe Notifikasi
+                p11: "Jenis Lain", // ID Pengajuan
+                p12: formDataRef.current.creaby, // Pembuat notifikasi
+                p13: 'ROL02', // User pembuat notifikasi
+                p14: withID["Kode Prodi"],
+              })
+                .then((data) => {
+                  if (data === "ERROR" || data.length === 0) {
+                    setIsError(true);
+                    SweetAlert(
+                      "Error",
+                      "Gagal mengirimkan notifikasi.",
+                      "error"
+                    );
+                  } else {
+                    SweetAlert(
+                      "Berhasil",
+                      "Notifikasi telah dikirimkan ke PRODI. Tunggu konfirmasi dari PRODI.",
+                      "success"
+                    );
+                  }
+                })
+
               window.location.reload();
             }
           } catch (error) {

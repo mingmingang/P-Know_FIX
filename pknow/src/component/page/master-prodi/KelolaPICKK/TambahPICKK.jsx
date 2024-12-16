@@ -12,8 +12,14 @@ import Konfirmasi from "../../../part/Konfirmasi";
 import BackPage from "../../../../assets/backPage.png";
 import FileUpload from "../../../part/FileUpload";
 import UploadFile from "../../../util/UploadFile";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../util/Encryptor";
 
 export default function TambahPIC({ onChangePage, withID }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -184,6 +190,8 @@ export default function TambahPIC({ onChangePage, withID }) {
     }
   }, [formDataRef.current.programStudi]);
 
+  console.log("id kry", formDataRef.current.personInCharge);
+
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -225,11 +233,65 @@ export default function TambahPIC({ onChangePage, withID }) {
             message: "Gagal mengubah status kelompok keahlian.",
           }));
         } else {
+          UseFetch(API_LINK + "Utilities/createNotifikasi", {
+            p1: "SENTTOTENAGAPENDIDIK",
+            p2: "ID12346",
+            p3: "APP59",
+            p4: "PRODI",
+            p5: activeUser,
+            p6: "Anda terpilih sebagai PIC Kelompok Keahlian yang dipilih oleh Prodi",
+            p7: "Notifikasi PIC Kelompok Keahlian",
+            p8: "Dimohon untuk membuat Progaram beserta Kategori Program.",
+            p9: "Dari PRODI",
+            p10: "0",
+            p11: "Jenis Lain",
+            p12: activeUser,
+            p13: "ROL03",
+            p14: formDataRef.current.personInCharge,
+          }).then((data) => {
+            if (data === "ERROR" || data.length === 0) setIsError(true);
+            else {
+              SweetAlert(
+                "Berhasil",
+                "Notifikasi telah dikirimkan ke Tenaga Pendidik.",
+                "success"
+              );
+              UseFetch(API_LINK + "Utilities/createNotifikasi", {
+                p1: "SENTOPICPKNOW", // Penanda aksi
+                p2: "ID123457", // ID pengajuan
+                p3: "APP59", // Aplikasi
+                p4: "PRODI", // Pengirim
+                p5: activeUser, // CC (not_cc)
+                p6: "PIC KK telah ditetapkan oleh Prodi", // Pesan
+                p7: "Penetapan PIC KK", // Subjek
+                p8: "PIC KK telah berhasil dipilih oleh Prodi", // Body Message
+                p9: "Dari Prodi", // Footer Pesan
+                p10: "0", // Tipe Notifikasi
+                p11: "Jenis Lain", // ID Pengajuan
+                p12: activeUser,
+                p13: 'ROL01', // User pembuat notifikasi
+              }).then((data) => {
+                console.log("notifikasi", data);
+                if (data === "ERROR" || data.length === 0) setIsError(true);
+                else {
+                  SweetAlert(
+                    "Berhasil",
+                    "Notifikasi telah dikirimkan ke PIC P-KNOW.",
+                    "success"
+                  );
+                }
+              });
+            }
+          });
+
           SweetAlert(
             "Sukses",
             "PIC kelompok keahlian berhasil ditambahkan",
             "success"
           );
+
+          
+
         onChangePage("index");
       }
     }

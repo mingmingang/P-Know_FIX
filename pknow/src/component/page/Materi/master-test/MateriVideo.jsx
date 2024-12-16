@@ -187,7 +187,7 @@ export default function MasterTestIndex({ onChangePage, materiId }) {
      isActivePostTest={false}
      isOpen={true}
       onChangePage={onChangePage}
-      materiId={materiId}
+      materiId={AppContext_test.materiId}
       // refreshKey={refreshKey}
       // setRefreshKey={setRefreshKey}
     />
@@ -223,6 +223,7 @@ export default function MasterTestIndex({ onChangePage, materiId }) {
                                     marginTop: "5px",
                                   }}
                                 />
+                                
                               ) : (
                                 <div className="alert alert-warning mt-4 mb-4 ml-0" >
                                 Tidak ada Materi Video yang tersedia.

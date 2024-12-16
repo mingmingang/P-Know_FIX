@@ -158,7 +158,7 @@ export default function MasterSharingAdd({ onChangePage }) {
 
   const handlePdfChange = () => handleFileChange(fileInputRef, "pdf,docx,xlsx,pptx", 10);
   const handleVideoChange = () =>
-    handleFileChange(vidioInputRef, "mp4,mov", 100);
+    handleFileChange(vidioInputRef, "mp4,mov", 250);
   const handleFileChange = async (ref, extAllowed, maxFileSize) => {
     const file = ref.current.files[0];
     const fileName = file.name;
@@ -527,7 +527,7 @@ export default function MasterSharingAdd({ onChangePage }) {
                   forInput="mat_sharing_expert_video"
                   label="Video Sharing Expert (.mp4, .mov)"
                   formatFile=".mp4,.mov"
-                  maxFileSize={100}
+                  maxFileSize={250}
                   onChange={() => handleVideoChange(vidioInputRef, "mp4,mov")}
                   errorMessage={errors.mat_sharing_expert_video}
                   style={{ width: "195%" }}

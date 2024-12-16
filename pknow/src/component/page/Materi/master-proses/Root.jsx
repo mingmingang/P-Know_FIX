@@ -19,8 +19,8 @@ import MasterMateriReviewJawaban from "./master-materi/MateriReviewJawaban";
 // // Sharing Expert
 import MasterSharingAdd from "./master-sharing/SharingAdd";
 // import MasterSharingDetailNot from "./master-sharing/SharingDetailNot";
-// import MasterSharingEditNot from "./master-sharing/SharingEditNot";
-// import MasterSharingEdit from "./master-sharing/SharingEdit";
+import MasterSharingEditNot from "./master-sharing/SharingEditNot";
+import MasterSharingEdit from "./master-sharing/SharingEdit";
 // import MasterSharingDetail from "./master-sharing/SharingDetail";
 // // Forum
 import MasterForumAdd from "./master-forum/ForumAdd";
@@ -106,15 +106,15 @@ export default function MasterProses() {
       //           onChangePage={handleSetPageMode}
       //           withID={dataID}
       //          />;
-      // case "sharingEdit":
-      //   return <MasterSharingEdit 
-      //           onChangePage={handleSetPageMode}
-      //           withID={dataID}/>;
-      // case "sharingEditNot":
-      //   return <MasterSharingEditNot 
-      //           onChangePage={handleSetPageMode}
-      //           withID={dataID}
-      //           />;
+      case "sharingEdit":
+        return <MasterSharingEdit 
+                onChangePage={handleSetPageMode}
+                withID={dataID}/>;
+      case "sharingEditNot":
+        return <MasterSharingEditNot 
+                onChangePage={handleSetPageMode}
+                withID={dataID}
+                />;
       // case "sharingDetail":
       //   return <MasterSharingDetail 
       //           onChangePage={handleSetPageMode} 

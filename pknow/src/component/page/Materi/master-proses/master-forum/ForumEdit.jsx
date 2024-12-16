@@ -52,7 +52,7 @@ function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
             sx={{
               cursor: "pointer",
               "& .MuiStepIcon-root": {
-                fontSize: "2rem",
+                fontSize: "1.5rem",
                 color: index <= activeStep ? "primary.main" : "grey.300",
                 "&.Mui-active": {
                   color: "primary.main",
@@ -96,7 +96,6 @@ export default function MasterForumEdit({ onChangePage }) {
   const [isBackAction, setIsBackAction] = useState(false); 
 
   const handleGoBack = () => {
-    console.log(AppContext_test.activeUser);
     setIsBackAction(true);  
     setShowConfirmation(true);  
   };
@@ -232,13 +231,10 @@ export default function MasterForumEdit({ onChangePage }) {
      <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
             <div className="back-and-title" style={{display:"flex"}}>
               <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
-                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Materi Baru</h4>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Edit Forum</h4>
               </div>
-                <div className="ket-draft">
-                <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
-                </div>
               </div>
-      <form onSubmit={handleAdd}>
+      <form onSubmit={handleAdd} style={{margin:"20px 100px"}}>
         <div>
         <div className="mb-4">
         <CustomStepper
@@ -251,7 +247,7 @@ export default function MasterForumEdit({ onChangePage }) {
          
         </div>
   
-        <div className="card mt-0" style={{margin:"100px"}}>
+        <div className="card mt-0" >
           {/* Handling different scenarios */}
           {isLoading && (
             <div className="card-body">
@@ -318,9 +314,9 @@ export default function MasterForumEdit({ onChangePage }) {
    <div className="d-flex justify-content-between my-4 mx-1 mt-0">
           <div className="ml-4">
           <Button
-            classType="outline-secondary me-2 px-4 py-2"
+            classType="dark ms-3 px-4 py-2"
             label="Sebelumnya"
-            onClick={() => onChangePage("materiAdd", AppContext_test.ForumForm = formData)}
+            onClick={() => onChangePage("materiEdit", AppContext_master.MateriForm = AppContext_test.DetailMateriEdit, AppContext_master.count += 1)}
           />
           </div>
           <div className="d-flex mr-4" >
@@ -333,7 +329,7 @@ export default function MasterForumEdit({ onChangePage }) {
           <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("posttestAdd", AppContext_test.ForumForm = formData)}
+            onClick={() => onChangePage("sharingEdit", AppContext_test.ForumForm = formData, AppContext_master.MateriForm = AppContext_test.DetailMateriEdit, AppContext_master.count += 1)}
           />
           </div>
         </div>

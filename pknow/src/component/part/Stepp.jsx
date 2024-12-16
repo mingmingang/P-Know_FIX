@@ -107,11 +107,15 @@ function CustomStepper({
 
   return (
     <Box sx={{ width: "100%", mt: 2 }}>
-      <Stepper activeStep={activeStep} alternativeLabel>
+      <Stepper 
+      activeStep={activeStep} 
+      alternativeLabel>
         {steps.map((label, index) => (
-          <Step key={index} onClick={() => handleChangeActiveStep(index)}>
+          <Step key={index} 
+          //onClick={() => handleChangeActiveStep(index)}
+          >
             <StepLabel 
-            onClick={() => handleChangePage(index)}
+            //onClick={() => handleChangePage(index)}
               sx={{ cursor: "pointer", "&:hover": { color: "primary.main" } }}
             >
               {label}

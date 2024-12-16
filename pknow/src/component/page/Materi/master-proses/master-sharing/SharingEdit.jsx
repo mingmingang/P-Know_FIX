@@ -1,93 +1,210 @@
 import { useRef, useState } from "react";
 import { object, string } from "yup";
-import { API_LINK } from "../../../util/Constants";
-import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
-import SweetAlert from "../../../util/SweetAlert";
-import UseFetch from "../../../util/UseFetch";
-import UploadFile from "../../../util/UploadFile";
-import Button from "../../../part/Button";
-import DropDown from "../../../part/Dropdown";
-import Input from "../../../part/Input";
-import Loading from "../../../part/Loading";
-import Alert from "../../../part/Alert";
+import { API_LINK } from "../../../../util/Constants";
+import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
+import SweetAlert from "../../../../util/SweetAlert";
+import UseFetch from "../../../../util/UseFetch";
+import UploadFile from "../../../../util/UploadFile";
+import Button from "../../../../part/Button copy";
+import DropDown from "../../../../part/Dropdown";
+import Input from "../../../../part/Input";
+import Loading from "../../../../part/Loading";
+import Alert from "../../../../part/Alert";
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
-import FileUpload from "../../../part/FileUpload";
-import uploadFile from "../../../util/UploadFile";
-import { Stepper, Step, StepLabel } from '@mui/material';
-
+import FileUpload from "../../../../part/FileUpload";
+import uploadFile from "../../../../util/UploadFile";
+import { Stepper, Step, StepLabel, Box  } from '@mui/material';
+import Konfirmasi from "../../../../part/Konfirmasi";
+import BackPage from "../../../../../assets/backPage.png";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../../util/Encryptor";
 import axios from "axios";
-const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+
+const steps = ["Pengenalan", "Materi", "Forum", "Sharing Expert", "Pre Test", "Post Test"];
 
 function getStepContent(stepIndex) {
   switch (stepIndex) {
     case 0:
-      return 'materiAdd';
+      return 'pengenalanEdit';
     case 1:
-      return 'pretestAdd';
+      return 'materiEdit';
     case 2:
-      return 'sharingAdd';
-    case 3:
-      return 'forumAdd';
+      return 'forumEdit';
+      case 3:
+      return 'sharingEdit';
     case 4:
-      return 'posttestAdd';
+      return 'pretestEdit';
+      case 5:
+      return 'posttestEdit';
     default:
       return 'Unknown stepIndex';
   }
 }
 
-const previewFile = async (namaFile) => {
-    try {
-      namaFile = namaFile.trim();
-      const response = await axios.get(`${API_LINK}Utilities/Upload/DownloadFile`, {
-        params: {
-          namaFile 
-        },
-        responseType: 'arraybuffer' 
-      }); 
+function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
+  return (
+    <Box sx={{ width: "100%", mt: 2 }}>
+      <Stepper activeStep={activeStep} alternativeLabel>
+        {steps.map((label, index) => (
+          <Step
+            key={label}
+            onClick={() => onChangePage(getStepContent(index))} 
+            sx={{
+              cursor: "pointer",
+              "& .MuiStepIcon-root": {
+                fontSize: "1.5rem",
+                color: index <= activeStep ? "primary.main" : "grey.300",
+                "&.Mui-active": {
+                  color: "primary.main",
+                },
+                "& .MuiStepIcon-text": {
+                  fill: "#fff",
+                  fontSize: "1rem",
+                },
+              },
+            }}
+          >
+            <StepLabel
+              sx={{
+                "& .MuiStepLabel-label": {
+                  typography: "body1",
+                  color: index <= activeStep ? "primary.main" : "grey.500",
+                },
+              }}
+            >
+              {label}
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
+  );
+}
 
-      const blob = new Blob([response.data], { type: response.headers['content-type'] });
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-    } catch (error) {
-    }
-  };
-
-export default function MasterSharingAdd({ onChangePage }) {
+export default function MasterSharingEdit({ onChangePage }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isBackAction, setIsBackAction] = useState(false); 
 
   const fileInputRef = useRef(null);
-  const gambarInputRef = useRef(null);
   const vidioInputRef = useRef(null);
 
   const Materi = AppContext_test.DetailMateriEdit;
 
-  const formDataRef = useRef({
-    mat_id: Materi.Key,
-    mat_sharing_expert_pdf: Materi.Sharing_pdf || "",
-    mat_sharing_expert_video: Materi.Sharing_video || "",
-  });
+  console.log("id materi", Materi)
+ 
 
-  const userSchema = object({
-    mat_id: string(),
-    mat_sharing_expert_pdf: string(),
-    mat_sharing_expert_video: string(),
-  });
+  async function fetchSectionData() {
+    try {
+      const response = await axios.post(API_LINK + 'Section/GetDataSectionByMateri', {
+        p1 : Materi.Key,
+        p2 : 'Sharing Expert',
+        p3 : 'Aktif'
+      });
 
-  const handleInputChange = async (e) => {
-    const { name, value } = e.target;
-    const validationError = await validateInput(name, value, userSchema);
-    formDataRef.current[name] = value;
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [validationError.name]: validationError.error,
-    }));
+      // Handle the response
+      if (response.status === 200) {
+        const data = response.data;
+        console.log('Fetched data:', data);
+
+        // Extract sec_id and mat_id if needed
+        const secId = data[0].SectionId;
+        const materialId = Materi.Key;
+
+        console.log('Section ID:', secId);
+        console.log('Material ID:', materialId);
+
+        formDataRef.current.sec_id = secId;
+        formDataRef.current.mat_id = materialId;
+
+        // Return or process the data as needed
+        return { secId, materialId};
+      } else {
+        console.error('Failed to fetch data, status:', response.status);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      return null;
+    }
+  }
+
+  const matIdFromContext = AppContext_master.MateriForm;
+
+  const previewFile = async (namaFile) => {
+    try {
+      namaFile = namaFile.trim();
+      console.log(namaFile);
+      const response = await axios.get(
+        `${API_LINK}Upload/GetFile/${namaFile}`,
+        {
+          responseType: "arraybuffer",
+        }
+      );
+      const blob = new Blob([response.data], {
+        type: response.headers["content-type"],
+      });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Error fetching file:", error);
+    }
   };
 
-  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf", 5);
-  const handleVideoChange = () => handleFileChange(vidioInputRef, "mp4,mov", 100);
+
+  fetchSectionData(matIdFromContext).then((data) => {
+    if (data) {
+      console.log('Data fetched successfully:', data);
+    } else {
+      console.log('Failed to fetch data.');
+    }
+  });
+
+
+
+  const handleGoBack = () => {
+    setIsBackAction(true);  
+    setShowConfirmation(true);  
+  };
+
+  const handleConfirmYes = () => {
+    setShowConfirmation(false); 
+    window.location.reload();
+  };
+
+
+  const handleConfirmNo = () => {
+    setShowConfirmation(false);  
+  };
+
+  
+
+  console.log("data materi", Materi)
+
+  const formDataRef = useRef({
+    sec_id: "",
+    mat_id: "",
+    mat_sharing_expert_pdf: "",
+    mat_sharing_expert_video: "",
+  });
+
+
+  const userSchema = object({
+    sec_id: string(),
+    mat_id: string().required("ID Materi tidak boleh kosong"),
+    mat_sharing_expert_pdf: string(),
+    mat_sharing_expert_video: string(),
+
+  });
+
+  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf", 10);
+  const handleVideoChange = () => handleFileChange(vidioInputRef, "mp4,mov", 250);
   const handleFileChange = async (ref, extAllowed, maxFileSize) => {
     const { name, value } = ref.current;
     const file = ref.current.files[0];
@@ -112,137 +229,119 @@ export default function MasterSharingAdd({ onChangePage }) {
     }));
   };
 
-  let hasPdfFile = false;
-  let hasVideoFile = false;
   const handleAdd = async (e) => {
     e.preventDefault();
-
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
       setErrors
     );
 
-    const hasPDF = Materi.Sharing_pdf !== null && Materi.Sharing_pdf !== "";
-    const hasVideo = Materi.Sharing_video !== null && Materi.Sharing_video !== "";
+    const isPdfEmpty = !fileInputRef.current.files.length;
+    const isVideoEmpty = !vidioInputRef.current.files.length;
 
-    if (!hasPDF && !hasVideo) {
+    if (isPdfEmpty && isVideoEmpty) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        mat_sharing_expert_pdf: "Pilih salah satu antara PDF atau Video",
+        mat_sharing_expert_video: "Pilih salah satu antara PDF atau Video",
+      }));
       return;
     }
 
-    if (Object.values(validationErrors).every((error) => !error)) {
+    console.log("formDataRef.current:", formDataRef.current);
+    
+    if (
+      Object.values(validationErrors).every((error) => !error) &&
+      (!isPdfEmpty || !isVideoEmpty)
+    ) {
       setIsLoading(true);
       setIsError({ error: false, message: "" });
       setErrors({});
 
       const uploadPromises = [];
 
+      // Upload file PDF jika ada
       if (fileInputRef.current && fileInputRef.current.files.length > 0) {
         uploadPromises.push(
           uploadFile(fileInputRef.current).then((data) => {
-            formDataRef.current["mat_sharing_expert_pdf"] = data.newFileName;
-            AppContext_test.sharingExpertPDF = data.newFileName;
+            formDataRef.current.mat_sharing_expert_pdf = data.Hasil;
+            AppContext_test.sharingExpertPDF = data.Hasil;
           })
         );
-        hasPdfFile = true;
       }
-
+      // Upload file video jika ada
       if (vidioInputRef.current && vidioInputRef.current.files.length > 0) {
         uploadPromises.push(
           uploadFile(vidioInputRef.current).then((data) => {
-            formDataRef.current["mat_sharing_expert_video"] = data.newFileName;
-            AppContext_test.sharingExpertVideo = data.newFileName;
+            formDataRef.current.mat_sharing_expert_video = data.Hasil;
+            AppContext_test.sharingExpertVideo = data.Hasil;
           })
         );
-        hasVideoFile = true;
       }
-      console.log(hasPdfFile, hasVideoFile)
-      if (!hasPdfFile && !hasVideoFile) {
-        setIsLoading(false);
-        setIsError(prevError => ({
-          ...prevError,
-          error: true,
-          message: "Harus memilih salah satu file PDF atau file video, tidak boleh keduanya kosong."
-        }));
-        return;
-      }
+      try {
+        await Promise.all(uploadPromises);
 
-      Promise.all(uploadPromises).then(() => {
-        UseFetch(
-          API_LINK + "SharingExperts/SaveDataSharing",
-          formDataRef.current
-        )
-          .then((data) => {
-            if (data === "ERROR") {
-              setIsError({ error: true, message: "Terjadi kesalahan: Gagal menyimpan data Sharing." });
-            } else {
-              SweetAlert("Sukses", "Data Sharing Expert berhasil disimpan", "success");
-              // onChangePage("index");
-            }
-          })
-          .catch((err) => {
-            setIsError({ error: true, message: "Terjadi kesalahan: " + err.message });
-          })
-          .finally(() => setIsLoading(false));
-      });
+        // Kirim data ke API
+        const response = await axios.post(API_LINK + "SharingExpert/UpdateDataSharing", {
+          p1: formDataRef.current.sec_id, 
+          p2: formDataRef.current.mat_sharing_expert_pdf || "", 
+          p3: formDataRef.current.mat_sharing_expert_video || "", 
+          p4: activeUser, 
+        });
+
+        if (response.status === 200) {
+          SweetAlert("Berhasil", "Data Sharing Expert berhasil diubah!", "success");
+        } else {
+          throw new Error("Gagal untuk menyimpan data Sharing Expert");
+        }
+      } catch (error) {
+        console.error("Error editing Sharing Expert data:", error);
+        setIsError({
+          error: true,
+          message: "Terjadi kesalahan: " + error.message,
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
+
 
   if (isLoading) return <Loading />;
 
   const hasPDF = Materi.Sharing_pdf !== null && Materi.Sharing_pdf !== "";
   const hasVideo = Materi.Sharing_video !== null && Materi.Sharing_video !== "";
-const [activeStep, setActiveStep] = useState(2);
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  const handlePageChange = (content) => {
+    onChangePage(content);
   };
 
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
 
-  const handleReset = () => {
-    setActiveStep(0);
-  };
   return (
     <>
+     <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
+            <div className="back-and-title" style={{display:"flex"}}>
+              <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Edit Sharing Expert</h4>
+              </div>
+              </div>
       {isError.error && (
         <div className="flex-fill">
           <Alert type="danger" message={isError.message} />
         </div>
       )}
-      <form onSubmit={handleAdd}>
-        <div>
-          <Stepper activeStep={activeStep}>
-            {steps.map((label, index) => (
-              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-          <div>
-            {activeStep === steps.length ? (
-              <div>
-                <Button onClick={handleReset}>Reset</Button>
-              </div>
-            ) : (
-              <div>
-                <Button disabled={activeStep === 0} onClick={handleBack}>
-                  Back
-                </Button>
-                <Button variant="contained" color="primary" onClick={handleNext}>
-                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                </Button>
-              </div>
-            )}
-          </div>
+      
+      <form onSubmit={handleAdd} style={{marginBottom:"20px"}}>
+      <div className="mb-4">
+            <CustomStepper
+          activeStep={3}
+          steps={steps}
+          onChangePage={handlePageChange}
+          getStepContent={getStepContent}
+        />
         </div>
-
-        <div className="card">
-          <div className="card-header bg-outline-primary fw-medium text-black">
-            Edit Sharing Expert
-          </div>
+        <div className="card" style={{margin:"0px 80px"}}>
           <div className="card-body p-4">
             {hasPDF || hasVideo ? (
               <div className="row">
@@ -275,7 +374,7 @@ const [activeStep, setActiveStep] = useState(2);
                     forInput="mat_sharing_expert_video"
                     label="Video Sharing Expert (.mp4, .mov)"
                     formatFile=".mp4,.mov"
-                    maxFileSize={100}
+                    maxFileSize={250}
                     onChange={() => handleVideoChange(vidioInputRef, "mp4,mov")}
                     errorMessage={errors.mat_sharing_expert_video}
                   />
@@ -293,29 +392,24 @@ const [activeStep, setActiveStep] = useState(2);
                     </a>
                   )}
                 </div>
-              </div>
-            ) : (
-              <Alert type="warning" message={(
-                <span>
-                  Data Sharing Expert belum ditambahkan. <a onClick={() => onChangePage("sharingEditNot")} className="text-primary">Tambah Data</a>
-                </span>
-              )} />
-            )}
-          </div>
-        </div>
 
-        <div className="float my-4 mx-1">
+                <div className="float my-4 mx-1 d-flex " style={{justifyContent:"space-between"}}>
+                  <div className="">
           <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Kembali"
             onClick={() => onChangePage("pretestEdit")}
           />
+          </div>
+          <div className="d-flex">
           {hasPDF || hasVideo ? (
+            <div className="mr-2">
               <Button
                   classType="primary ms-2 px-4 py-2"
                   type="submit"
                   label="Simpan"
               />
+              </div>
           ) : (
             null  
           )}
@@ -324,7 +418,26 @@ const [activeStep, setActiveStep] = useState(2);
             label="Berikutnya"
             onClick={() => onChangePage("forumEdit")}
           />
+          </div>
         </div>
+              </div>
+            ) : (
+              <Alert type="warning" message={(
+                <span>
+                  Data Sharing Expert belum ditambahkan. <a onClick={() => onChangePage("sharingEditNot", AppContext_master.MateriForm = AppContext_test.DetailMateriEdit)} className="text-primary">Tambah Data</a>
+                </span>
+              )} />
+            )}
+          </div>
+        </div>
+        {showConfirmation && (
+        <Konfirmasi
+          title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
+          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          onYes={handleConfirmYes}
+          onNo={handleConfirmNo}
+        />
+        )}
       </form>
     </>
   );

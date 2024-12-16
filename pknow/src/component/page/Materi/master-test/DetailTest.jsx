@@ -292,6 +292,7 @@ export default function PengerjaanTest({
           setTotalQuestion(transformedData.length);
           setQuestionNumbers(transformedData.length);
           console.log("data question", transformedData);
+          console.log("jawaban pengguna soal", transformedData[0].jawabanPengguna_soal.ans_jawaban_pengguna);
           setCurrentData(transformedData);
           updateAnswerStatus(transformedData, penggunaJawaban);
         } else {
@@ -441,16 +442,16 @@ export default function PengerjaanTest({
                     <div className="d-flex flex-column">
                     {item.options.map((option, optionIndex) => {
                     // Pastikan item.jawabanPengguna_soal adalah array sebelum di-loop
-                    const jawabanPengguna = Array.isArray(item.jawabanPengguna_soal)
-                      ? item.jawabanPengguna_soal
-                      : [];
+                    // const jawabanPengguna = Array.isArray(item.jawabanPengguna_soal)
+                    //   ? item.jawabanPengguna_soal
+                    //   : [];
 
-                    // Logika untuk menentukan style button
-                    const pengguna = jawabanPengguna.find(
-                      (pengguna) => option.nomorSoal === pengguna.que_id
-                    );
+                    // // Logika untuk menentukan style button
+                    // const pengguna = jawabanPengguna.find(
+                    //   (pengguna) => option.nomorSoal === pengguna.que_id
+                    // );
                                         
-                    const isSelected = pengguna && option.value === pengguna.ans_jawaban_pengguna;
+                    const isSelected =  option.value === item.jawabanPengguna_soal.ans_jawaban_pengguna;
 
                     const isCorrect = option.nilai !== 0;
 

@@ -179,6 +179,38 @@ export default function MasterTestPreTest({
       }
     };
 
+
+    async function updateProgres() {
+      let success = false;
+      let retryCount = 0;
+      let maxRetries = 10;
+  
+      while (!success && retryCount < maxRetries) {
+        try {
+          const response = await axios.post(
+            API_LINK + "Materi/UpdatePoinProgresMateri",
+            {
+              materiId: AppContext_test.materiId,
+              kry_user : activeUser,
+              tipe: 'Pre-Test'
+            }
+          );
+          console.log("respon progres", response.status);
+          if (response.status === 200) {
+            success = true;
+          }
+        } catch (error) {
+          console.error("Failed to save progress:", error);
+          retryCount += 1;
+          if (retryCount >= maxRetries) {
+            console.error(
+              "Max retries reached. Stopping attempts to save progress."
+            );
+          }
+        }
+      }
+    }
+
     const fetchDataWithRetry_pretest = async (retries = 15, delay = 500) => {
       for (let i = 0; i < retries; i++) {
         try {
@@ -192,6 +224,7 @@ export default function MasterTestPreTest({
           );
           if (response.data.length !== 0) {
             setDataDetailQuiz(response.data);
+            updateProgres();
             return response.data;
           }
         } catch (error) {
@@ -327,7 +360,7 @@ export default function MasterTestPreTest({
             isActivePostTest={false}
             isOpen={true}
             onChangePage={onChangePage}
-            materiId={materiId}
+            materiId={AppContext_test.materiId}
             // refreshKey={refreshKey}
             // setRefreshKey={setRefreshKey}
           />

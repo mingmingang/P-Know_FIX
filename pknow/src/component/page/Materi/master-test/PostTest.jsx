@@ -208,20 +208,6 @@ export default function MasterTestPreTest({
       }
     };
 
-    // const getQuizData = async () => {
-    //     try {
-    //       const sectionData = await getSectionData();
-    //       const data = await UseFetch(API_LINK + "Quiz/GetDataQuizByIdSection", {
-    //         section: sectionData.SectionId
-    //       });
-    //       if (data === "ERROR" || data.length === 0) throw new Error("Gagal mengambil data quiz.");
-    //       return data[0];
-    //     } catch (error) {
-    //       console.error("Error fetching quiz data:", error);
-    //       throw error;
-    //     }
-    //   };
-
     const getQuiz_pretest = async (retries = 10, delay = 500) => {
       for (let i = 0; i < retries; i++) {
         try {
@@ -289,7 +275,7 @@ export default function MasterTestPreTest({
             isActivePostTest={true}
             isOpen={true}
             onChangePage={onChangePage}
-            materiId={materiId}
+            materiId={AppContext_test.materiId}
             // refreshKey={refreshKey}
             // setRefreshKey={setRefreshKey}
           />

@@ -48,11 +48,11 @@ function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
         {steps.map((label, index) => (
           <Step
             key={label}
-            onClick={() => onChangePage(getStepContent(index))} 
+            //onClick={() => onChangePage(getStepContent(index))} 
             sx={{
               cursor: "pointer", 
               "& .MuiStepIcon-root": {
-                fontSize: "2rem",
+                fontSize: "1.5rem",
                 color: index <= activeStep ? "primary.main" : "grey.300",
                 "&.Mui-active": {
                   color: "primary.main",
@@ -380,11 +380,9 @@ export default function MastermateriEdit({ onChangePage}) {
       <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
             <div className="back-and-title" style={{display:"flex"}}>
               <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
-                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Materi Baru</h4>
+                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Edit Materi</h4>
               </div>
-                <div className="ket-draft">
-                <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
-                </div>
+               
               </div>
 
       <form onSubmit={handleAdd} style={{margin:"20px 100px"}}>
@@ -489,7 +487,7 @@ export default function MastermateriEdit({ onChangePage}) {
           <Button
             classType="primary ms-2 px-4 py-2"
             type="submit"
-            label="Simpan"
+            label="Edit"
             style={{marginRight:"10px"}}
           />
           <Button

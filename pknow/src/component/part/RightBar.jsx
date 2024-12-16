@@ -19,82 +19,6 @@ import "../../App.css";
 import { ProgressBar } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const MateriDropdown = () => {
-  const [dropdownOpen, setDropdownOpen] = React.useState(false);
-
-  const toggle = () => setDropdownOpen(!dropdownOpen);
-
-  return (
-    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-      <Dropdown isOpen={dropdownOpen} toggle={toggle} style={{ width: "100%" }}>
-        <DropdownToggle
-          caret
-          color="primary"
-          outline
-          style={{ width: "100%", padding: "10px" }}
-        >
-          Materi
-        </DropdownToggle>
-        <DropdownMenu
-          style={{ width: "100%", textAlign: "center" }}
-          autoClose="outside" // Tetap terbuka kecuali klik area luar
-        >
-          <DropdownItem
-            style={{ width: "100%", padding: "10px" }}
-            onClick={(e) => e.preventDefault()} // Mencegah penutupan dropdown
-          >
-            Materi PDF
-          </DropdownItem>
-          <DropdownItem
-            style={{ width: "100%" }}
-            onClick={(e) => e.preventDefault()} // Tetap terbuka
-          >
-            Materi Video
-          </DropdownItem>
-        </DropdownMenu>
-      </Dropdown>
-    </div>
-  );
-};
-
-const SharingDropdown = () => {
-  const [dropdownOpen, setDropdownOpen] = React.useState(false);
-
-  const toggle = () => setDropdownOpen(!dropdownOpen);
-
-  return (
-    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-      <Dropdown isOpen={dropdownOpen} toggle={toggle} style={{ width: "100%" }}>
-        <DropdownToggle
-          caret
-          color="primary"
-          outline
-          style={{ width: "100%", padding: "10px" }}
-        >
-          Sharing Expert
-        </DropdownToggle>
-        <DropdownMenu
-          style={{ width: "100%", textAlign: "center" }}
-          autoClose="outside" // Tetap terbuka kecuali klik area luar
-        >
-          <DropdownItem
-            style={{ width: "100%", padding: "10px" }}
-            onClick={(e) => e.preventDefault()} // Mencegah penutupan dropdown
-          >
-            Sharing Expert PDF
-          </DropdownItem>
-          <DropdownItem
-            style={{ width: "100%" }}
-            onClick={(e) => e.preventDefault()} // Tetap terbuka
-          >
-            Sharing Expert Video
-          </DropdownItem>
-        </DropdownMenu>
-      </Dropdown>
-    </div>
-  );
-};
-
 export default function KMS_Rightbar({
   handlePreTestClick_close,
   handlePreTestClick_open,
@@ -136,6 +60,7 @@ export default function KMS_Rightbar({
 
   useEffect(() => {}, [AppContext_test]);
 
+
   useEffect(() => {
     setShowMainContent_SideBar(isOpen);
   }, [isOpen]);
@@ -143,7 +68,6 @@ export default function KMS_Rightbar({
   const isDataReadyTemp = "";
   const materiIdTemp = "";
   const isOpenTemp = true;
-  //
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -151,7 +75,7 @@ export default function KMS_Rightbar({
       let progresData = null;
       let maxRetries = 10;
       let retryCount = 0;
-      if (AppContext_test.materiId != null) {
+      if (materiId != null) {
         while ((!materiData || !progresData) && retryCount < maxRetries) {
           try {
             const [progresResponse] = await Promise.all([fetchProgresMateri()]);
@@ -246,7 +170,7 @@ export default function KMS_Rightbar({
         const response = await axios.post(
           API_LINK + "Materi/GetProgresMateri",
           {
-            materiId: AppContext_test.materiId,
+            materiId: materiId,
             karyawanId: AppContext_test.activeUser,
           }
         );
@@ -587,7 +511,19 @@ export default function KMS_Rightbar({
           <div className="">
             <div className="ml-3 mr-3 mb-3">
             <h5 style={{fontSize:"15px"}}>Progres</h5>
-            <ProgressBar now={48} label={`${48}%`} style={{ height: "10px"}} />
+            <div className="" >
+              {currentData.map((item) => (
+                <div key={item.Key} className="d-flex">
+                  <KMS_ProgressBar progress={item.TotalProgres ?? 0} />
+                  <div className="d-flex mt-1">
+                  <span style={{ fontSize: "14px", marginLeft: "8px" }}>
+                    {item.TotalProgres ?? 0}
+                  </span>
+                  <span style={{fontSize: "12px"}}>%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
           <hr style={{margin:"10px 17px"}}/>
           </div>
@@ -744,16 +680,7 @@ export default function KMS_Rightbar({
               </button>
             </div>
 
-            <div className="" style={progressStyle}>
-              {currentData.map((item) => (
-                <div key={item.Key}>
-                  <KMS_ProgressBar progress={item.TotalProgres ?? 0} />
-                  <span style={{ fontSize: "14px", marginLeft: "8px" }}>
-                    {item.TotalProgres ?? 0}% Selesai
-                  </span>
-                </div>
-              ))}
-            </div>
+            
             <div className="" style={contentSidebarStyle}>
               {showPengenalan && (
                 <div style={styles.sidebarItem}>

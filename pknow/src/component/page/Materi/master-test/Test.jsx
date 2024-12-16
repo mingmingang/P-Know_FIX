@@ -133,7 +133,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
 
   const handleTextareaChange = (event, index, itemId) => {
     const value = event.target.value;
-    handleValueAnswer("", "", "", "essay", index, value, itemId);
+    handleValueAnswer("0", "", "", "essay", index, value, itemId);
   };
 
 
@@ -176,9 +176,9 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
     } else {
       formDataRef.current.keterangan = "Lulus Quiz";
     }
-  } else {
-    formDataRef.current.keterangan = "Sedang Direview";
-  }
+    } else {
+      formDataRef.current.status = "Not Reviewed";
+    }
 
     // formDataRef.current.nilai = totalNilai;
     // formDataRef.current.answers = submittedAnswers;
@@ -197,6 +197,8 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
       trq_id: item[4],
       ans_created_by: item[5]
     }));
+
+    console.log("submitt answer", submittedAnswersFormatted)
 
     while ((!responseSave)) {
       try {
@@ -226,24 +228,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
               console.error("Error:", error.response ? error.response.data : error.message);
             }
           }
-
-          // try {
-          //       const response = await axios.post(API_LINK + 'Quiz/SaveDataAnswer', {
-          //         que: "ayam",
-          //         idQue : "QUE0012",
-          //         isi : "goo",
-          //         poin: "50",
-          //         trqId: "023"
-          //       });
-          //       if (response.data.length != 0) {
-          //         console.log("Berhasil:", response.data);
-          //       }
-          //     } catch (error) {
-          //       console.error("Error:", error.response ? error.response.data : error.message);
-          //     }
-
-          
-          
         }
       } catch (error) {
         console.error("Error:", error);
@@ -288,14 +272,13 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
   const [selectedOption, setSelectedOption] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [submittedAnswers, setSubmittedAnswers] = useState([]);
-
-  console.log("array answer")
+  const [submittedAnswersEssay, setSubmittedAnswersEssay] = useState([]);
 
   useEffect(() => {
   }, [AppContext_test.arrayAnswerQuiz]);
 
   const handleValueAnswer = (urutan, idSoal, answer, nilaiSelected, index, file, id_question) => {
-    console.log("tes answer",urutan, idSoal, answer, nilaiSelected, index, file, id_question )
+    console.log("tes answer", nilaiSelected, index, file, id_question )
     setSelectedOption(answer);
 
     const updatedAnswers = [...answers];
@@ -320,11 +303,11 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
             }
           } else {
             if (existingAnswerNonPilgan !== -1) {
-              updatedAnswers[existingAnswerNonPilgan] = {nilaiSelected,id_question,answer,nilaiSelected};
-              submitAnswer[existingAnswerNonPilgan] = [nilaiSelected,id_question,file,AppContext_test.dataIdTrQuiz,activeUser];
+              updatedAnswers[existingAnswerNonPilgan] = {nilaiSelected,id_question,answer};
+              submitAnswer[existingAnswerNonPilgan] = [urutan,id_question,file,"0",AppContext_test.dataIdTrQuiz,activeUser];
             }else{
-              updatedAnswers.push({nilaiSelected,id_question,answer,nilaiSelected});
-              submitAnswer.push ([nilaiSelected,id_question,file,AppContext_test.dataIdTrQuiz,activeUser]) ;
+              updatedAnswers.push({nilaiSelected,id_question,answer});
+              submitAnswer.push ([urutan,idSoal,answer,"0",AppContext_test.dataIdTrQuiz,activeUser]) ;
             }
           }
         })
@@ -340,9 +323,9 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
       }
     }
       idSoal = index;
-
     setAnswers(updatedAnswers);
-    setSubmittedAnswers(submitAnswer);
+    console.log("data jabawan", submitAnswer)
+    setSubmittedAnswers(submitAnswer);  
     AppContext_test.indexTest = index;
   };
   
@@ -382,13 +365,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
           materiId: AppContext_test.materiId,
           karyawanId: activeUser,
         });
-        // if (checkIsDone.data && Array.isArray(checkIsDone.data)) {
-        //   if (checkIsDone.data.length == 0) {
-        //   } else {
-
-        //   }
-        // }
-
         if (response.data && Array.isArray(response.data)) {
         AppContext_test.quizId = response.data[0].ForeignKey;
         const questionMap = new Map();
@@ -459,14 +435,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
     // Jika ditemukan, kembalikan nilai yang sesuai, jika tidak kembalikan string kosong
     return answer ? answer[2] : "";
   };
-
-  useEffect(() => {
-    document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
-    const sidebarMenuElement = document.querySelector('.sidebarMenu');
-    if (sidebarMenuElement) {
-      sidebarMenuElement.classList.add('sidebarMenu-hidden');
-    }
-  }, []);
 
   const removeHtmlTags = (str) => {
     return str.replace(/<\/?[^>]+(>|$)/g, ''); // Menghapus semua tag HTML

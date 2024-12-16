@@ -13,6 +13,14 @@ import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
 import Search from "../../part/Search";
 import Icon from "../../part/Icon";
+import Cookies from "js-cookie";
+import { decryptId } from "../../util/Encryptor";
+import axios from 'axios';
+
+
+let activeUser = "";
+const cookie = Cookies.get("activeUser");
+if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
 
 const inisialisasiData = [
   {
@@ -51,8 +59,39 @@ export default function NotifikasiIndex() {
   const searchFilterSort = useRef();
   const searchFilterStatus = useRef();
 
-  function handleApproveNotificationAction() {
-  
+  async function handleApproveNotificationAction() {
+    const result = await SweetAlert(
+      "Tandai Sudah Dibaca",
+      "Apakah Anda yakin ingin menandai semua status notifikasi menjadi sudah dibaca?",
+      "info",
+      "Ya, saya yakin!"
+    );
+
+    if (result) {
+      try {
+        const response = await axios.post(
+          API_LINK + "Utilities/AllSetReadNotifikasi",
+          {
+            application: APPLICATION_ID,
+            user: activeUser,
+          }
+        );
+    
+        console.log("set read", response.data);
+    
+        // Validasi response data
+        if (response.data && response.data.length !== 0) {
+          window.location.reload();
+          return response.data;
+        }
+        return []; // Return array kosong jika data kosong atau undefined
+      } catch (error) {
+        console.error("Error while setting notification read:", error); // Tangkap error
+        setIsError(true); // Set error state
+      } finally {
+        setIsLoading(false); // Set loading state selesai
+      }
+    }
   }
 
   function handleSetCurrentPage(newCurrentPage) {
@@ -78,10 +117,10 @@ export default function NotifikasiIndex() {
     });
   }
 
-  async function handleSetRead() {
+  async function handleSetRead(notificationKey) {
     const result = await SweetAlert(
-      "Tandai Semua Sudah Dibaca",
-      "Apakah Anda yakin ingin menandai status semua notifikasi menjadi sudah dibaca?",
+      "Tandai Sudah Dibaca",
+      "Apakah Anda yakin ingin menandai status notifikasi menjadi sudah dibaca?",
       "info",
       "Ya, saya yakin!"
     );
@@ -89,21 +128,29 @@ export default function NotifikasiIndex() {
     if (result) {
       setIsLoading(true);
       setIsError(false);
-      UseFetch(API_LINK + "Utilities/SetReadNotifikasi", {
-        application: APPLICATION_ID,
-      })
-        .then((data) => {
-          if (data === "ERROR" || data.length === 0) setIsError(true);
-          else {
-            SweetAlert(
-              "Sukses",
-              "Semua notifikasi ditandai sudah dibaca",
-              "success"
-            );
-            handleSetCurrentPage(currentFilter.page);
-          }
-        })
-        .then(() => setIsLoading(false));
+      try {
+        const data = await UseFetch(API_LINK + "Utilities/SetReadNotifikasi", {
+          application: APPLICATION_ID,
+          notId: notificationKey,
+        });
+        console.log("key", notificationKey); // Debug log
+        console.log("data", currentData);
+        if (data === "ERROR" || data.length === 0) {
+          setIsError(true);
+        } else {
+          SweetAlert(
+            "Sukses",
+            "Semua notifikasi ditandai sudah dibaca",
+            "success"
+          );
+          handleSetCurrentPage(currentFilter.page); // Refresh data
+        }
+      } catch (e) {
+        console.error("Error setting notifications as read:", e);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -124,6 +171,7 @@ export default function NotifikasiIndex() {
         } else {
           const formattedData = data.map((value) => ({
             ...value,
+            Key: value["Key"],
             Dari: value["Dari"].toUpperCase(),
             Pesan: (
               <div
@@ -136,7 +184,7 @@ export default function NotifikasiIndex() {
             Waktu: formatDate(value["Waktu"]),
             Status: value["Status"],
             Aksi: value["Status"] === "Belum Dibaca" ? ["Approve"] : [],
-            Alignment: ["center", "left", "left", "center", "center","center"],
+            Alignment: ["center", "left", "left", "center", "center", "center"],
           }));
           setCurrentData(formattedData);
         }
@@ -163,17 +211,21 @@ export default function NotifikasiIndex() {
         )}
         <div className="flex-fill">
           <div className="input-group">
-          <Search
-          title="Notifikasi P-KNOW Sistem"
-          description="Lihat seluruh notifikasi aktivitas pesan - pesan data yang dikirimkan ke akun P-KNOW anda."
-          placeholder="Cari Notifikasi"
-        />
+            <Search
+              title="Notifikasi P-KNOW Sistem"
+              description="Lihat seluruh notifikasi aktivitas pesan - pesan data yang dikirimkan ke akun P-KNOW anda."
+              placeholder="Cari Notifikasi"
+            />
             <Button
               iconName="search"
               classType="primary px-4"
               title="Cari"
               onClick={handleSearch}
             />
+           
+          </div>
+        </div>
+        <div className="d-flex  mt-4 mb-4" style={{justifyContent:"flex-end", alignItems:"center", marginRight:"120px"}}>
             <Filter>
               <DropDown
                 ref={searchFilterSort}
@@ -192,30 +244,32 @@ export default function NotifikasiIndex() {
                 defaultValue="Belum Dibaca"
               />
             </Filter>
-            <Button
-              iconName="check-double"
-              classType="success px-4 border-start"
+            <div className="" style={{background:"green", padding:"10px 10px", color:"white", borderRadius:"10px", marginLeft:"20px"}}>
+            <button
+             style={{border:"none", background:"transparent", color:"white"}}
               title="Set Sudah Dibaca"
               label="Set Sudah Dibaca"
-              onClick={handleSetRead}
-            />
-          </div>
-        </div>
-        <div className="mt-3" style={{margin:"10px 100px"}}>
+              onClick={handleApproveNotificationAction}
+            ><i className="fa fa-check" ></i> Set Sudah Dibaca</button>
+            </div>
+            </div>
+        <div className="mt-3" style={{ margin: "10px 100px" }}>
           {isLoading ? (
             <Loading />
           ) : (
-            
             <div className="d-flex flex-column">
-              <Table data={currentData} onApprove={handleApproveNotificationAction}/>
-              <div className="mb-4 d-flex justify-content-center">
-              <Paging
-                pageSize={PAGE_SIZE}
-                pageCurrent={currentFilter.page}
-                totalData={currentData[0]["Count"]}
-                navigation={handleSetCurrentPage}
+              <Table
+                data={currentData}
+                onApprove={(notificationKey) => handleSetRead(notificationKey)}
               />
-            </div>
+              <div className="mb-4 d-flex justify-content-center">
+                <Paging
+                  pageSize={PAGE_SIZE}
+                  pageCurrent={currentFilter.page}
+                  totalData={currentData[0]["Count"]}
+                  navigation={handleSetCurrentPage}
+                />
+              </div>
             </div>
           )}
         </div>

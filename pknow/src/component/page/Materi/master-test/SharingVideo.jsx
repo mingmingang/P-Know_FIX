@@ -127,32 +127,32 @@ export default function MasterTestSharingVideo({ onChangePage, CheckDataReady, m
      isActivePostTest={false}
       isOpen={true}
       onChangePage={onChangePage}
-      materiId={materiId}
+      materiId={AppContext_test.materiId}
       // refreshKey={refreshKey}
       // setRefreshKey={setRefreshKey}
     />
-            <div className="file-preview" style={{marginBottom:"50px", marginTop:"100px", color:"#002B6C" }}>
-            <h1 className="ml-4" style={{fontWeight:"600", color: "#002B6C" }} >Sharing Expert Video</h1>
+            <div className="file-preview" style={{marginBottom:"20px", marginTop:"100px", color:"#002B6C" }}>
+            <h1 className="ml-2" style={{fontWeight:"600", color: "#002B6C" }} >Sharing Expert Video</h1>
                     {currentData ? (
-                        <p className="ml-4">
+                        <p className="ml-2 mb-0">
                             Dibuat oleh {currentData.Nama} - {formatDate(currentData.CreatedDate)}
                         </p>
                     ) : (
                         <div className=""></div>
                     )}
                     {fileData.file ? (
-                    <ReactPlayer
-                        url={`${API_LINK}Upload/GetFile/${fileData.file}`}
-                        playing={true}
-                        controls={true}
-                        width="150%"
-                        height="90%"
-                        style={{
-                        borderRadius: "80px",
-                        marginLeft: "20px",
-                        marginTop: "-15px",
-                        }}
-                    />
+                     <ReactPlayer
+                     url={`${API_LINK}Upload/GetFile/${fileData.file}`}
+                     playing={true}
+                     controls={true}
+                     width="1000px"
+                     maxwidth="1000px"
+                     height="90%"
+                     style={{
+                       borderRadius: "80px",
+                        marginLeft:"10px"
+                     }}
+                   />
                     ) : (
                         <div className="alert alert-warning mt-4 mb-4 ml-4" >
                         Tidak ada Sharing Expert Video yang tersedia.
