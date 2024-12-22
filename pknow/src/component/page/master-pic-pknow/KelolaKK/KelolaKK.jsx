@@ -500,7 +500,7 @@ export default function KelolaKK({ onChangePage }) {
               />
               <Button2
                 iconName="search"
-                classType="primary px-4"
+                classType="px-4"
                 title="Cari"
                 onClick={handleSearch}
                 style={{ backgroundColor: "transparent", color: "#08549F" }}
@@ -550,7 +550,7 @@ export default function KelolaKK({ onChangePage }) {
             </div>
 
             <div className="tes" style={{ display: "flex" }}>
-              <div className="">
+              <div className="mt-1">
                 <Filter handleSearch={handleSearch}>
                   <DropDown
                     ref={searchFilterSort}
@@ -570,12 +570,12 @@ export default function KelolaKK({ onChangePage }) {
                   />
                 </Filter>
               </div>
-              <div className="">
+              <div className="mt-1">
                 <ButtonPro
                   style={{ marginLeft: "20px" }}
                   iconName="add"
-                  classType="success"
-                  label="Tambah"
+                  classType="primary py-2 fw-semibold rounded-4"
+                  label="Tambah Data"
                   onClick={() => onChangePage("add")}
                 />
               </div>

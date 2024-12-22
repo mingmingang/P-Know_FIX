@@ -168,7 +168,7 @@ async function updateProgres() {
         {
           materiId: AppContext_test.materiId,
           kry_user : activeUser,
-          tipe: 'Materi File'
+          tipe: 'Materi'
         }
       );
       console.log("respon progres", response.status);

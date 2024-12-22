@@ -385,6 +385,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
 
             if (Gambar) {
               const gambarPromise = API_LINK + `Upload/GetFile/${Gambar}`;
+              console.log("gambar",gambarPromise)
               question.gambar = gambarPromise; 
               filePromises.push(gambarPromise);
             }

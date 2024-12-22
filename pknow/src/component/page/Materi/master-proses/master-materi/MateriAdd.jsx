@@ -8,76 +8,15 @@ import {
 import SweetAlert from "../../../../util/SweetAlert";
 import UseFetch from "../../../../util/UseFetch";
 import Button from "../../../../part/Button copy";
-import DropDown from "../../../../part/Dropdown";
-import Input from "../../../../part/Input";
 import FileUpload from "../../../../part/FileUpload";
 import uploadFile from "../../../../util/UploadFile";
-import Loading from "../../../../part/Loading";
 import Alert from "../../../../part/Alert";
-// import { Stepper } from 'react-form-stepper';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 import axios from "axios";
-import { Editor } from "@tinymce/tinymce-react";
-import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import BackPage from "../../../../../assets/backPage.png";
 import Konfirmasi from "../../../../part/Konfirmasi";
 import CustomStepper from "../../../../part/Stepp";
-
-// const steps = ["Pengenalan", "Materi", "Forum"];
-
-// function getStepContent(stepIndex) {
-//   switch (stepIndex) {
-//     case 0:
-//       return 'pengenalanAdd';
-//     case 1:
-//       return 'materiAdd';
-//     case 2:
-//       return 'forumAdd';
-//     default:
-//       return 'Unknown stepIndex';
-//   }
-// }
-
-// function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
-//   return (
-//     <Box sx={{ width: "100%", mt: 2 }}>
-//       <Stepper activeStep={activeStep} alternativeLabel>
-//         {steps.map((label, index) => (
-//           <Step
-//             key={label}
-//             onClick={() => onChangePage(getStepContent(index))}
-//             sx={{
-//               cursor: "pointer",
-//               "& .MuiStepIcon-root": {
-//                 fontSize: "2rem",
-//                 color: index <= activeStep ? "primary.main" : "grey.300",
-//                 "&.Mui-active": {
-//                   color: "primary.main",
-//                 },
-//                 "& .MuiStepIcon-text": {
-//                   fill: "#fff",
-//                   fontSize: "1rem",
-//                 },
-//               },
-//             }}
-//           >
-//             <StepLabel
-//               sx={{
-//                 "& .MuiStepLabel-label": {
-//                   typography: "body1",
-//                   color: index <= activeStep ? "primary.main" : "grey.500",
-//                 },
-//               }}
-//             >
-//               {label}
-//             </StepLabel>
-//           </Step>
-//         ))}
-//       </Stepper>
-//     </Box>
-//   );
-// }
 
 export default function MastermateriAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
@@ -110,9 +49,6 @@ export default function MastermateriAdd({ onChangePage }) {
   const previewFile = async (namaFile) => {
     try {
       namaFile = namaFile.trim();
-      console.log(namaFile);
-
-      // Ubah URL untuk menyertakan namaFile langsung di path URL
       const response = await axios.get(
         `${API_LINK}Upload/GetFile/${namaFile}`,
         {
@@ -129,6 +65,7 @@ export default function MastermateriAdd({ onChangePage }) {
       console.error("Error fetching file:", error);
     }
   };
+
 
   const kategori = AppContext_master.KategoriIdByKK;
 
@@ -162,6 +99,8 @@ export default function MastermateriAdd({ onChangePage }) {
     createBy: string(),
     createdBy: string(),
   });
+
+  console.log("id materrr",AppContext_master.dataIDMateri)
 
   // const handleGambarChange = () => handleFileChange(gambarInputRef, "jpg,png", 5);
   const handlePdfChange = () =>
@@ -207,10 +146,8 @@ export default function MastermateriAdd({ onChangePage }) {
     }
   };
 
-  // Handle form submit
   const handleAdd = async (e) => {
     e.preventDefault();
-
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
@@ -253,6 +190,7 @@ export default function MastermateriAdd({ onChangePage }) {
       }
 
       Promise.all(uploadPromises).then(() => {
+        if(AppContext_test.materiVideo == null || AppContext_test.materiPdf == null){
         if (!hasPdfFile && !hasVideoFile) {
           setIsLoading(false);
           SweetAlert(
@@ -262,17 +200,19 @@ export default function MastermateriAdd({ onChangePage }) {
           );
           return;
         }
+      }
+
         axios
           .post(API_LINK + "Materi/UpdateSaveDataMateri", formDataRef.current)
           .then((response) => {
             const data = response.data;
             if (data[0].hasil === "OK") {
               SweetAlert("Sukses", "File Materi berhasil disimpan", "success");
-              setIsFileDisabled(true);
+              setIsFileDisabled(false);
               AppContext_master.formSavedMateriFile = true;
               onChangePage(
                 "forumAdd",
-                (AppContext_master.MateriForm = formDataRef),
+                (AppContext_master.MateriForm),
                 (AppContext_master.count += 1)
               );
             } else {
@@ -351,16 +291,12 @@ export default function MastermateriAdd({ onChangePage }) {
   }, [kategori]);
 
   useEffect(() => {
-    // if (AppContext_master.MateriForm && AppContext_master.MateriForm.current && Object.keys(AppContext_master.MateriForm.current).length > 0) {
-    //   formDataRef.current = { ...formDataRef.current, ...AppContext_master.MateriForm.current };
+    // if (AppContext_master.formSavedMateriFile === false) {
+    //   setIsFileDisabled(false);
     // }
-
-    if (AppContext_master.formSavedMateriFile === false) {
-      setIsFileDisabled(false);
-    }
   }, [AppContext_master.MateriForm, AppContext_master.formSavedMateriFile]);
   // Render form
-  const dataSimpan = AppContext_master.formSavedMateriFile; // Menyimpan nilai AppContext_master.formSavedMateri untuk menentukan apakah form harus di-disable atau tidak
+  const dataSimpan = AppContext_master.formSavedMateriFile; 
 
   const [activeStep, setActiveStep] = useState(0);
 
@@ -395,7 +331,6 @@ export default function MastermateriAdd({ onChangePage }) {
     onChangePage(stepContent);
   };
 
-  // if (isLoading) return <Loading />;
 
   return (
     <>
@@ -477,7 +412,6 @@ export default function MastermateriAdd({ onChangePage }) {
                     handlePdfChange(fileInputRef, "pdf,docx,xlsx,pptx")
                   }
                   errorMessage={errors.mat_file_pdf}
-                  disabled={isFileDisabled || dataSimpan}
                   style={{ width: "195%" }}
                 />
                 {AppContext_test.materiPdf && (
@@ -504,7 +438,6 @@ export default function MastermateriAdd({ onChangePage }) {
                   maxFileSize={250}
                   onChange={() => handleVideoChange(vidioInputRef, "mp4,mov")}
                   errorMessage={errors.mat_file_video}
-                  disabled={isFileDisabled || dataSimpan}
                   style={{ width: "195%" }}
                 />
                 {AppContext_test.materiVideo && (
@@ -543,18 +476,17 @@ export default function MastermateriAdd({ onChangePage }) {
             // isDisabled={!isFormSubmitted}
           /> */}
             <div className="ml-4">
-              {/* <Button
+              <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Sebelumnya"
-            onClick={() => onChangePage("pengenalanAdd")}
-          /> */}
+            onClick={() => onChangePage("pengenalanBefore", AppContext_master.MateriForm, AppContext_master.dataIDMateri)}
+          />
             </div>
             <div className="d-flex mr-4">
               <Button
                 classType="primary ms-2 px-4 py-2"
                 type="submit"
                 label="Berikutnya"
-                isDisabled={isFileDisabled || dataSimpan}
                 style={{ marginRight: "10px" }}
               />
               {/* <Button

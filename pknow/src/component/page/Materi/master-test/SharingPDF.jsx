@@ -7,10 +7,14 @@ import AppContext_test from "./TestContext";
 import UseFetch from "../../../util/UseFetch";
 import PDF_Viewer from "../../../part/PDF_Viewer";
 import KMS_Rightbar from "../../../part/RightBar";
-
+import Cookies from "js-cookie";
+import { decryptId } from "../../../util/Encryptor";
 
 
 export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, materiId }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
     const [isError, setIsError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [currentData, setCurrentData] = useState();
@@ -32,29 +36,39 @@ export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, mat
         }
     }, []);
 
-    // async function updateProgres() {
-    //   let success = false;
-    //   let retryCount = 0;
-    //   let maxRetries = 10; 
-
-    //   while (!success && retryCount < maxRetries) {
-    //     try {
-    //       const response = await axios.post(API_LINK + "Materi/UpdatePoinProgresMateri", {
-    //         materiId: AppContext_test.materiId,
-    //       });
-
-    //       if (response.status === 200){
-    //         success = true;
-    //       }
-    //     } catch (error) {
-    //       console.error("Failed to save progress:", error);
-    //       retryCount += 1;
-    //       if (retryCount >= maxRetries) {
-    //         console.error("Max retries reached. Stopping attempts to save progress.");
-    //       }
-    //     }
-    //   }
-    // };
+    async function updateProgres() {
+      let success = false;
+      let retryCount = 0;
+      let maxRetries = 10;
+    
+      while (!success && retryCount < maxRetries) {
+        try {
+          const response = await axios.post(
+            API_LINK + "Materi/UpdatePoinProgresMateri",
+            {
+              materiId: AppContext_test.materiId,
+              kry_user : activeUser,
+              tipe: 'Sharing Expert'
+            }
+          );
+          if (response.status === 200) {
+            success = true;
+          }
+        } catch (error) {
+          console.error("Failed to save progress:", error);
+          retryCount += 1;
+          if (retryCount >= maxRetries) {
+            console.error(
+              "Max retries reached. Stopping attempts to save progress."
+            );
+          }
+        }
+      }
+    }
+    
+      useEffect(() => {
+        updateProgres();
+      }, []);
 
     const getListSection = async (retries = 10, delay = 2000) => {
         for (let i = 0; i < retries; i++) {
@@ -157,7 +171,7 @@ export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, mat
               Dokumen Word tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
               {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
                 unduh
-              </a>{" "} */}  
+              </a>{" "}  */}
             </p>
             <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
             </div>
@@ -168,7 +182,7 @@ export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, mat
               Dokumen Power Point tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
               {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
                 unduh
-              </a>{" "} */}  
+              </a>{" "} */}
             </p>
             <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
             </div>
@@ -177,9 +191,9 @@ export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, mat
             <div className="">
             <p style={{marginLeft:"25px", marginTop:"20px"}}>
               Dokumen Excel tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
-              {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
+            {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
                 unduh
-              </a>{" "} */}  
+              </a>{" "}   */}
             </p>
             <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
             </div>

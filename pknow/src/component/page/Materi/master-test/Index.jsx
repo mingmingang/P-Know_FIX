@@ -279,7 +279,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
                   />
                   <Button
                     iconName="search"
-                    classType="primary px-4"
+                    classType="px-4"
                     title="Cari"
                     onClick={handleSearch}
                     style={{ backgroundColor: "transparent", color: "#08549F" }}
@@ -356,7 +356,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
               />
             )} */}
              <div className="mb-4 d-flex justify-content-center">
-            <div className="d-flex flex-column ">
+            <div className="d-flex">
               <Paging
                 pageSize={PAGE_SIZE}
                 pageCurrent={currentFilter.page}

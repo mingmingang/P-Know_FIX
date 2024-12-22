@@ -163,7 +163,7 @@ export default function KelolaAKK({ onChangePage }) {
           
             <Button2
               iconName="search"
-              classType="primary px-4"
+              classType="px-4"
               title="Cari"
               onClick={handleSearch}
               style={{backgroundColor:"transparent", color:"#08549F"}}

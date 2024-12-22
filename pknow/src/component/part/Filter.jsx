@@ -5,7 +5,7 @@ export default function Filter({ children, handleSearch }) {
     <>
       <Button
         iconName="apps-sort"
-        classType="primary dropdown-toggle px-4 border-start"
+        classType=" px-3 custom-add py-2 add-button fw-semibold rounded-4 "
         title="Saring atau Urutkan Data"
         data-bs-toggle="dropdown"
         data-bs-auto-close="outside"
@@ -15,7 +15,7 @@ export default function Filter({ children, handleSearch }) {
       <div className="dropdown-menu p-4" style={{ width: "350px" }}>
         {children}
         <Button
-              classType="primary px-4 d-flex justify-content-end"
+              classType="primary px-4 d-flex justify-content-end rounded-3"
               title="Cari"
               onClick={handleSearch}
               label="Filter"

@@ -34,6 +34,41 @@ export default function Forum({ onChangePage, isOpen }) {
   };
 
   const descForum = stripHTMLTags();
+
+  async function updateProgres() {
+    let success = false;
+    let retryCount = 0;
+    let maxRetries = 10;
+  
+    while (!success && retryCount < maxRetries) {
+      try {
+        const response = await axios.post(
+          API_LINK + "Materi/UpdatePoinProgresMateri",
+          {
+            materiId: AppContext_test.materiId,
+            kry_user : activeUser,
+            tipe: 'Forum'
+          }
+        );
+        if (response.status === 200) {
+          success = true;
+        }
+      } catch (error) {
+        console.error("Failed to save progress:", error);
+        retryCount += 1;
+        if (retryCount >= maxRetries) {
+          console.error(
+            "Max retries reached. Stopping attempts to save progress."
+          );
+        }
+      }
+    }
+  }
+
+  useEffect(() => {
+    updateProgres();
+  }, []);
+
   
   const formDataRef = useRef({
     forumId:currentData[0]?.Key,

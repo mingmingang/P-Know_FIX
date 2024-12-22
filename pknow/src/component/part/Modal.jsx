@@ -42,10 +42,10 @@ const Modal = forwardRef(function Modal(
   return (
     <dialog
       ref={dialog}
-      className="custom-modal" // Apply the custom modal CSS class
+      className="custom-modal rounded-4" // Apply the custom modal CSS class
       style={{ maxWidth: maxSize }}
     >
-      <div className="custom-modal-header" style={{fontWeight:'600'}}>{title}</div>
+      <div className="custom-modal-header " style={{fontWeight:'600'}}>{title}</div>
       <hr className="custom-divider" />
       <div className="custom-modal-body">{children}</div>
       <hr className="custom-divider" />

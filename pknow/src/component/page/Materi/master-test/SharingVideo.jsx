@@ -7,9 +7,13 @@ import AppContext_test from "./TestContext";
 import UseFetch from "../../../util/UseFetch";
 import ReactPlayer from 'react-player';
 import KMS_Rightbar from "../../../part/RightBar";
-
+import Cookies from "js-cookie";
+import { decryptId } from "../../../util/Encryptor";
 
 export default function MasterTestSharingVideo({ onChangePage, CheckDataReady, materiId }) {
+    let activeUser = "";
+    const cookie = Cookies.get("activeUser");
+    if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
     const [isError, setIsError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [currentData, setCurrentData] = useState();
@@ -31,29 +35,39 @@ export default function MasterTestSharingVideo({ onChangePage, CheckDataReady, m
         }
     }, []);
 
-    // async function updateProgres() {
-    //   let success = false;
-    //   let retryCount = 0;
-    //   let maxRetries = 10; 
+    useEffect(() => {
+        updateProgres();
+      }, []);
 
-    //   while (!success && retryCount < maxRetries) {
-    //     try {
-    //       const response = await axios.post(API_LINK + "Materi/UpdatePoinProgresMateri", {
-    //         materiId: AppContext_test.materiId,
-    //       });
-
-    //       if (response.status === 200){
-    //         success = true;
-    //       }
-    //     } catch (error) {
-    //       console.error("Failed to save progress:", error);
-    //       retryCount += 1;
-    //       if (retryCount >= maxRetries) {
-    //         console.error("Max retries reached. Stopping attempts to save progress.");
-    //       }
-    //     }
-    //   }
-    // };
+    async function updateProgres() {
+        let success = false;
+        let retryCount = 0;
+        let maxRetries = 10;
+      
+        while (!success && retryCount < maxRetries) {
+          try {
+            const response = await axios.post(
+              API_LINK + "Materi/UpdatePoinProgresMateri",
+              {
+                materiId: AppContext_test.materiId,
+                kry_user : activeUser,
+                tipe: 'Sharing Expert'
+              }
+            );
+            if (response.status === 200) {
+              success = true;
+            }
+          } catch (error) {
+            console.error("Failed to save progress:", error);
+            retryCount += 1;
+            if (retryCount >= maxRetries) {
+              console.error(
+                "Max retries reached. Stopping attempts to save progress."
+              );
+            }
+          }
+        }
+      }
 
     const getListSection = async (retries = 10, delay = 2000) => {
         for (let i = 0; i < retries; i++) {

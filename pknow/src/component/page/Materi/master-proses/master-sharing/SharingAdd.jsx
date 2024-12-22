@@ -387,6 +387,13 @@ export default function MasterSharingAdd({ onChangePage }) {
     }
   };
 
+  const handleSebelumnya = () => {
+    if (steps.length == 4) {
+      onChangePage("forumBefore", AppContext_test.MateriForm, AppContext_test.ForumForm);
+    }
+  };
+
+
   const [activeStep, setActiveStep] = useState(2);
 
   const handleNext = () => {
@@ -550,11 +557,11 @@ export default function MasterSharingAdd({ onChangePage }) {
           </div>
           <div className="d-flex justify-content-between my-4 mx-1 mt-0">
             <div className="ml-4">
-              {/* <Button
+              <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Sebelumnya"
-            onClick={() => onChangePage("materiAdd", AppContext_test.ForumForm = formData)}
-          /> */}
+            onClick={handleSebelumnya}
+          />
             </div>
             <div className="d-flex mr-4">
               <Button

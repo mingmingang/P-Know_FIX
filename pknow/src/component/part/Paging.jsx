@@ -7,6 +7,7 @@ export default function Paging({
   navigation,
 }) {
   function generatePageButton(pageSize, pageCurrent, totalData) {
+    console.log("current",pageCurrent)
     let totalPage = Math.ceil(totalData / pageSize);
     let segmentPage = Math.ceil(pageCurrent / 10);
     let maxSegmentPage = Math.ceil(totalPage / 10);
@@ -18,7 +19,7 @@ export default function Paging({
         <Button
           key={"PageForwardPrev"}
           label="<<"
-          classType="light border"
+          classType="custom-button"
           onClick={() => navigation(1)}
         />
       );
@@ -26,7 +27,7 @@ export default function Paging({
         <Button
           key={"PagePrev"}
           label="..."
-          classType="light border"
+          classType="custom-button"
           onClick={() => navigation((segmentPage - 1) * 10)}
         />
       );
@@ -34,11 +35,11 @@ export default function Paging({
     for (let i = 1 + (segmentPage - 1) * 10; i <= endPage; i++) {
       pageButton.push(
         <Button
-          key={"Page" + i}
-          label={i}
-          classType={pageCurrent === i ? "primary" : "light border"}
-          onClick={() => navigation(i)}
-        />
+    key={"Page" + i}
+    label={i}
+    classType={pageCurrent === i ? "primary" : "custom-button"}
+    onClick={() => navigation(i)}
+  />
       );
     }
     if (totalPage > 10 && segmentPage < maxSegmentPage) {
@@ -46,7 +47,7 @@ export default function Paging({
         <Button
           key={"PageNext"}
           label="..."
-          classType="light border"
+          classType="custom-button"
           onClick={() => navigation(segmentPage * 10 + 1)}
         />
       );
@@ -54,7 +55,7 @@ export default function Paging({
         <Button
           key={"PageForwardNext"}
           label=">>"
-          classType="light border"
+          classType="custom-button"
           onClick={() => navigation(totalPage)}
         />
       );

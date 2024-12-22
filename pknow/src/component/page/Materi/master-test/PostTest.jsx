@@ -36,6 +36,14 @@ export default function MasterTestPreTest({
   const [receivedMateriId, setReceivedMateriId] = useState();
   const [sectionData, setSectionData] = useState([]);
   const [error, setError] = useState(null);
+  const [tableData, setTableData] = useState([]);
+
+  function handleDetailAction(action, key) {
+    if (action === "detail") {
+      onChangePage("detailtest", "Posttest", AppContext_test.IdQuiz, key);
+      AppContext_test.QuizType = "Posttest";
+    }
+  }
   
 
   function onStartTest() {
@@ -47,9 +55,6 @@ export default function MasterTestPreTest({
           karyawanId: activeUser,
           status: "",
           createdBy: activeUser,
-          // nilai: "", 
-          // answers: [],
-          // createdBy: AppContext_test.displayName,
           jumlahBenar: "",
         })
         .then((response) => {
@@ -65,11 +70,6 @@ export default function MasterTestPreTest({
               currentData.timer,
               AppContext_test.dataIdTrQuiz
             );
-            // SweetAlert(
-            //   "Sukses",
-            //   "Data Quiz berhasil ditambahkan",
-            //   "success"
-            // );
           } else {
             setIsError((prevError) => ({
               ...prevError,
@@ -112,30 +112,62 @@ export default function MasterTestPreTest({
 
   useEffect(() => {
     let isMounted = true;
+    let totalSoal = 0;
 
-    const fetchData_pretest = async (retries = 10, delay = 1000) => {
+    const fetchData_posttest = async (retries = 10, delay = 1000) => {
       for (let i = 0; i < retries; i++) {
         setIsLoading(true);
         try {
-          const [dataQuiz] = await Promise.all([
-            // fetchDataWithRetry_pretest(),
-            getListSection(),
-            getQuiz_pretest(),
-          ]);
-
+          const data = await fetchDataWithRetry_posttest();
           if (isMounted) {
-            // if (data) {
-            //   if (Array.isArray(data)) {
-            //     if (data.length !== 0) {
-            //       onChangePage("hasiltest", "Pretest", data[0].IdQuiz);
-            //       AppContext_test.quizType = "Pretest";
-            //       break;
-            //     }
-            //   } else {
-            //     console.error("Data is not an array:", data);
-            //   }
-            // } else {
-            // }
+            if (data != "") {
+              if (Array.isArray(data)) {
+                if (data.length != 0) {
+                  setTableData(
+                    data.map((item, index) => ({
+                      Key: item.IdTrq,
+                      No: index + 1,
+                      ["Tanggal Ujian"]: new Intl.DateTimeFormat("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      }).format(new Date(item["Tanggal Quiz"])),
+                      Nilai: item.Status == "Reviewed" ? item.Nilai : "",
+                      Keterangan:
+                        item.Status == "Reviewed"
+                          ? item.JumlahBenar + " Benar / " + totalSoal + " Soal"
+                          : "Sedang direview oleh Tenaga Pendidik",
+                      Aksi: item.Status == "Reviewed" ? ["Detail"] : [""],
+                      Alignment: [
+                        "center",
+                        "center",
+                        "center",
+                        "center",
+                        "center",
+                      ],
+                    }))
+                  );
+                }
+              } else {
+                console.error("Data is not an array:", data);
+              }
+            } else {
+              setTableData([
+                {
+                  Key: "",
+                  No: "",
+                  ["Tanggal Ujian"]: "",
+                  Nilai: "",
+                  Keterangan: "",
+                  Aksi: "",
+
+                  Alignment: ["center", "center", "center", "center", "center"],
+                },
+              ]);
+            }
           }
         } catch (error) {
           if (isMounted) {
@@ -155,7 +187,7 @@ export default function MasterTestPreTest({
       }
     };
 
-    const fetchDataWithRetry_pretest = async (retries = 15, delay = 500) => {
+    const fetchDataWithRetry_posttest = async (retries = 15, delay = 500) => {
       for (let i = 0; i < retries; i++) {
         try {
           const response = await axios.post(
@@ -208,7 +240,7 @@ export default function MasterTestPreTest({
       }
     };
 
-    const getQuiz_pretest = async (retries = 10, delay = 500) => {
+    const getQuiz_posttest = async (retries = 10, delay = 500) => {
       for (let i = 0; i < retries; i++) {
         try {
           const quizResponse = await axios.post(
@@ -233,8 +265,27 @@ export default function MasterTestPreTest({
       }
     };
 
-    fetchData_pretest();
-    fetchDataWithRetry_pretest();
+    const initializeData = async () => {
+      try {
+        setIsLoading(true);
+        await getListSection(); 
+        const quizData = await getQuiz_posttest();
+
+        if (quizData) {
+          totalSoal = quizData.jumlahSoal;
+          setCurrentData(quizData); 
+        }
+
+        await fetchData_posttest();
+      } catch (error) {
+        console.error("Error initializing data:", error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeData();
 
     return () => {
       isMounted = false;
@@ -331,7 +382,7 @@ export default function MasterTestPreTest({
                 />
               </div>
               <hr style={{marginRight:"20px"}}/>
-              <div className="table-container">
+              {/* <div className="table-container">
       <h3>Riwayat</h3>
       {error ? (
         <p>{error}</p>
@@ -339,9 +390,8 @@ export default function MasterTestPreTest({
         <table className="dynamic-table mb-4">
         <thead>
           <tr>
-            <th>No</th> {/* Tambahkan kolom No */}
+            <th>No</th> 
             <th>Tanggal Quiz</th>
-            {/* <th>Trq ID</th> */}
             <th>Nilai</th>
             <th>Keterangan</th>
            
@@ -368,7 +418,6 @@ export default function MasterTestPreTest({
             hour12: false,
           }).format(new Date(item["Tanggal Quiz"]))}
         </td>
-        {/* <td>{item.IdTrq}</td> */}
         <td>{item.Nilai}</td>
         <td>{item.Keterangan}</td>
       </tr>
@@ -385,7 +434,19 @@ export default function MasterTestPreTest({
       </table>
       
       )}
-    </div>
+    </div> */}
+      <div className="">
+                <div className="mb-4">
+                  <h3
+                    className=""
+                    style={{ fontWeight: "600", color: "#002B6C" }}
+                  >
+                    Riwayat
+                  </h3>
+                  <Table data={tableData} onDetail={handleDetailAction} />
+                </div>
+              </div>
+
             </div>
           ) : (
             <div className="" style={{marginTop:"110px", }}>

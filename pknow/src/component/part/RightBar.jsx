@@ -57,6 +57,8 @@ export default function KMS_Rightbar({
   const [currentDataMateri, setCurrentDataMateri] = useState([]);
   const [currentFilter, setCurrentFilter] = useState([]);
   const [idMateri, setIdMateri] = useState("");
+  const [sections, setSections] = useState([]);
+
 
   useEffect(() => {}, [AppContext_test]);
 
@@ -64,6 +66,8 @@ export default function KMS_Rightbar({
   useEffect(() => {
     setShowMainContent_SideBar(isOpen);
   }, [isOpen]);
+
+console.log("cek materi", materiId);
 
   const isDataReadyTemp = "";
   const materiIdTemp = "";
@@ -152,6 +156,7 @@ export default function KMS_Rightbar({
             materiId: AppContext_test.materiId,
           }
         );
+        
         if (response.data != 0) {
           success = true;
           return response.data;
@@ -185,6 +190,34 @@ export default function KMS_Rightbar({
       }
     }
   };
+
+
+  useEffect(() => {
+    const fetchSections = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.post(`${API_LINK}Section/GetDataSection`, {
+          p1: materiId,
+          p2: "Aktif",
+        });
+        if (response.data) {
+          setSections(response.data);
+          // Determine button visibility based on sec_type
+          const secTypes = response.data.map(section => section.SectionType);
+          setShowPreTest(secTypes.includes("Pre-Test"));
+          setShowSharing(secTypes.includes("Sharing Expert"));
+          setShowPostTest(secTypes.includes("Post-Test"));
+        }
+      } catch (err) {
+        console.error("Error fetching sections:", err);
+        setError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (materiId) fetchSections();
+  }, [materiId]);
 
   const toggleDropdown = (name) => {
     setDropdowns((prev) => ({ ...prev, [name]: !prev[name] }));
@@ -278,6 +311,7 @@ export default function KMS_Rightbar({
   const [showPreTest, setShowPreTest] = useState(false);
   const [showForum, setShowForum] = useState(false);
   const [showPostTest, setShowPostTest] = useState(false);
+  const [showSharing, setShowSharing] = useState(false);
 
   useEffect(() => {
     if (currentDataMateri[0]?.File_video != "") {
@@ -403,11 +437,6 @@ export default function KMS_Rightbar({
 
   function onClick_Posttest() {
     onChangePage("posttest");
-    AppContext_test.refreshPage += 1;
-  }
-
-  function onClick_sharing() {
-    onChangePage("sharing");
     AppContext_test.refreshPage += 1;
   }
 
@@ -542,6 +571,8 @@ export default function KMS_Rightbar({
                 Pengenalan Materi
               </button>
             </div>
+            
+            {showPreTest && (
             <div className="ml-3 mr-3 mt-3">
               <button
                 className="buttonRightBar"
@@ -549,12 +580,12 @@ export default function KMS_Rightbar({
                   backgroundColor: isActivePreTest ? "#0A5EA8" : "transparent",
                   color: isActivePreTest ? "white" : "black",
                 }}
-                label="Pre-Test"
                 onClick={onClick_Pretest}
               >
                 Pre-Test
               </button>
             </div>
+          )}
 
             <div className="ml-3 mr-3 mt-3">
               <button
@@ -595,7 +626,7 @@ export default function KMS_Rightbar({
                         : "transparent",
                       color: isActiveMateriVideo ? "white" : "black",
                     }}
-                    label="Pre-Test"
+                    label="Materi Video"
                     onClick={onClick_materiVideo}
                   >
                     Materi Video
@@ -604,10 +635,10 @@ export default function KMS_Rightbar({
               </>
             )}
 
+            {showSharing && (
             <div className="ml-3 mr-3 mt-3">
               <button
                 className="buttonRightBar"
-                label="Pre-Test"
                 style={{
                   backgroundColor: isActiveSharing ? "#0A5EA8" : "transparent",
                   color: isActiveSharing ? "white" : "black",
@@ -617,43 +648,40 @@ export default function KMS_Rightbar({
                 Sharing Expert <i className="fas fa-caret-down ml-2"></i>
               </button>
             </div>
-
-            {/* Menampilkan tombol PDF dan Video jika showSharingOptions bernilai true */}
-            {showSharingOptions && (
-              <>
-                <div className="ml-3 mr-3 mt-3">
-                  <button
-                    className="buttonRightBar"
-                    style={{
-                      backgroundColor: isActiveSharingPDF
-                        ? "#0A5EA8"
-                        : "transparent",
-                      color: isActiveSharingPDF ? "white" : "black",
-                    }}
-                    label="Sharing PDF"
-                    onClick={onClick_sharingPDF}
-                  >
-                    Sharing Expert File
-                  </button>
-                </div>
-                <div className="ml-3 mr-3 mt-3">
-                  <button
-                    className="buttonRightBar"
-                    style={{
-                      backgroundColor: isActiveSharingVideo
-                        ? "#0A5EA8"
-                        : "transparent",
-                      color: isActiveSharingVideo ? "white" : "black",
-                    }}
-                    label="Sharing Video"
-                    onClick={onClick_sharingVideo}
-                  >
-                    Sharing Expert Video
-                  </button>
-                </div>
-              </>
-            )}
-
+          )}
+          {showSharingOptions && (
+            <>
+              <div className="ml-3 mr-3 mt-3">
+                <button
+                  className="buttonRightBar"
+                  style={{
+                    backgroundColor: isActiveSharingPDF
+                      ? "#0A5EA8"
+                      : "transparent",
+                    color: isActiveSharingPDF ? "white" : "black",
+                  }}
+                  onClick={onClick_sharingPDF}
+                >
+                  Sharing Expert File
+                </button>
+              </div>
+              <div className="ml-3 mr-3 mt-3">
+                <button
+                  className="buttonRightBar"
+                  style={{
+                    backgroundColor: isActiveSharingVideo
+                      ? "#0A5EA8"
+                      : "transparent",
+                    color: isActiveSharingVideo ? "white" : "black",
+                  }}
+                  onClick={onClick_sharingVideo}
+                >
+                  Sharing Expert Video
+                </button>
+              </div>
+            </>
+          )}
+          {showPostTest && (
             <div className="ml-3 mr-3 mt-3">
               <button
                 className="buttonRightBar"
@@ -661,12 +689,13 @@ export default function KMS_Rightbar({
                   backgroundColor: isActivePostTest ? "#0A5EA8" : "transparent",
                   color: isActivePostTest ? "white" : "black",
                 }}
-                label="Post-Test"
                 onClick={onClick_Posttest}
               >
                 Post-Test
               </button>
             </div>
+          )}
+
             <div className="ml-3 mr-3 mt-3">
               <button
                 className="buttonRightBar"
@@ -681,96 +710,6 @@ export default function KMS_Rightbar({
             </div>
 
             
-            <div className="" style={contentSidebarStyle}>
-              {showPengenalan && (
-                <div style={styles.sidebarItem}>
-                  <button style={styles.link} onClick={onClick_pengenalan}>
-                    Pengenalan Materi
-                  </button>
-                </div>
-              )}
-              {showPreTest && (
-                <div style={styles.sidebarItem}>
-                  <button style={styles.link} onClick={onClick_preTest}>
-                    Pre-Test
-                  </button>
-                </div>
-              )}
-              <div className="dropDown_menu">
-                {dropdownData.map((dropdown, index) => (
-                  <div key={index} style={styles.sidebarItem}>
-                    <div
-                      onClick={() => toggleDropdown(dropdown.name)}
-                      style={styles.buttonDropdown}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                          {dropdowns[dropdown.name] ? (
-                            <Icon
-                              name="caret-up"
-                              type="Bold"
-                              cssClass="text-black ms-0"
-                            />
-                          ) : (
-                            <Icon
-                              name="caret-down"
-                              type="Bold"
-                              cssClass="text-black ms-0"
-                            />
-                          )}
-                          <div
-                            style={{ paddingLeft: "20px", fontSize: "14px" }}
-                          >
-                            {dropdown.name}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    {dropdowns[dropdown.name] && (
-                      <div style={styles.dropdownContent}>
-                        {dropdown.items.map((item, itemIndex) => (
-                          <label key={itemIndex} style={styles.item}>
-                            {/* <Icon
-                              name="check"
-                              type="Bold"
-                              cssClass="text-black ms-0"
-                              style={{ paddingRight: '10px' }}
-                            /> */}
-                            <a
-                              href={item.href}
-                              style={styles.link}
-                              onClick={item.onClick}
-                            >
-                              {item.label}
-                            </a>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              {showForum && (
-                <div style={styles.sidebarItem}>
-                  <button style={styles.link} onClick={onClick_forum}>
-                    Forum
-                  </button>
-                </div>
-              )}
-              {showPostTest && (
-                <div style={styles.sidebarItem}>
-                  <button style={styles.link} onClick={onClick_postTest}>
-                    Post-Test
-                  </button>
-                </div>
-              )}
-            </div>
           </>
         </div>
       )}

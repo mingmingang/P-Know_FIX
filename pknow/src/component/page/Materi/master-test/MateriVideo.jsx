@@ -16,6 +16,8 @@ import AppContext_test from "./TestContext";
 import ReactPlayer from 'react-player';
 import KMS_Rightbar from "../../../part/RightBar";
 import { FaPlay, FaPause } from 'react-icons/fa'; 
+import Cookies from "js-cookie";
+import { decryptId } from "../../../util/Encryptor";
 
   const inisialisasiData = [
     {
@@ -46,8 +48,9 @@ export default function MasterTestIndex({ onChangePage, materiId }) {
     sort: "[Kode Test] asc",
     status: "Aktif",
   });
-
-  // console.log(materiId)
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
   
   
   const formUpdate = useRef({
@@ -136,38 +139,40 @@ export default function MasterTestIndex({ onChangePage, materiId }) {
     }
   }
 
-  // async function updateProgres() {
-  //   let success = false;
-  //   let retryCount = 0;
-  //   const maxRetries = 5; 
-
-  //   while (!success && retryCount < maxRetries) {
-  //     try {
-  //       const response = await axios.post(API_LINK + "Materis/UpdatePoinProgresMateri", {
-  //         materiId: AppContext_test.materiId,
-  //       });
-  //     } catch (error) {
-  //       console.error("Failed to save progress:", error);
-  //       retryCount += 1;
-  //       if (retryCount >= maxRetries) {
-  //         console.error("Max retries reached. Stopping attempts to save progress.");
-  //       }
-  //     }
-  //   }
-  // };
-
+  async function updateProgres() {
+    let success = false;
+    let retryCount = 0;
+    let maxRetries = 10;
   
-  // useEffect(() => {
-  //   document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
-  //   const sidebarMenuElement = document.querySelector('.sidebarMenu');
-  //   if (sidebarMenuElement) {
-  //     sidebarMenuElement.classList.add('sidebarMenu-hidden');
-  //   }
-  // }, []);
+    while (!success && retryCount < maxRetries) {
+      try {
+        const response = await axios.post(
+          API_LINK + "Materi/UpdatePoinProgresMateri",
+          {
+            materiId: AppContext_test.materiId,
+            kry_user : activeUser,
+            tipe: 'Materi'
+          }
+        );
+        console.log("respon progres", response.status);
+        if (response.status === 200) {
+          success = true;
+        }
+      } catch (error) {
+        console.error("Failed to save progress:", error);
+        retryCount += 1;
+        if (retryCount >= maxRetries) {
+          console.error(
+            "Max retries reached. Stopping attempts to save progress."
+          );
+        }
+      }
+    }
+  }
 
   useEffect(() => {
     saveProgress();
-    // updateProgres();
+    updateProgres();
   }, []);
 
 

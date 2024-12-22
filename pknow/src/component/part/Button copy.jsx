@@ -2,7 +2,7 @@ import Icon from "./Icon";
 import "../../style/Button.css";
 
 export default function Button({
-  classType,
+  classType = "custom-button",
   iconName,
   label = "",
   title = "",
@@ -10,10 +10,11 @@ export default function Button({
   isDisabled = false,
   ...props
 }) {
+  console.log("type", classType)
   return (
     <button
       type={type}
-      className="custom-button add-button"
+      className={"btn btn-" + classType}
       {...props}
       title={title}
       disabled={isDisabled}

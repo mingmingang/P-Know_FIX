@@ -458,7 +458,7 @@ export default function MasterProsesIndex({ onChangePage }) {
               />
               <Button
                 iconName="search"
-                classType="primary px-4"
+                classType="px-4"
                 title="Cari"
                 onClick={handleSearch}
                 style={{ backgroundColor: "transparent", color: "#08549F" }}
@@ -497,7 +497,7 @@ export default function MasterProsesIndex({ onChangePage }) {
               <div className="">
               <Button
                   iconName="add"
-                  classType="success" 
+                  classType="primary py-2" 
                   title="Tambah Materi"
                   label="Tambah Materi"
                   onClick={handleButtonClick}
@@ -506,12 +506,7 @@ export default function MasterProsesIndex({ onChangePage }) {
             </div>
           </div>
         </div>
-             {/* <Search
-                    title={listKategori.find((item) => item.value === AppContext_test.KategoriIdByKK)?.label || ""}
-                    description={listKategori.find((item) => item.value === AppContext_test.KategoriIdByKK)?.deskripsi || ""}
-                    showInput={false}
-                /> */}
-                        <div className="mt-1">
+            <div className="mt-1">
                 {currentFilter.status === "Semua" ? (
                   currentData.length >= 1 ? (
                     <CardMateri

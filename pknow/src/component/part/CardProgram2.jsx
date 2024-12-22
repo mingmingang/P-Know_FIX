@@ -86,7 +86,7 @@ const CardProgram = ({ program, onChangePage }) => {
         <div className="ps-3">
           <Button
             iconName={isContentVisible ? "caret-up" : "caret-down"}
-            classType="outline-primary btn-sm px-3"
+            classType=""
             onClick={toggleContentVisibility}
             title="Detail Program"
             style={{
@@ -95,6 +95,7 @@ const CardProgram = ({ program, onChangePage }) => {
               boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
               fontSize: "25px",
               padding: "5px 10px",
+              borderRadius:"10px"
             }}
           />
         </div>

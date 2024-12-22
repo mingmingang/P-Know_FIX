@@ -83,9 +83,6 @@ function getStepContent(stepIndex) {
 
   
   export default function PengenalanEdit({onChangePage}) {
-  // console.log("ID: " + JSON.stringify(Materi));
-  // console.log("onChangePage prop:", onChangePage);
-
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -107,8 +104,6 @@ function getStepContent(stepIndex) {
   };
   
   const cleanedPengenalan = stripHTMLTags(Materi.Pengenalan);
-
-  // console.log("kategori di materi: " + AppContext_test.KategoriIdByKK);
   const formDataRef = useRef({
     mat_id:Materi.Key,
     kat_id: AppContext_test.KategoriIdByKK, 
@@ -123,22 +118,6 @@ function getStepContent(stepIndex) {
     modifiedBy: AppContext_test.activeUser
   });
 
-  // console.log(formDataRef)
-
-  // const formUpdateRef = useRef({
-  //   mat_id:Materi.Key,
-  //   kat_id:"",
-  //   mat_judul: Materi.Judul, 
-  //   mat_file_pdf: Materi.File_P,
-  //   mat_file_video: Materi.File_video,
-  //   mat_pengenalan: Materi.Pengenalan,
-  //   mat_keterangan: Materi.Keterangan,
-  //   kry_id: "1",
-  //   mat_kata_kunci:Materi["Kata Kunci"],
-  //   mat_gambar: "FILE_1717049166708.jpg",
-  // });
-
-  
   const userSchema = object({
     mat_id: string(),
     kat_id: string(),
@@ -447,23 +426,6 @@ useEffect(() => {
                 />
               </div>
               <div className="col-lg-16">
-                {/* <div className="form-group">
-                  <label htmlFor="deskripsiMateri" className="form-label fw-bold">
-                  Deskripsi Materi <span style={{color:"Red"}}> *</span>
-                  </label>
-                  <textarea
-                    className="form-control mb-3"
-                    id="mat_keterangan"
-                    name="mat_keterangan"
-                    forInput="mat_keterangan"
-                    value={formDataRef.current.mat_keterangan}
-                    onChange={handleInputChange}
-                    required
-                  />
-                  {errors.deskripsiMateri && (
-                    <div className="invalid-feedback">{errors.deskripsiMateri}</div>
-                  )}
-                </div> */}
                 <Input
                   type="textarea"
                   forInput="mat_keterangan"

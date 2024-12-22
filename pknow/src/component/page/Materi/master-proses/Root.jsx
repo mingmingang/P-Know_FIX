@@ -6,6 +6,7 @@ import MasterProsesIndex from "./Index";
 //Pengenalan
 import PengenalanAdd from "./master-materi/PengenalanAdd";
 import PengenalanEdit from "./master-materi/PengenalanEdit";
+import PengenalanBefore from "./master-materi/PengenalanBefore";
 // PreTest
 import MasterPreTestAdd from "./master-pretest/PreTestAdd";
 // import MasterPreTestAddNot from "./master-pretest/PreTestAddNot";
@@ -24,6 +25,7 @@ import MasterSharingEdit from "./master-sharing/SharingEdit";
 // import MasterSharingDetail from "./master-sharing/SharingDetail";
 // // Forum
 import MasterForumAdd from "./master-forum/ForumAdd";
+import MasterForumBefore from "./master-forum/ForumBefore";
 // import MasterForumDetailNot from "./master-forum/ForumDetailNot";
 // import MasterForumEditNot from "./master-forum/ForumEditNot";
 import MasterForumEdit from "./master-forum/ForumEdit";
@@ -39,6 +41,7 @@ import PilihKelompokKeahlian from "./Kelompok_Keahlian";
 
 //
 import "../../../../style/Materi.css";
+
 
 
 export default function MasterProses() {
@@ -84,6 +87,11 @@ export default function MasterProses() {
           return <PengenalanEdit 
                 onChangePage={handleSetPageMode} 
                 withID={dataID}/>;
+      case "pengenalanBefore":
+          return <PengenalanBefore 
+                onChangePage={handleSetPageMode} 
+                withID={dataID}/>;
+
       case "materiAdd":
         return <MasterMateriAdd 
                 onChangePage={handleSetPageMode} 
@@ -123,6 +131,10 @@ export default function MasterProses() {
         return <MasterForumAdd 
                 onChangePage={handleSetPageMode}
                 withID={dataID}/>;
+      case "forumBefore":
+         return <MasterForumBefore 
+                  onChangePage={handleSetPageMode} 
+                  withID={dataID}/>;
       // case "forumDetailNot":
       //   return <MasterForumDetailNot
       //           onChangePage={handleSetPageMode}

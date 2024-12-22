@@ -44,14 +44,12 @@ export default function MasterTestPreTest({
           karyawanId: activeUser,
           status: "Aktif",
           quizId: activeUser,
-          // nilai: "",
-          // answers: [],
-          // createdBy: AppContext_test.displayName,
           jumlahBenar: "",
         })
         .then((response) => {
           const data = response.data;
           if (data[0].hasil === "OK") {
+            updateProgres();
             AppContext_test.dataIdTrQuiz = data[0].tempIDAlt;
             onChangePage(
               "pengerjaantest",
@@ -84,6 +82,38 @@ export default function MasterTestPreTest({
         message: "Failed to save forum data: " + error.message,
       });
       setIsLoading(false);
+    }
+  }
+
+
+  async function updateProgres() {
+    let success = false;
+    let retryCount = 0;
+    let maxRetries = 10;
+
+    while (!success && retryCount < maxRetries) {
+      try {
+        const response = await axios.post(
+          API_LINK + "Materi/UpdatePoinProgresMateri",
+          {
+            materiId: AppContext_test.materiId,
+            kry_user : activeUser,
+            tipe: 'Pre-Test'
+          }
+        );
+        console.log("respon progres", response.status);
+        if (response.status === 200) {
+          success = true;
+        }
+      } catch (error) {
+        console.error("Failed to save progress:", error);
+        retryCount += 1;
+        if (retryCount >= maxRetries) {
+          console.error(
+            "Max retries reached. Stopping attempts to save progress."
+          );
+        }
+      }
     }
   }
 
@@ -179,38 +209,6 @@ export default function MasterTestPreTest({
       }
     };
 
-
-    async function updateProgres() {
-      let success = false;
-      let retryCount = 0;
-      let maxRetries = 10;
-  
-      while (!success && retryCount < maxRetries) {
-        try {
-          const response = await axios.post(
-            API_LINK + "Materi/UpdatePoinProgresMateri",
-            {
-              materiId: AppContext_test.materiId,
-              kry_user : activeUser,
-              tipe: 'Pre-Test'
-            }
-          );
-          console.log("respon progres", response.status);
-          if (response.status === 200) {
-            success = true;
-          }
-        } catch (error) {
-          console.error("Failed to save progress:", error);
-          retryCount += 1;
-          if (retryCount >= maxRetries) {
-            console.error(
-              "Max retries reached. Stopping attempts to save progress."
-            );
-          }
-        }
-      }
-    }
-
     const fetchDataWithRetry_pretest = async (retries = 15, delay = 500) => {
       for (let i = 0; i < retries; i++) {
         try {
@@ -224,7 +222,7 @@ export default function MasterTestPreTest({
           );
           if (response.data.length !== 0) {
             setDataDetailQuiz(response.data);
-            updateProgres();
+            //updateProgres();
             return response.data;
           }
         } catch (error) {

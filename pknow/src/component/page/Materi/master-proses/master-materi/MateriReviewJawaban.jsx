@@ -11,8 +11,15 @@ import Swal from 'sweetalert2';
 import Alert from "../../../../part/Alert";
 import SweetAlert from "../../../../util/SweetAlert";
 import he from "he";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../../util/Encryptor";
 
 export default function MasterMateriReviewJawaban({ onChangePage, status, withID }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
+
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState([]);
@@ -22,13 +29,14 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
   const [badges, setBadges] = useState([]);
   const [reviewStatus, setReviewStatus] = useState([]);
   const [formDataReview, setFormDataReview] = useState([]);
-
+  const [questions, setQuestions] = useState([]);
 
   const handleSubmitAction = async () => {
     try {
       setIsLoading(true);
       for (const review of formDataReview) {
         const { idSoal, isCorrect, materiId, idKaryawan, idQuiz, idTransaksi } = review;
+        console.log("bebek", idTransaksi);
         const response = await axios.post(API_LINK + "Quiz/SaveReviewQuiz", {
           p1: idTransaksi,
           p2: idSoal,
@@ -36,9 +44,8 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
           p4: materiId,
           p5: idKaryawan,
           p6: idQuiz,
-          p7: AppContext_test.activeUser,
+          p7: activeUser,
         });
-        console.log("awokaok", idTransaksi, idSoal)
         SweetAlert(
           "Sukses",
           "Review jawaban telah berhasil disimpan!",
@@ -84,7 +91,30 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
               setIsLoading(false);
               return;
             } else {
-              setCurrentData(data);
+              const groupAnswer = {};
+              data.forEach((answer) => {
+                const trqId = answer.trq_id;
+                if(!groupAnswer[trqId]){
+                  groupAnswer[trqId] = {
+                    trq_id : trqId,
+                    mat_id : answer.mat_id,
+                    qui_id: answer.quiId,
+                    usr_id: answer.usr_id,
+                    trq_status: answer.trq_status,
+                    nilai: answer.trq_nilai,
+                    qui_judul: answer.qui_judul, 
+                    trq_created_by: answer.trq_created_by,
+                    qui_tipe : answer.qui_tipe,
+                    nama : answer.Nama,
+                    answer: [],
+                  }
+                }
+                groupAnswer[trqId].answer.push({
+                  ans_jawaban_pengguna : answer.ans_jawaban_pengguna
+                })
+              });
+              setCurrentData(Object.values(groupAnswer));
+              console.log("data group", groupAnswer)
               setBadges(Array(data.length).fill(null).map(() => Array(0).fill(0)));
               setReviewStatus(Array(data.length).fill(null).map(() => Array(0).fill(false)));
               await fetchQuestions(data[0].qui_id);
@@ -114,13 +144,12 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
         const response = await axios.post(API_LINK + "Quiz/GetDataTransaksiReview", {
           quizId: AppContext_test.materiId,
         });
-        console.log("materi",  AppContext_test.materiId)
-        console.log("data review", response.data)
         if (response.data.length !== 0) {
           setIsLoading(false)
           const filteredTransaksi = response.data.filter(transaksi =>
             transaksi.trq_status === "Not Reviewed"
           );
+          
           return filteredTransaksi;
         }
       } catch (error) {
@@ -154,8 +183,8 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
           const filteredQuestions = response.data.filter(question =>
             question.TipeSoal === "Essay" || question.TipeSoal === "Praktikum"
           );
-
           setCurrentQuestions(filteredQuestions);
+         
         }
       } catch (error) {
         console.error("Error fetching quiz data:", error);
@@ -226,7 +255,6 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     const updatedReviewStatus = [...reviewStatus];
     updatedReviewStatus[currentRespondentIndex][idSoal] = isCorrect;
     setReviewStatus(updatedReviewStatus);
-
     const updatedBadges = [...badges ];
     updatedBadges[currentRespondentIndex][idSoal] = isCorrect ? 'success' : 'danger';
     setBadges(updatedBadges);
@@ -238,8 +266,6 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
       idQuiz: quizId,
       idTransaksi: transaksiId,
     };
-
-    console.log("data dtelai", detail)
 
     setFormDataReview([...formDataReview, detail]);
 
@@ -294,25 +320,26 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
   }
 
   const currentRespondent = currentData[currentRespondentIndex];
-  const jawabanPenggunaStr = currentRespondent.ans_jawaban_pengguna;
+//   const jawabanPenggunaStr = currentRespondent.ans_jawaban_pengguna;
+//   console.log("penguna jawaban", currentRespondent.ans_jawaban_pengguna)
 
-  const jawabanPengguna = jawabanPenggunaStr
-      .slice(1, -1)  
-      .split('], [')  
-      .map(item => item.replace(/[\[\]]/g, '').split(','));
-  const processedJawaban = jawabanPengguna.map(item => {
-    if (item[0] === "essay") {
-        return [item[0], item[1], item.slice(2).join(' ')];
-    }
-    return item;
-});
+//   const jawabanPengguna = jawabanPenggunaStr
+//       .slice(1, -1)  
+//       .split('], [')  
+//       .map(item => item.replace(/[\[\]]/g, '').split(','));
+//   const processedJawaban = jawabanPengguna.map(item => {
+//     if (item[0] === "essay") {
+//         return [item[0], item[1], item.slice(2).join(' ')];
+//     }
+//     return item;
+// });
 
-  const validJawabanPengguna = processedJawaban.filter(item => item.length === 3);
+//   const validJawabanPengguna = processedJawaban.filter(item => item.length === 3);
 
-  const formattedAnswers = validJawabanPengguna.map(item => ({
-    idSoal: item[1],
-    namaFile: item[2]
-  }));
+//   const formattedAnswers = validJawabanPengguna.map(item => ({
+//     idSoal: item[1],
+//     namaFile: item[2]
+//   }));
 
   const downloadFile = async (namaFile) => {
     try {
@@ -345,18 +372,18 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
 
   return (
     <div className="container" style={{marginTop:'120px'}}>
-      {/* {isLoading ? (
-        <Loading />
-      ) : ( */}
       <Card className="mb-4">
         <Card.Header className="bg-primary text-light d-flex align-items-center justify-content-between">
           <div className="header-left">
-            <h3>{currentRespondent.qui_judul} - {currentRespondent.qui_tipe}</h3>
+          <h3>
+          {currentData.length > 0 && currentData[0].qui_judul} - 
+          {currentData.length > 0 && currentData[0].qui_tipe}
+        </h3>
           </div>
           <div className="header-right" style={{ marginLeft: 'auto'}}>
             <select
               className="form-select me-4 mt-4 "
-              value={currentRespondent.trq_created_by}
+              value={currentData.trq_created_by}
               onChange={(e) =>
                 setCurrentRespondentIndex(
                   currentData.findIndex(
@@ -366,9 +393,9 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
               }
               style={{ flex: '1' }}
             >
-              {currentData.map((respondent, index) => (
+             {Object.values(currentData).map((respondent, index) => (
                 <option key={respondent.trq_id} value={respondent.trq_created_by}>
-                  {respondent.trq_created_by}
+                  {respondent.nama}
                 </option>
               ))}
             </select>
@@ -400,52 +427,68 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
           </div>
         </Card.Header>
         <Card.Body>
-          {currentQuestions.map((question, questionIndex) => {
-            const matchedAnswer = formattedAnswers.find(answer => answer.idSoal === " " + question.Key);
-            return (
-              <Card key={question.Key} className="mb-4">
-                <Card.Header className="d-flex align-items-center">
-                  <div className="d-flex flex-column align-items-start">
-                    <div className="d-flex align-items-center mb-2">
-                      <Badge bg="secondary" className="me-2">
-                        {question.TipeSoal === "Essay" ? "Essay" : "Praktikum"}
-                      </Badge>
-                      {badges[currentRespondentIndex][question.Key] && 
-                        <Badge bg={badges[currentRespondentIndex][question.Key]} className="me-2">
-                          {badges[currentRespondentIndex][question.Key] === 'success' ? 'Benar' : 'Salah'}
+            {currentQuestions.map((question, questionIndex) => {
+              const currentRespondent = currentData[currentRespondentIndex];
+              const matchedAnswer = currentRespondent?.answer?.[questionIndex]?.ans_jawaban_pengguna;
+
+              return (
+                <Card key={question.Key} className="mb-4">
+                  <Card.Header className="d-flex align-items-center">
+                    <div className="d-flex flex-column align-items-start">
+                      <div className="d-flex align-items-center mb-2">
+                        <Badge bg="secondary" className="me-2">
+                          {question.TipeSoal === "Essay" ? "Essay" : "Praktikum"}
                         </Badge>
-                      }
+                        {badges?.[currentRespondentIndex]?.[question.Key] && (
+                          <Badge
+                            bg={badges[currentRespondentIndex][question.Key]}
+                            className="me-2"
+                          >
+                            {badges[currentRespondentIndex][question.Key] === "success"
+                              ? "Benar"
+                              : "Salah"}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="">
+                        {removeHtmlTags(he.decode(question.Soal))}
+                      </div>
                     </div>
-                    <div className="">{removeHtmlTags(he.decode(question.Soal))}</div>
-                    
-                  </div>
-                </Card.Header>
-                <Card.Body>
-                  <Form>
-                    <Form.Label>Jawaban:</Form.Label>
-                    {question.TipeSoal === "Essay" ? (
-                      <Form.Group controlId={`jawaban-${question.Key}`}>
-                        <Form.Control
-                          as="textarea"
-                          rows={3}
-                          value={currentRespondent.ans_jawaban_pengguna}
-                          onChange={(e) => handleAnswerChange(questionIndex, e.target.value)}
-                          disabled={true}
-                        />
-                      </Form.Group>
-                    ) : (
-                      <Form.Group controlId={`file-${question.Key}`} className="">
-                        <Button className="btn btn-primary" 
-                          onClick={() => downloadFile(matchedAnswer ? matchedAnswer.namaFile : "Tidak ada file")}>
-                          <i className="fi fi-rr-file-download me-2"></i>
-                          {matchedAnswer ? matchedAnswer.namaFile : "Tidak ada file"}
-                        </Button>
-                      </Form.Group>
-                    )}
-                  </Form>
-                </Card.Body>
-                <Card.Footer className="text-end">
-                {reviewStatus[currentRespondentIndex][question.Key] == null ? (
+                  </Card.Header>
+                  <Card.Body>
+                    <Form>
+                      <Form.Label>Jawaban:</Form.Label>
+                      {question.TipeSoal === "Essay" ? (
+                        <Form.Group controlId={`jawaban-${question.Key}`}>
+                          <Form.Control
+                            as="textarea"
+                            rows={3}
+                            value={matchedAnswer || "Belum ada jawaban"}
+                            onChange={(e) =>
+                              handleAnswerChange(questionIndex, e.target.value)
+                            }
+                            disabled={true}
+                          />
+                        </Form.Group>
+                      ) : (
+                        <Form.Group controlId={`file-${question.Key}`} className="">
+                          <Button
+                            className="btn btn-primary"
+                            onClick={() =>
+                              downloadFile(
+                                matchedAnswer ? matchedAnswer.namaFile : "Tidak ada file"
+                              )
+                            }
+                          >
+                            <i className="fi fi-rr-file-download me-2"></i>
+                            {matchedAnswer ? matchedAnswer.namaFile : "Tidak ada file"}
+                          </Button>
+                        </Form.Group>
+                      )}
+                    </Form>
+                  </Card.Body>
+                  <Card.Footer className="text-end">
+                  {reviewStatus[currentRespondentIndex][question.Key] == null ? (
                   <>
                     <Button
                       variant="success"
@@ -469,11 +512,11 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
                     Batal
                   </Button>
                 )}
-              </Card.Footer>
-              </Card>
-            );
-          })}
-        </Card.Body>
+                  </Card.Footer>
+                </Card>
+              );
+            })}
+          </Card.Body>
       </Card>
     <div className="float my-4 mx-1 d-flex" style={{justifyContent:"space-between"}}>
       <LocalButton
@@ -491,3 +534,6 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     </div>
   );
 }
+
+
+

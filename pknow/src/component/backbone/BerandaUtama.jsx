@@ -3,6 +3,9 @@ import cowoTop from "../../assets/cowoTop_beranda.png";
 import "../../style/Beranda.css";
 
 export default function BerandaUtama() {
+  const handleKnowledgeDatabase = () => {
+      window.location.replace("/daftar_pustaka"); // Redirect to login page
+  }
   return (
     <div>
       <section className="sec1">
@@ -14,7 +17,7 @@ export default function BerandaUtama() {
             efisien. Mari kita mulai dengan menjelajahi fitur-fitur yang
             tersedia dengan mengakses menu yang disediakan.”
           </p>
-          <button>Knowledge Database</button>
+          <button onClick={handleKnowledgeDatabase}>Knowledge Database</button>
         </div>
 
         <div className="imgDatang">

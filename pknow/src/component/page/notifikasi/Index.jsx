@@ -4,7 +4,6 @@ import { formatDate } from "../../util/Formatting";
 import SweetAlert from "../../util/SweetAlert";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
-import Input from "../../part/Input";
 import Table from "../../part/Table";
 import Paging from "../../part/Paging";
 import Filter from "../../part/Filter";
@@ -12,7 +11,6 @@ import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
 import Loading from "../../part/Loading";
 import Search from "../../part/Search";
-import Icon from "../../part/Icon";
 import Cookies from "js-cookie";
 import { decryptId } from "../../util/Encryptor";
 import axios from 'axios';
@@ -50,9 +48,9 @@ export default function NotifikasiIndex() {
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
     query: "",
-    sort: "[Waktu] desc",
-    // status: "Belum Dibaca",
+    sort: "[Waktu] asc",
     app: APPLICATION_ID,
+    status: "Belum Dibaca",
   });
 
   const searchQuery = useRef();
@@ -106,15 +104,18 @@ export default function NotifikasiIndex() {
 
   function handleSearch() {
     setIsLoading(true);
-    setCurrentFilter((prevFilter) => {
-      return {
-        ...prevFilter,
-        page: 1,
-        query: searchQuery.current.value,
-        sort: searchFilterSort.current.value,
-        status: searchFilterStatus.current.value,
-      };
-    });
+    const query = searchQuery.current?.value || "";
+    const sort = searchFilterSort.current?.value || "";
+    const status = searchFilterStatus.current?.value || "";
+
+    setCurrentFilter((prevFilter) => ({
+      ...prevFilter,
+      page: 1,
+      query,
+      sort,
+      app: "APP59",
+      status,
+    }));
   }
 
   async function handleSetRead(notificationKey) {
@@ -164,6 +165,7 @@ export default function NotifikasiIndex() {
           currentFilter
         );
 
+        console.log("ayamm", data)
         if (data === "ERROR") {
           setIsError(true);
         } else if (data.length === 0) {
@@ -226,7 +228,7 @@ export default function NotifikasiIndex() {
           </div>
         </div>
         <div className="d-flex  mt-4 mb-4" style={{justifyContent:"flex-end", alignItems:"center", marginRight:"120px"}}>
-            <Filter>
+            <Filter handleSearch={handleSearch}>
               <DropDown
                 ref={searchFilterSort}
                 forInput="ddUrut"
@@ -258,6 +260,11 @@ export default function NotifikasiIndex() {
             <Loading />
           ) : (
             <div className="d-flex flex-column">
+                {currentData.length === 0 && (
+                <div className="" style={{ margin: "5px 20px" }}>
+                  <Alert type="warning" message="Tidak ada data!" />
+                </div>
+              )}
               <Table
                 data={currentData}
                 onApprove={(notificationKey) => handleSetRead(notificationKey)}
@@ -266,7 +273,7 @@ export default function NotifikasiIndex() {
                 <Paging
                   pageSize={PAGE_SIZE}
                   pageCurrent={currentFilter.page}
-                  totalData={currentData[0]["Count"]}
+                  totalData={currentData[0]?.Count || 0}
                   navigation={handleSetCurrentPage}
                 />
               </div>

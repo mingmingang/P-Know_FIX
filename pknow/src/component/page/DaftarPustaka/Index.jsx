@@ -288,7 +288,7 @@ export default function DaftarPustaka({ onChangePage }) {
               />
               <ButtonPro
                 iconName="search"
-                classType="primary px-4"
+                classType="px-4"
                 title="Cari"
                 onClick={handleSearch}
                 style={{ backgroundColor: "transparent", color: "#08549F" }}
@@ -301,7 +301,6 @@ export default function DaftarPustaka({ onChangePage }) {
       <Loading />
     ) : (
       <div className="d-flex flex-column">
-        {/* Tombol Tambah */}
         <div className="flex-fill">
         <div className="navigasi-layout-page">
           <p className="title-kk">Daftar Pustaka</p>
@@ -344,7 +343,7 @@ export default function DaftarPustaka({ onChangePage }) {
             </div>
 
             <div className="tes" style={{ display: "flex" }}>
-              <div className="">
+              <div className="mt-1">
                 <Filter handleSearch={handleSearch}>
                   <DropDown
                     ref={searchFilterSort}
@@ -365,12 +364,12 @@ export default function DaftarPustaka({ onChangePage }) {
                 </Filter>
               </div>
               {activerole !== "ROL05" && (
-          <div className="">
+          <div className="mt-1">
             <ButtonPro
               style={{ marginLeft: "20px" }}
               iconName="add"
-              classType="success"
-              label="Tambah"
+              classType="primary py-2 rounded-4 fw-semibold"
+              label="Tambah Pustaka"
               onClick={() => onChangePage("add")}
             />
           </div>

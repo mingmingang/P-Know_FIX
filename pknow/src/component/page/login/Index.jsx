@@ -5,6 +5,8 @@ import logoPknow from "../../../assets/pknow.png";
 import { useState, useRef } from "react";
 import Role from "../../part/Role";
 import Cookies from "js-cookie";
+import ReCAPTCHA from "react-google-recaptcha";
+
 import {
   API_LINK,
   APPLICATION_ID,
@@ -26,6 +28,10 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [listRole, setListRole] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [captchaValue, setCaptchaValue] = useState(null);
+
+  const RECAPTCHA_SITE_KEY = "6Lf99J4qAAAAAK7bBg2Wh5ynAaXBwEbPY4gJcgKx";
+
 
   const formDataRef = useRef({
     username: "",
@@ -51,8 +57,16 @@ export default function Login() {
     }));
   };
 
+  const handleCaptchaChange = (value) => setCaptchaValue(value);
+
   // Login button click handler
   const handleLoginClick = async (e) => {
+    // if (!captchaValue) {
+    //   setIsError({ error: true, message: "Harap selesaikan CAPTCHA!" });
+    //   return;
+    // }
+
+  
     e.preventDefault();
     const validationErrors = await validateAllInputs(
       formDataRef.current,
@@ -196,7 +210,16 @@ export default function Login() {
                     errorMessage={errors.password}
                     style={{ marginTop: "20px" }}
                   />
+                 
+                 {/* <ReCAPTCHA
+                  sitekey={RECAPTCHA_SITE_KEY}
+                  onChange={handleCaptchaChange}
+                /> */}
 
+                  {/* <div className="captcha">
+                    <div id="captchaValue">SSSS</div>
+                      <input type="text" id="inputCaptcha" placeholder="Captcha" />
+                  </div> */}
                   <button className="login-button" style={{border:'none', width:'100%', backgroundColor:'#0E6DFE', height:'40px', color:'white', marginTop:'20px', borderRadius:'10px'}}
                     type="submit"
                     label="MASUK">Masuk</button>
@@ -208,18 +231,25 @@ export default function Login() {
         <Footer />
 
         <Modal title="Pilih Peran" ref={modalRef} size="small">
-          <div className="list-group">
+          <div className="">
             {listRole.map((value, index) => (
+              <>
+              <div className="d-flex justify-content-between mr-2 ml-2 fw-normal">
               <button
                 key={index}
                 type="button"
-                className="list-group-item list-group-item-action"
+                className="list-group-item list-group-item-action mb-3"
                 onClick={() =>
                   handleLoginWithRole(value.RoleID, value.Nama, value.Role)
                 }
               >
-                Login sebagai {value.Role}
+                Masuk sebagai {value.Role}
               </button>
+              <input type="radio" name="" id="" style={{cursor:"pointer", width:"20px"}}  onClick={() =>
+                  handleLoginWithRole(value.RoleID, value.Nama, value.Role)
+                }/>
+              </div>
+              </>
             ))}
           </div>
         </Modal>

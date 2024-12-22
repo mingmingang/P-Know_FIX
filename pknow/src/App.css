@@ -16,3 +16,15 @@
     border-color: #0A5EA8; /* Border tetap pada warna yang sama */
   }
   
+
+  .primary.active {
+    background-color: #007bff; /* Warna latar belakang biru */
+    color: #ffffff; /* Warna teks putih */
+    border-color: #007bff; /* Warna border biru */
+  }
+  
+  .primary.active:hover {
+    background-color: #0056b3; /* Warna lebih gelap saat di-hover */
+    border-color: #0056b3;
+  }
+  

@@ -22,7 +22,7 @@ const userSchema = object({
   forumIsi: string().required("harus diisi"),
 });
 
-export default function MasterForumAdd({ onChangePage }) {
+export default function MasterForumBefore({ onChangePage }) {
 
 
   const [errors, setErrors] = useState({});
