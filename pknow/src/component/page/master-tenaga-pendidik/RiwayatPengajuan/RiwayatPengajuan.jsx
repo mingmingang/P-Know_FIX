@@ -212,7 +212,7 @@ export default function RiwayatPengajuan({onChangePage}) {
               />
               <Button2
                 iconName="search"
-                classType="primary px-4"
+                classType="px-4"
                 title="Cari"
                 onClick={handleSearch}
                 style={{ backgroundColor: "transparent", color: "#08549F" }}
@@ -269,9 +269,11 @@ export default function RiwayatPengajuan({onChangePage}) {
               </div>
           
           <div className="container">
-            <div className="row mt-3 gx-4">
+            <div className="row mb-4 gx-4">
             {Array.isArray(listKK) && listKK.length > 0 && listKK[0]?.Message ? (
+              <div className="" style={{marginRight:"120px", marginLeft:"10px"}} >
   <Alert type="warning" message="Tidak ada riwayat.." />
+  </div>
 ) : (
   listKK?.map((value) => (
     <CardPengajuanBaru

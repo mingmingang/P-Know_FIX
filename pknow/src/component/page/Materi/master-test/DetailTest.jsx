@@ -20,6 +20,7 @@ import AppContext_test from "./TestContext";
 import Cookies from "js-cookie";
 import he from "he";
 import { decryptId } from "../../../util/Encryptor";
+import Search from "../../../part/Search";
 
 const ButtonContainer = styled.div`
     bottom: 35px;
@@ -378,7 +379,13 @@ export default function PengerjaanTest({
   AppContext_test.durasiTest = 10000;
   return (
     <>
-      <div className="d-flex" style={{marginTop:"100px"}}>
+     <Search
+            title="Hasil Kuis Materi"
+            description="Anda akan mendapatkan hasil kuis yang telah anda kerjakan selama anda mengerjakannya sesuai dengan jawaban yang benar atau salah."
+            placeholder="Cari Kelompok Keahlian"
+            showInput={false}
+          />
+      <div className="d-flex" style={{marginTop:"20px"}}>
         <div
           className="flex-fill p-3 d-flex flex-column"
           style={{ marginLeft: "4vw" }}
@@ -461,10 +468,11 @@ export default function PengerjaanTest({
                     if (isSelected) {
                       borderColor1 = isCorrect ? "#28a745" : "#dc3545";
                       backgroundColor1 = isCorrect ? "#e9f7eb" : "#f8d7da";
-                    } else if (isCorrect) {
-                      borderColor1 = "#28a745";
-                      backgroundColor1 = "#e9f7eb";
                     }
+                    //  else if (isCorrect) {
+                    //   borderColor1 = "#28a745";
+                    //   backgroundColor1 = "#e9f7eb";
+                    // }
 
                     return (
                       <div

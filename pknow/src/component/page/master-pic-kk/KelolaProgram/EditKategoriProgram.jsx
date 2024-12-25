@@ -106,7 +106,7 @@ export default function ProgramEdit({ onChangePage, withID }) {
               };
             });
           } else {
-            SweetAlert("Sukses", "Data mata kuliah berhasil diubah", "success");
+            SweetAlert("Sukses", "Kategori Program berhasil diubah", "success");
             onChangePage("index");
           }
         })

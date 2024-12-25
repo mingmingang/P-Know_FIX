@@ -249,7 +249,7 @@ export default function DaftarPustaka({ onChangePage }) {
       if (!data || data === "ERROR" || data.length === 0) {
         setIsError(true);
       } else {
-        SweetAlert("Sukses", "Data "+id+" berhasil dihapus.", "success");
+        SweetAlert("Sukses", "Data Pustaka berhasil dihapus.", "success");
         handleSetCurrentPage(currentFilter.page);
       }
     }

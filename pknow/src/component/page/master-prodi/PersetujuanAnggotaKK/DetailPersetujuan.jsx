@@ -242,13 +242,11 @@ export default function DetailPersetujuan({ onChangePage, withID }) {
       <div className="appcontainer">
         <main>
           <Search
-            title="Manajemen Informatika Persetujuan Anggota Keahlian"
+            title="Persetujuan Anggota Keahlian"
             description="Program Studi dapat menyetujui persetujuan pengajuan anggota keahlian yang diajukan oleh Tenaga Pendidik untuk menjadi anggota dalam Kelompok Keahlian. Program Studi dapat melihat lampiran pengajuan dari Tenaga Pendidik untuk menjadi bahan pertimbangan"
             placeholder="Cari Kelompok Keahlian"
             showInput={false}
           />
-
-
           <>
             {isError.error && (
               <div className="flex-fill">
@@ -303,14 +301,11 @@ export default function DetailPersetujuan({ onChangePage, withID }) {
                             return value.Status === "Aktif";
                           })
                           .map((pr, index) => (
-                            <div className="card-profile mb-2 d-flex shadow-sm">
-                              <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
+                            <>
+                            <div className="card-profile mb-2 d-flex shadow-sm rounded-4">
+                              <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold ml-3" style={{color:"#0A5EA8"}}>
                                 {index + 1}
                               </p>
-                              <div
-                                className="bg-primary"
-                                style={{ width: "1.5%" }}
-                              ></div>
                               <div className="p-1 ps-2 d-flex">
                                 <img
                                   src={maskotPknow}
@@ -318,14 +313,15 @@ export default function DetailPersetujuan({ onChangePage, withID }) {
                                   className="img-fluid rounded-circle"
                                   width="45"
                                 />
-                                <div className="ps-3">
-                                  <p className="mb-0">{pr["Nama Anggota"]}</p>
+                                <div className="ps-3" style={{color:"#0A5EA8"}}>
+                                  <p className="mb-0 fw-bold">{pr["Nama Anggota"]}</p>
                                   <p className="mb-0" style={{ fontSize: "13px" }}>
                                     {pr.Prodi}
                                   </p>
                                 </div>
                               </div>
                             </div>
+                            </>
                           ))}
                         {/* <div className="text-end">
                             <Button
@@ -368,15 +364,11 @@ export default function DetailPersetujuan({ onChangePage, withID }) {
                           .map((value, index) => (
                             <div key={value.Key}>
                               <h6 className="fw-semibold mb-3">{value.Text}</h6>
-                              <div className="card-profile mb-3 d-flex justify-content-between shadow-sm">
+                              <div className="card-profile mb-3 d-flex justify-content-between shadow-sm rounded-4">
                                 <div className="d-flex w-100">
-                                  <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
+                                  <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary ml-3">
                                     {index + 1}
                                   </p>
-                                  <div
-                                    className="bg-primary"
-                                    style={{ width: "1.5%" }}
-                                  ></div>
                                   <div className="p-1 ps-2 d-flex">
                                     <img
                                       src={maskotPknow}
@@ -405,17 +397,17 @@ export default function DetailPersetujuan({ onChangePage, withID }) {
                                     onClick={() => handleDetailLampiran(value)}
                                   />
                                   <Button
-                                    classType="light btn-sm text-primary px-3 mx-1"
+                                    classType="light btn-sm px-3 mx-1"
                                     iconName="check"
                                     title="Konfirmasi"
-                                    style={{ backgroundColor: "#00BF29" }}
+                                    style={{ color: "#00BF29" }}
                                     onClick={() => handleSetStatus(value, "Aktif")}
                                   />
                                   <Button
                                     classType="light btn-sm text-danger px-3 mx-1"
                                     iconName="x"
                                     title="Tolak"
-                                    style={{ backgroundColor: "red" }}
+                                    
                                     onClick={() => handleSetStatus(value, "Ditolak")}
                                   />
                                 </div>
@@ -455,7 +447,7 @@ export default function DetailPersetujuan({ onChangePage, withID }) {
                                   item.Lampiran.map((link, linkIndex) => (
                                     <div key={linkIndex} style={{ marginTop: "15px" }}>
                                       <p className="mb-3 fw-bold">{`Lampiran ${linkIndex + 1}`}</p>
-                                      <a href={link.trim()} target="_blank" rel="noopener noreferrer">
+                                      <a href={link.trim()} target="_blank" rel="noopener noreferrer" style={{ padding:"5px", marginTop:"20px", textDecoration:"none", borderRadius:"10px", color:"white", backgroundColor:"#0A5EA8"}}>
                                         {`Lampiran ${linkIndex + 1} ${withID["Nama Kelompok Keahlian"]}`}
                                       </a>
                                     </div>
@@ -463,7 +455,7 @@ export default function DetailPersetujuan({ onChangePage, withID }) {
                                 ) : typeof item.Lampiran === "string" ? (
                                   // Jika Lampiran adalah string
                                   item.Lampiran.split(",").map((link, linkIndex) => (
-                                    <div key={linkIndex} style={{ marginTop: "15px" }}>
+                                    <div key={linkIndex} style={{ marginTop: "15px", border:"1px grey solid" }}>
                                       <p className="mb-3" style={{color:"blue"}}>{`Lampiran ${index + 1}`}</p>
                                       <a href={link.trim()} target="_blank" rel="noopener noreferrer">
                                         {`Lampiran ${linkIndex + 1} ${withID["Nama Kelompok Keahlian"]}`}
@@ -489,7 +481,7 @@ export default function DetailPersetujuan({ onChangePage, withID }) {
                       {karyawan?.Key && (
                         <div className="d-flex justify-content-between ml-3 mr-3 mt-5 mb-3">
                           <Button
-                            classType="secondary btn-sm px-3 mx-1"
+                            classType="secondary btn-sm px-3 py-2 rounded-3"
                             label="Batalkan"
                             style={{ height: "50px", backgroundColor: "#5A5A5A" }}
                             onClick={handleBatalkan}
@@ -497,19 +489,21 @@ export default function DetailPersetujuan({ onChangePage, withID }) {
                           <div className="d-flex text-end">
                             <div className="mr-2">
                             <Button
-                              classType="primary btn-sm px-3 mx-1"
+                              classType="primary btn-sm px-3 mx-1 py-2"
                               iconName="check"
                               label="Konfirmasi"
                               onClick={() => handleSetStatus(karyawan, "Aktif")}
                             />
                             </div>
+                            <div className="">
                             <Button
-                              classType="danger btn-sm px-3 mx-1"
+                              classType="danger btn-sm px-3 mx-1 py-2"
                               iconName="x"
                               label="Tolak"
                               style={{ backgroundColor: "red" }}
                               onClick={() => handleSetStatus(karyawan, "Ditolak")}
                             />
+                            </div>
                           </div>
                         </div>
                       )}

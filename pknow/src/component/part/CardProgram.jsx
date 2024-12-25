@@ -123,7 +123,7 @@ const CardProgram = ({
               onClick={() => onChangePage("edit", data)}
             />
             <div
-              class="form-check form-switch py-0 ms-2"
+              className="form-check form-switch py-0 ms-2"
               style={{ width: "fit-content" }}
             >
               <Input
@@ -150,7 +150,7 @@ const CardProgram = ({
         <div className="">
           <Button
             iconName={isActive ? "caret-up" : "caret-down"}
-            classType="outline-primary btn-sm px-3"
+            classType="btn-sm px-2 rounded-3"
             onClick={onClick}
             title="Detail Kelompok Keahlian"
             style={{background:"white", color:"#0A5EA8",  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", fontSize:"25px", padding:"5px 10px" }}
@@ -160,15 +160,21 @@ const CardProgram = ({
         </div>
       </div>
       <div
-        className="card-body"
+        className="card-body "
         style={{ display: isActive ? "block" : "none" }}
       >
+        <div className="d-flex justify-content-between">
+         <h5 className="text-primary fw-semibold mb-0 mt-2">
+                                      Daftar Kategori Program
+                                    </h5>
+        
         <Button
           iconName="add"
-          classType="primary btn-sm mb-2"
+          classType="primary btn-sm mb-2 py-2 rounded-3"
           label="Tambah Kategori"
           onClick={() => onChangePage("addKategori", data)}
         />
+        </div>
         {children}
       </div>
     </div>

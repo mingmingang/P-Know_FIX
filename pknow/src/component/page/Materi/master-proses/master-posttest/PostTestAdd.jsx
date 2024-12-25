@@ -938,135 +938,115 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
         </div>
         </div>
         <div className="card mt-4 " style={{margin:"100px"}}>
-          <div className="card-body p-4">
-            <div className="row mb-4">
-
-              <div className="col-lg">
+        <div className="card-body p-4">
+            <div className="row mb-3">
+              <div className="col-lg-7">
                 <Input
                   type="text"
-                  label="Deskripsi"
+                  label="Deskripsi Post Test"
                   forInput="quizDeskripsi"
                   value={formData.quizDeskripsi}
                   onChange={handleInputChange}
                   isRequired={true}
+                  style={{ width: "100%" }}
+                  errorMessage={errors.quizDeskripsi}
                 />
               </div>
-            </div>
-            <div className="row mb-4">
-                <div className="col-lg-4">
-                    <label htmlFor="waktuInput" className="form-label">
-                        <span style={{ fontWeight: 'bold' }}>Durasi:</span>
-                        <span style={{ color: 'red' }}> *</span>
-                    </label>
+              <div className="col-lg-4">
+                <label htmlFor="waktuInput" className="form-label">
+                  <span style={{ fontWeight: "bold" }}>Durasi:</span>
+                  <span style={{ color: "red" }}> *</span>
+                </label>
 
-                    <div className="d-flex align-items-center">
-                        <div className="d-flex align-items-center me-3">
-                            <select 
-                                className="form-select me-2" 
-                                name="hours" 
-                                value={hours} 
-                                onChange={handleHoursChange}
-                            >
-                                {[...Array(24)].map((_, i) => (
-                                    <option key={i} value={i.toString().padStart(2, '0')}>
-                                        {i.toString().padStart(2, '0')}
-                                    </option>
-                                ))}
-                            </select>
-                            <span>Jam</span>
-                        </div>
-                        <div className="d-flex align-items-center">
-                            <select 
-                                className="form-select me-2" 
-                                name="minutes" 
-                                value={minutes} 
-                                onChange={handleMinutesChange}
-                            >
-                                {[...Array(60)].map((_, i) => (
-                                    <option key={i} value={i.toString().padStart(2, '0')}>
-                                        {i.toString().padStart(2, '0')}
-                                    </option>
-                                ))}
-                            </select>
-                            <span>Menit</span>
-                        </div>
-                    </div>
+                <div className="d-flex">
+                  <div className="d-flex align-items-center me-3">
+                    <select
+                      className="form-select me-2"
+                      name="hours"
+                      value={hours}
+                      onChange={handleHoursChange}
+                    >
+                      {[...Array(24)].map((_, i) => (
+                        <option key={i} value={i.toString().padStart(2, "0")}>
+                          {i.toString().padStart(2, "0")}
+                        </option>
+                      ))}
+                    </select>
+                    <span>Jam</span>
+                  </div>
+                  <div className="d-flex align-items-center">
+                    <select
+                      className="form-select me-2"
+                      name="minutes"
+                      value={minutes}
+                      onChange={handleMinutesChange}
+                    >
+                      {[...Array(60)].map((_, i) => (
+                        <option key={i} value={i.toString().padStart(2, "0")}>
+                          {i.toString().padStart(2, "0")}
+                        </option>
+                      ))}
+                    </select>
+                    <span>Menit</span>
+                  </div>
                 </div>
-              <div className="col-lg-4">
-                <Input
-                  label="Tanggal Dimulai:"
-                  type="date"
-                  value={formData.tanggalAwal}
-                  onChange={(e) => handleChange('tanggalAwal', e.target.value)}
-                  isRequired={true}
-                />
-              </div>
-              <div className="col-lg-4">
-                <Input
-                  label="Tanggal Berakhir:"
-                  type="date"
-                  value={formData.tanggalAkhir}
-                  onChange={(e) => handleChange('tanggalAkhir', e.target.value)}
-                  isRequired={true}
-                />
               </div>
             </div>
             <div className="row mb-4">
-              <div className="mb-2">
-              </div>
-              <div className="">
-                <div className="d-flex justify-content-end">
-                <div className="">
-                <Button
-                  title="Tambah Pertanyaan"
-                  onClick={() => addQuestion("Essay")}
-                  iconName="plus"
-                  label="Tambah Soal"
-                  classType="primary btn-sm px-3 py-1"
-                />
-                <input
-                  type="file"
-                  id="fileInput"
-                  style={{ display: 'none' }}
-                  onChange={handleFileExcel }
-                  accept=".xls, .xlsx"
-                />
-                </div>
-                <div className="ml-3">
-                <Button
-                  title="Tambah File Excel"
-                  iconName="upload"
-                  label="Tambah File Excel"
-                  classType="primary btn-sm mx-2 px-3 py-1"
-                  onClick={() => document.getElementById('fileInput').click()} // Memicu klik pada input file
-                />
-                </div>
+              <div className="d-flex justify-content-between">
+                <div className="d-flex">
+                  <div className="">
+                    <Button
+                      title="Tambah Pertanyaan"
+                      onClick={() => addQuestion("Essay")}
+                      iconName="plus"
+                      label="Tambah Soal"
+                      classType="primary btn-sm px-3 py-2 rounded-3 fw-semibold"
+                    />
+                    <input
+                      type="file"
+                      id="fileInput"
+                      style={{ display: 'none' }}
+                      onChange={handleFileExcel}
+                      accept=".xls, .xlsx"
+                    />
+                  </div>
+                  <div className="ml-3">
+                    <Button
+                      title="Tambah File Excel"
+                      iconName="upload"
+                      label="Tambah File Excel"
+                      classType="primary btn-sm mx-2 px-3 py-2 rounded-3 fw-semibold"
+                      onClick={() => document.getElementById('fileInput').click()} // Memicu klik pada input file
+                    />
+                  </div>
                 </div>
                 {/* Tampilkan nama file yang dipilih */}
                 {selectedFile && <span>{selectedFile.name}</span>}
                 <br></br>
                 <br></br>
-                <div className="d-flex justify-content-end">
+                <div className="d-flex ">
                   <div className="mr-4">
-                <Button
-                  title="Unggah File Excel"
-                  iconName="paper-plane"
-                  classType="primary btn-sm px-3 py-1"
-                  onClick={handleUploadFile}
-                  label="Unggah File"
-                />
-                </div>
+                    <Button
+                      title="Unggah File Excel"
+                      iconName="paper-plane"
+                      classType="primary btn-sm px-3 py-2 rounded-3 fw-semibold"
+                      onClick={handleUploadFile}
+                      label="Unggah File"
+                    />
+                  </div>
+                  <div className="">
+                  <Button
+                    iconName="download"
+                    label="Unduh Template"
+                    classType="warning btn-sm px-3 py-2 mx-2 rounded-3 fw-semibold"
+                    onClick={handleDownloadTemplate}
+                    title="Unduh Template Excel"
+                  />
+                  </div>
 
-                <Button
-                  iconName="download"
-                  label="Unduh Template"
-                  classType="warning btn-sm px-3 py-1 mx-2"
-                  onClick={handleDownloadTemplate}
-                  title="Unduh Template Excel"
-                />
-                </div>
-              </div>
-
+            </div>
+            </div>
             </div>
             {formContent.map((question, index) => (
               <div key={index} className="card mb-4">

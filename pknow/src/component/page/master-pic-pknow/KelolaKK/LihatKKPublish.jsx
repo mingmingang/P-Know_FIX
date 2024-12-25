@@ -212,7 +212,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                 {formData.programStudi}
               </h5>
               <h4 className="fw-semibold" style={{ marginTop: "30px" }}>Tentang Kelompok Keahlian</h4>
-              <p className="py-2" style={{ textAlign: "justify", width: "500px" }}>
+              <p className="py-2" style={{ textAlign: "justify", width: "600px" }}>
                 {formData.deskripsi}
               </p>
               <div className="">
@@ -243,22 +243,22 @@ export default function KKDetailPublish({ onChangePage, withID }) {
               </h5>
               {listAnggota.length > 0 ? (
                 listAnggota[0].Message ? (
-                  <p>Tidak Ada Anggota Aktif</p>
+                  <Alert
+                  type="warning mt-3"
+                  message="Tidak ada anggota aktif!"
+                />
                 ) : (
                   <div>
                     {listAnggota.map((ag, index) => (
                       <div
-                        className="card-profile mb-3 mt-3 d-flex justify-content-between shadow-sm"
+                        className="card-profile mb-3 mt-3 d-flex justify-content-between shadow-sm rounded-4"
                         key={ag.Key}
                       >
                         <div className="d-flex w-100">
-                          <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
+                          <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary ml-4">
                             {index + 1}
                           </p>
-                          <div
-                            className="bg-primary"
-                            style={{ width: "1.5%" }}
-                          ></div>
+                        
                           <div className="p-1 ps-2 d-flex">
                             <img
                               src={maskotPknow}
@@ -266,8 +266,8 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                               className="img-fluid rounded-circle"
                               width="45"
                             />
-                            <div className="ps-3">
-                              <p className="mb-0">{ag["Nama Anggota"]}</p>
+                            <div className="ps-3" style={{color:"#0A5EA8"}}>
+                              <p className="mb-0 fw-bold">{ag["Nama Anggota"]}</p>
                               <p className="mb-0" style={{ fontSize: "13px" }}>
                                 {ag.Prodi}
                               </p>
@@ -288,7 +288,10 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                   </div>
                 )
               ) : (
-                <p>Tidak Ada Anggota Aktif</p>
+                <Alert
+                type="warning mt-3"
+                message="Tidak ada anggota aktif!"
+              />
               )}
             </div>
           </div>
@@ -298,7 +301,10 @@ export default function KKDetailPublish({ onChangePage, withID }) {
           </h5>
           {listProgram.length > 0 ? (
             listProgram[0].Message ? (
-              <p>Tidak Ada Program</p>
+              <Alert
+              type="warning mt-3"
+              message="Tidak ada Program!"
+            />
             ) : (
               listProgram.map((data, index) => (
                 <div
@@ -326,6 +332,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                     </p>
                     <div className="row row-cols-3">
                       {data.kategori.map((kat, indexKat) => (
+                        <>
                         <div className="col">
                           <div className="card card-kategori-program mt-3">
                             <div className="card-body">
@@ -360,6 +367,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                             </div>
                           </div>
                         </div>
+                        </>
                       ))}
                     </div>
                   </div>
@@ -367,7 +375,10 @@ export default function KKDetailPublish({ onChangePage, withID }) {
               ))
             )
           ) : (
-            <p>Tidak Ada Program</p>
+            <Alert
+            type="warning mt-3"
+            message="Tidak ada Program!"
+          />
           )}
         </div>
       </div>
@@ -440,7 +451,10 @@ export default function KKDetailPublish({ onChangePage, withID }) {
               </div> */}
               {listAnggota.length > 0 ? (
                 listAnggota[0].Message ? (
-                  <p>Tidak Ada Anggota Aktif</p>
+                  <Alert
+              type="warning mt-3"
+              message="Tidak ada anggota aktif!"
+            />
                 ) : (
                   listAnggota.map((ag, index) => (
                     <div
@@ -474,7 +488,10 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                   ))
                 )
               ) : (
-                <p>Tidak Ada Anggota Aktif</p>
+                <Alert
+                type="warning mt-3"
+                message="Tidak ada anggota aktif!"
+              />
               )}
             </div>
           </div>

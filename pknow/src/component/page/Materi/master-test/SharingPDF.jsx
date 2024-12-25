@@ -9,7 +9,8 @@ import PDF_Viewer from "../../../part/PDF_Viewer";
 import KMS_Rightbar from "../../../part/RightBar";
 import Cookies from "js-cookie";
 import { decryptId } from "../../../util/Encryptor";
-
+import WordViewer from "../../../part/DocumentViewer";
+import ExcelViewer from "../../../part/ExcelViewer";
 
 export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, materiId }) {
   let activeUser = "";
@@ -93,26 +94,56 @@ export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, mat
         }
     };
 
-    useEffect(() => {
-        const fetchSectionData = async () => {
-            try {
-                const sections = await getListSection();
-                if (sections && sections.length > 0) {
-                    const fileFromResponse = sections[0]?.ExpertFile || "";
-                    setCurrentData(sections[0]);
-                    setFileData({ file: fileFromResponse });
-                    setFileExtension(fileFromResponse.split('.').pop().toLowerCase());
-                } else {
-                    console.error("No sections found.");
-                }
-            } catch (error) {
-                console.error("Error fetching section data:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    // useEffect(() => {
+    //     const fetchSectionData = async () => {
+    //         try {
+    //             const sections = await getListSection();
+    //             if (sections && sections.length > 0) {
+    //                 const fileFromResponse = sections[0]?.ExpertFile || "";
+    //                 setCurrentData(sections[0]);
+    //                 setFileData({ file: fileFromResponse });
+    //                 setFileExtension(fileFromResponse.split('.').pop().toLowerCase());
+    //             } else {
+    //                 console.error("No sections found.");
+    //             }
+    //         } catch (error) {
+    //             console.error("Error fetching section data:", error);
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     };
     
-        fetchSectionData();
+    //     fetchSectionData();
+    // }, [AppContext_test.materiId]);
+
+
+    useEffect(() => {
+      const fetchSectionData = async () => {
+        try {
+          const sections = await getListSection();
+          if (sections.length > 0) {
+            const fileFromResponse = sections[0]?.ExpertFile || "";
+            const materialTitle = sections[0]?.MaterialTitle || "Sharing Expert";
+  
+            setCurrentData(sections[0]);
+            setFileData({ file: fileFromResponse });
+            setFileExtension(fileFromResponse.split(".").pop().toLowerCase());
+  
+            // Log untuk memastikan MaterialTitle ada
+            console.log("Material Title:", materialTitle);
+          } else {
+            console.warn("No sections found for the specified criteria.");
+            setCurrentData(null); // Set state to null if no data found
+          }
+        } catch (error) {
+          console.error("Error fetching section data:", error.message);
+          setIsError(true);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+  
+      fetchSectionData();
     }, [AppContext_test.materiId]);
     
     // Logging perubahan state
@@ -166,15 +197,14 @@ export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, mat
         
           {/* Anda bisa menambahkan lebih banyak kondisi untuk file lain seperti .docx atau .xlsx */}
           {fileExtension === "docx" && (
-            <div className="">
-            <p style={{marginLeft:"25px", marginTop:"20px"}}>
-              Dokumen Word tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
-              {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
-                unduh
-              </a>{" "}  */}
-            </p>
-            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
+            <div className="ml-4">
+            <WordViewer fileUrl={`${API_LINK}Upload/GetFile/${fileData.file}`} fileData={fileData} width="1000px"/>
             </div>
+          )}
+          {fileExtension === "xlsx" && (
+           <div className="ml-4">
+           <ExcelViewer fileUrl={`${API_LINK}Upload/GetFile/${fileData.file}`} fileData={fileData} width="1000px" />
+           </div>
           )}
           {fileExtension === "pptx" && (
             <div className="">
@@ -183,17 +213,6 @@ export default function MasterTestSharingPDF({ onChangePage, CheckDataReady, mat
               {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
                 unduh
               </a>{" "} */}
-            </p>
-            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
-            </div>
-          )}
-          {fileExtension === "xlsx" && (
-            <div className="">
-            <p style={{marginLeft:"25px", marginTop:"20px"}}>
-              Dokumen Excel tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
-            {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
-                unduh
-              </a>{" "}   */}
             </p>
             <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
             </div>

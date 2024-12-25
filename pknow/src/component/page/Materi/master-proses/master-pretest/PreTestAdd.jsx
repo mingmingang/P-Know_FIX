@@ -3,7 +3,7 @@ import Button from "../../../../part/Button copy";
 import { object, string } from "yup";
 import Input from "../../../../part/Input";
 import Loading from "../../../../part/Loading";
-import { Stepper, Step, StepLabel, Box } from "@mui/material";
+import { Stepper, Step, StepLabel, Box, colors } from "@mui/material";
 import SweetAlert from "../../../../util/SweetAlert";
 import * as XLSX from "xlsx";
 import axios from "axios";
@@ -44,6 +44,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const [isBackAction, setIsBackAction] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [filePreview, setFilePreview] = useState(false);
+  const [filePreviews, setFilePreviews] = useState({});
 
   const [dataSection, setDataSection] = useState({
     materiId: AppContext_master.dataIDMateri,
@@ -184,16 +185,64 @@ export default function MasterPreTestAdd({ onChangePage }) {
     setFormContent(updatedFormContent);
   };
 
-  const handleAddOption = (index) => {
-    const updatedFormContent = [...formContent];
-    if (updatedFormContent[index].type === "Pilgan") {
-      updatedFormContent[index].options.push({
-        label: "",
-        value: "",
-        point: 0,
+  const handleJenisTypeChange = (e, questionIndex) => {
+    const { value } = e.target;
+
+    setFormContent((prevFormContent) => {
+      const updatedFormContent = [...prevFormContent];
+      updatedFormContent[questionIndex].jenis = value;
+
+      // Reset selectedOptions berdasarkan jenis baru
+      setSelectedOptions((prevSelected) => {
+        const updatedSelected = [...prevSelected];
+        if (value === "Tunggal") {
+          updatedSelected[questionIndex] = "";
+        } else if (value === "Jamak") {
+          updatedSelected[questionIndex] = [];
+        }
+        return updatedSelected;
       });
-      setFormContent(updatedFormContent);
-    }
+
+      return updatedFormContent;
+    });
+  };
+
+  const handleAddOption = (questionIndex) => {
+    setFormContent((prevFormContent) => {
+      const updatedFormContent = [...prevFormContent];
+      updatedFormContent[questionIndex].options.push({
+        value: "",
+        label: "",
+        point: "",
+      });
+      return updatedFormContent;
+    });
+  };
+
+  const handleDeleteOption = (questionIndex, optionIndex) => {
+    const optionValue = formContent[questionIndex].options[optionIndex].value;
+
+    setFormContent((prevFormContent) => {
+      const updatedFormContent = [...prevFormContent];
+      updatedFormContent[questionIndex].options.splice(optionIndex, 1);
+      return updatedFormContent;
+    });
+
+    setSelectedOptions((prevSelected) => {
+      const updatedSelected = [...prevSelected];
+
+      if (formContent[questionIndex].jenis === "Tunggal") {
+        if (updatedSelected[questionIndex] === optionValue) {
+          updatedSelected[questionIndex] = "";
+        }
+      } else if (formContent[questionIndex].jenis === "Jamak") {
+        updatedSelected[questionIndex] = updatedSelected[questionIndex].filter(
+          (v) => v !== optionValue
+        );
+      }
+
+      return updatedSelected;
+    });
   };
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -206,7 +255,38 @@ export default function MasterPreTestAdd({ onChangePage }) {
 
   const fileGambarRef = useRef(null);
 
-  const handleFileChangeGambar = (ref, extAllowed) => {
+  // const handleFileChangeGambar = (ref, extAllowed) => {
+  //   const { name, value } = ref.current;
+  //   const file = ref.current.files[0];
+  //   const fileName = file ? file.name : "";
+  //   const fileSize = file ? file.size : 0;
+  //   const fileExt = fileName.split(".").pop().toLowerCase();
+  //   const validationError = validateInput(name, value, userSchema);
+  //   let error = "";
+
+  //   if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
+  //   else if (!extAllowed.split(",").includes(fileExt))
+  //     error = "format berkas tidak valid";
+
+  //   if (error) ref.current.value = "";
+  //   else {
+  //     // Show preview if the file is an image
+  //     if (file && file.type.startsWith("image/")) {
+  //       const reader = new FileReader();
+  //       reader.onloadend = () => {
+  //         setFilePreview(reader.result); // Set the preview
+  //       };
+  //       reader.readAsDataURL(file);
+  //     }
+  //   }
+
+  //   setErrors((prevErrors) => ({
+  //     ...prevErrors,
+  //     [validationError.name]: error,
+  //   }));
+  // };
+
+  const handleFileChangeGambar = (ref, index, extAllowed) => {
     const { name, value } = ref.current;
     const file = ref.current.files[0];
     const fileName = file ? file.name : "";
@@ -215,22 +295,28 @@ export default function MasterPreTestAdd({ onChangePage }) {
     const validationError = validateInput(name, value, userSchema);
     let error = "";
 
+    // Validasi ukuran dan ekstensi file
     if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
     else if (!extAllowed.split(",").includes(fileExt))
       error = "format berkas tidak valid";
 
-    if (error) ref.current.value = "";
-    else {
-      // Show preview if the file is an image
+    if (error) {
+      ref.current.value = "";
+    } else {
+      // Tampilkan preview jika file adalah gambar
       if (file && file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setFilePreview(reader.result); // Set the preview
+          setFilePreviews((prev) => ({
+            ...prev,
+            [index]: reader.result, // Simpan preview berdasarkan indeks
+          }));
         };
         reader.readAsDataURL(file);
       }
     }
 
+    // Set error jika ada
     setErrors((prevErrors) => ({
       ...prevErrors,
       [validationError.name]: error,
@@ -260,14 +346,12 @@ export default function MasterPreTestAdd({ onChangePage }) {
       return;
     }
 
-    // if (
-    //   !isStartDateBeforeEndDate(formData.tanggalAwal, formData.tanggalAkhir)
-    // ) {
+    // if (!isStartDateBeforeEndDate(formData.tanggalAwal, formData.tanggalAkhir)) {
     //   Swal.fire({
-    //     title: "Error!",
-    //     text: "Tanggal awal tidak boleh lebih dari tanggal akhir.",
-    //     icon: "error",
-    //     confirmButtonText: "OK",
+    //     title: 'Error!',
+    //     text: 'Tanggal awal tidak boleh lebih dari tanggal akhir.',
+    //     icon: 'error',
+    //     confirmButtonText: 'OK'
     //   });
     //   return;
     // }
@@ -283,6 +367,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
         return;
       }
     }
+
+    // Hitung total point dari semua pertanyaan dan opsi
 
     const totalQuestionPoint = formContent.reduce((total, question) => {
       if (question.type !== "Pilgan") {
@@ -339,15 +425,16 @@ export default function MasterPreTestAdd({ onChangePage }) {
           quizId: quizId,
           soal: question.text,
           tipeQuestion: question.type,
-          gambar: question.gambar,
+          gambar: question.gambar ?? "",
           status: "Aktif",
           quecreatedby: activeUser,
-          poin: question.point,
+          point: question.point,
         };
-        console.log("question", formQuestion);
+
         const uploadPromises = [];
         if (question.type === "Essay" || question.type === "Praktikum") {
           if (fileGambarRef.current.files.length > 0) {
+            console.log("dsafadf");
             uploadPromises.push(
               UploadFile(fileGambarRef.current).then(
                 (data) => (formQuestion.gambar = data.Hasil)
@@ -617,23 +704,57 @@ export default function MasterPreTestAdd({ onChangePage }) {
 
   const handleOptionLabelChange = (e, questionIndex, optionIndex) => {
     const { value } = e.target;
-    const updatedFormContent = [...formContent];
-    updatedFormContent[questionIndex].options[optionIndex].label = value;
-    setFormContent(updatedFormContent);
+
+    setFormContent((prevFormContent) => {
+      const updatedFormContent = [...prevFormContent];
+      updatedFormContent[questionIndex].options[optionIndex].label = value;
+      return updatedFormContent;
+    });
   };
 
-  const handleOptionChange = (e, index) => {
-    const { value } = e.target;
+  // const handleOptionChange = (e, index) => {
+  //   const { value } = e.target;
 
-    // Update correctAnswer pada formContent
-    const updatedFormContent = [...formContent];
-    updatedFormContent[index].correctAnswer = value;
-    setFormContent(updatedFormContent);
+  //   // Update correctAnswer pada formContent
+  //   const updatedFormContent = [...formContent];
+  //   updatedFormContent[index].correctAnswer = value;
+  //   setFormContent(updatedFormContent);
 
-    // Update selectedOptions untuk radio button yang dipilih
-    const updatedSelectedOptions = [...selectedOptions];
-    updatedSelectedOptions[index] = value;
-    setSelectedOptions(updatedSelectedOptions);
+  //   // Update selectedOptions untuk radio button yang dipilih
+  //   const updatedSelectedOptions = [...selectedOptions];
+  //   updatedSelectedOptions[index] = value;
+  //   setSelectedOptions(updatedSelectedOptions);
+  // };
+
+  const handleOptionChange = (e, questionIndex, jenis) => {
+    const { value, checked } = e.target;
+
+    setSelectedOptions((prevSelected) => {
+      const updatedSelected = [...prevSelected];
+
+      if (jenis === "Tunggal") {
+        // Untuk Pilihan Tunggal, set nilai yang dipilih
+        updatedSelected[questionIndex] = value;
+      } else if (jenis === "Jamak") {
+        // Untuk Pilihan Jamak, tambahkan atau hapus nilai dari array
+        if (checked) {
+          // Tambahkan opsi jika dicentang
+          if (!updatedSelected[questionIndex]) {
+            updatedSelected[questionIndex] = [];
+          }
+          updatedSelected[questionIndex].push(value);
+        } else {
+          // Hapus opsi jika tidak dicentang
+          if (updatedSelected[questionIndex]) {
+            updatedSelected[questionIndex] = updatedSelected[
+              questionIndex
+            ].filter((v) => v !== value);
+          }
+        }
+      }
+
+      return updatedSelected;
+    });
   };
 
   const handleChangeQuestion = (index) => {
@@ -680,11 +801,11 @@ export default function MasterPreTestAdd({ onChangePage }) {
     });
   };
 
-  const handleDeleteOption = (questionIndex, optionIndex) => {
-    const updatedFormContent = [...formContent];
-    updatedFormContent[questionIndex].options.splice(optionIndex, 1);
-    setFormContent(updatedFormContent);
-  };
+  // const handleDeleteOption = (questionIndex, optionIndex) => {
+  //   const updatedFormContent = [...formContent];
+  //   updatedFormContent[questionIndex].options.splice(optionIndex, 1);
+  //   setFormContent(updatedFormContent);
+  // };
 
   const handleDeleteQuestion = (index) => {
     const updatedFormContent = [...formContent];
@@ -787,14 +908,14 @@ export default function MasterPreTestAdd({ onChangePage }) {
     if (selectedFile) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const data = new Uint8Array(e.target.result); // Baca sebagai Uint8Array
-        const workbook = XLSX.read(data, { type: "array" }); // Ubah type menjadi 'array'
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const parsedData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        parseExcelData(parsedData); // Kirim data ke fungsi Anda
+        parseExcelData(parsedData);
       };
-      reader.readAsArrayBuffer(selectedFile); // Baca file sebagai ArrayBuffer
+      reader.readAsBinaryString(selectedFile);
       Swal.fire({
         title: "Berhasil!",
         text: "File Excel berhasil ditambahkan",
@@ -810,27 +931,12 @@ export default function MasterPreTestAdd({ onChangePage }) {
       });
     }
   };
-  
 
   const handleDownloadTemplate = () => {
-    fetch("/template.xlsx")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.blob();
-      })
-      .then((blob) => {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "template.xlsx";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      })
-      .catch((error) => {
-        console.error("File download failed:", error);
-      });
+    const link = document.createElement("a");
+    link.href = "/template.xlsx";
+    link.download = "template.xlsx";
+    link.click();
   };
 
   const updateFormQuestion = (name, value) => {
@@ -840,15 +946,24 @@ export default function MasterPreTestAdd({ onChangePage }) {
     }));
   };
 
+  // const handleOptionPointChange = (e, questionIndex, optionIndex) => {
+  //   const { value } = e.target;
+
+  //   const updatedFormContent = [...formContent];
+
+  //   updatedFormContent[questionIndex].options[optionIndex].point = parseInt(value);
+  //   // Update the formContent state
+  //   setFormContent(updatedFormContent);
+  // };
+
   const handleOptionPointChange = (e, questionIndex, optionIndex) => {
     const { value } = e.target;
 
-    const updatedFormContent = [...formContent];
-
-    updatedFormContent[questionIndex].options[optionIndex].point =
-      parseInt(value);
-    // Update the formContent state
-    setFormContent(updatedFormContent);
+    setFormContent((prevFormContent) => {
+      const updatedFormContent = [...prevFormContent];
+      updatedFormContent[questionIndex].options[optionIndex].point = value;
+      return updatedFormContent;
+    });
   };
 
   const handleInputChange = async (e) => {
@@ -934,6 +1049,16 @@ export default function MasterPreTestAdd({ onChangePage }) {
     onChangePage(stepContent);
   };
 
+  const handleSebelumnya = () => {
+    if (steps.length == 4) {
+      onChangePage(
+        "forumBefore",
+        AppContext_test.MateriForm,
+        AppContext_test.ForumForm
+      );
+    }
+  };
+
   return (
     <>
       <style>
@@ -1017,8 +1142,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
         </div>
         <div className="card mt-4" style={{ margin: "100px" }}>
           <div className="card-body p-4">
-            <div className="row mb-4">
-              <div className="col-lg">
+            <div className="row mb-3">
+              <div className="col-lg-7">
                 <Input
                   type="text"
                   label="Deskripsi"
@@ -1026,10 +1151,11 @@ export default function MasterPreTestAdd({ onChangePage }) {
                   value={formData.quizDeskripsi}
                   onChange={handleInputChange}
                   isRequired={true}
+                  style={{ width: "100%" }}
                   errorMessage={errors.quizDeskripsi}
                 />
               </div>
-              <div className="col-lg-3">
+              <div className="col-lg-4">
                 <label htmlFor="waktuInput" className="form-label">
                   <span style={{ fontWeight: "bold" }}>Durasi:</span>
                   <span style={{ color: "red" }}> *</span>
@@ -1069,95 +1195,63 @@ export default function MasterPreTestAdd({ onChangePage }) {
                 </div>
               </div>
             </div>
-            {/* <div className="row mb-4">
-             
-           <div className="col-lg-4">
-                <Input
-                  label="Tanggal Dimulai:"
-                  type="date"
-                  value={formData.tanggalAwal}
-                  onChange={(e) => handleChange("tanggalAwal", e.target.value)}
-                  isRequired={true}
-                  forInput="tanggalAwal"
-                  errorMessage={errors.tanggalAwal}
-                />
-              </div>
-              <div className="col-lg-4">
-                <Input
-                  label="Tanggal Berakhir:"
-                  type="date"
-                  value={formData.tanggalAkhir}
-                  onChange={(e) => handleChange("tanggalAkhir", e.target.value)}
-                  isRequired={true}
-                  forInput="tanggalAkhir"
-                  errorMessage={errors.tanggalAkhir}
-                />
-              </div>
-            </div>
-             */}
             <div className="row mb-4">
               <div className="mb-2"></div>
-              <div className="">
               <div className="d-flex justify-content-between">
                 <div className="d-flex">
                   <div className="">
-                    <div className="">
-                      <Button
-                        title="Tambah Pertanyaan"
-                        onClick={() => addQuestion("Essay")}
-                        iconName="plus"
-                        label="Tambah Soal"
-                        classType="primary btn-sm px-3 py-1"
-                      />
-                      <input
-                        type="file"
-                        id="fileInput"
-                        style={{ display: "none" }}
-                        onChange={handleFileExcel}
-                        accept=".xls, .xlsx"
-                      />
-                    </div>
+                    <Button
+                      title="Tambah Pertanyaan"
+                      onClick={() => addQuestion("Essay")}
+                      iconName="plus"
+                      label="Tambah Soal"
+                      classType="primary btn-sm px-3 py-2 rounded-3 fw-semibold"
+                    />
+                    <input
+                      type="file"
+                      id="fileInput"
+                      style={{ display: "none" }}
+                      onChange={handleFileExcel}
+                      accept=".xls, .xlsx"
+                    />
                   </div>
                   <div className="ml-3">
-                      <Button
-                        title="Tambah File Excel"
-                        iconName="upload"
-                        label="Tambah File Excel"
-                        classType="primary btn-sm mx-2 px-3 py-1"
-                        onClick={() =>
-                          document.getElementById("fileInput").click()
-                        } // Memicu klik pada input file
-                      />
-                    </div>
+                    <Button
+                      title="Tambah File Excel"
+                      iconName="upload"
+                      label="Tambah File Excel"
+                      classType="primary btn-sm mx-2 px-3 py-2 rounded-3 fw-semibold"
+                      onClick={() =>
+                        document.getElementById("fileInput").click()
+                      } // Memicu klik pada input file
+                    />
+                  </div>
                 </div>
-
                 {/* Tampilkan nama file yang dipilih */}
                 {selectedFile && <span>{selectedFile.name}</span>}
-                <div className="d-flex">
+                <br></br>
+                <br></br>
+                <div className="d-flex ">
                   <div className="mr-4">
                     <Button
                       title="Unggah File Excel"
                       iconName="paper-plane"
-                      classType="primary btn-sm px-3 py-1"
+                      classType="primary btn-sm px-3 py-2 rounded-3 fw-semibold"
                       onClick={handleUploadFile}
                       label="Unggah File"
                     />
                   </div>
-
-                  <Button
-                    iconName="download"
-                    label="Unduh Template"
-                    classType="warning btn-sm px-3 py-1 mx-2"
-                    onClick={handleDownloadTemplate}
-                    title="Unduh Template Excel"
-                  />
-                </div>
-
+                  <div className="">
+                    <Button
+                      iconName="download"
+                      label="Unduh Template"
+                      classType="warning btn-sm px-3 py-2 mx-2 rounded-3 fw-semibold"
+                      onClick={handleDownloadTemplate}
+                      title="Unduh Template Excel"
+                    />
+                  </div>
                 </div>
               </div>
-
-
-              
             </div>
             {formContent.map((question, index) => (
               <div key={index} className="card mb-4">
@@ -1286,7 +1380,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
                         question.type === "Praktikum") && (
                         <div className="d-flex flex-column w-100">
                           <div className="preview-img">
-                            {filePreview ? (
+                            {filePreviews[index] ? (
                               <div
                                 style={{
                                   marginTop: "10px",
@@ -1294,7 +1388,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
                                 }}
                               >
                                 <img
-                                  src={filePreview}
+                                  src={filePreviews[index]}
                                   alt="Preview"
                                   style={{
                                     width: "200px",
@@ -1322,31 +1416,28 @@ export default function MasterPreTestAdd({ onChangePage }) {
                               </div>
                             )}
                           </div>
-                          {/* <FileUpload
-                            forInput={`fileInput_${index}`}
-                            formatFile=".jpg,.png"
-                            label={<span className="file-upload-label">Gambar (.jpg, .png)</span>}
-                            onChange={(e) => handleFileChange(e, index)} // Memanggil handleFileChange dengan indeks
-                            hasExisting={question.gambar}
-                            style={{ fontSize: '12px' }}
-                          /> */}
+
                           <FileUpload
-                            forInput="gambarMateri"
+                            forInput={`gambarMateri_${index}`}
                             label="Gambar Soal Essay (.jpg, .png)"
                             formatFile=".jpg,.png"
                             ref={fileGambarRef}
                             onChange={() =>
-                              handleFileChangeGambar(fileGambarRef, "jpg,png")
+                              handleFileChangeGambar(
+                                fileGambarRef,
+                                index,
+                                "jpg,png"
+                              )
                             }
                             hasExisting={question.gambar}
                           />
-                          {/* Tampilkan preview gambar jika ada gambar yang dipilih */}
+
                           {question.selectedFile && (
                             <div
                               style={{
-                                maxWidth: "300px", // Set maximum width for the image container
-                                maxHeight: "300px", // Set maximum height for the image container
-                                overflow: "hidden", // Hide any overflow beyond the set dimensions
+                                maxWidth: "300px",
+                                maxHeight: "300px",
+                                overflow: "hidden",
                                 marginLeft: "10px",
                               }}
                             >
@@ -1354,8 +1445,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
                                 src={question.selectedFile}
                                 alt="Preview Gambar"
                                 style={{
-                                  width: "100%", // Ensure image occupies full width of container
-                                  height: "auto", // Maintain aspect ratio
+                                  width: "100%",
+                                  height: "auto",
                                   objectFit: "contain",
                                 }}
                               />
@@ -1374,66 +1465,130 @@ export default function MasterPreTestAdd({ onChangePage }) {
                       )}
 
                       {question.type === "Pilgan" && (
-                        <div className="col-lg-12">
-                          {question.options.map((option, optionIndex) => (
-                            <div
-                              key={optionIndex}
-                              className="form-check"
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                marginBottom: "10px",
-                              }}
+                        <>
+                          {/* Dropdown untuk memilih jenis Pilihan */}
+                          <div
+                            className="col-lg-2 mb-3"
+                            style={{ width: "250px" }}
+                          >
+                            <select
+                              className="form-select"
+                              aria-label="Default select example"
+                              value={question.jenis}
+                              onChange={(e) => handleJenisTypeChange(e, index)}
                             >
-                              <input
-                                type="radio"
-                                id={`option_${index}_${optionIndex}`}
-                                name={`option_${index}`}
-                                value={option.value}
-                                checked={
-                                  selectedOptions[index] === option.value
-                                }
-                                onChange={(e) => handleOptionChange(e, index)}
-                                style={{ marginRight: "10px" }}
-                              />
-                              <input
-                                type="text"
-                                value={option.label}
-                                onChange={(e) =>
-                                  handleOptionLabelChange(e, index, optionIndex)
-                                }
-                                className="option-input"
-                                readOnly={question.type === "answer"}
-                                style={{ marginRight: "10px" }}
-                              />
-                              <Button
-                                iconName="delete"
-                                label="Hapus"
-                                classType="btn-sm ms-2 px-2 py-0"
-                                onClick={() =>
-                                  handleDeleteOption(index, optionIndex)
-                                }
-                                style={{ marginRight: "10px" }}
-                              />
-                              <input
-                                type="number"
-                                id={`optionPoint_${index}_${optionIndex}`}
-                                value={option.point}
-                                className="btn-sm ms-2 px-2 py-0"
-                                onChange={(e) =>
-                                  handleOptionPointChange(e, index, optionIndex)
-                                }
-                                style={{ width: "50px" }}
-                              />
-                            </div>
-                          ))}
-                          <Button
-                            onClick={() => handleAddOption(index)}
-                            iconName="add"
-                            classType="success btn-sm ms-2 px-3 py-1"
-                            label="Opsi Baru"
-                          />
-                        </div>
+                              <option value="Tunggal">Pilihan Tunggal</option>
+                              <option value="Jamak">Pilihan Jamak</option>
+                            </select>
+                          </div>
+
+                          {/* Daftar Opsi */}
+                          <div className="col-lg-12">
+                            {question.options.map((option, optionIndex) => (
+                              <div
+                                key={optionIndex}
+                                className="form-check"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  marginBottom: "10px",
+                                  marginLeft: "-15px",
+                                }}
+                              >
+                                {/* Input Radio atau Checkbox berdasarkan jenis Pilihan */}
+                                <input
+                                  type={
+                                    question.jenis === "Tunggal"
+                                      ? "radio"
+                                      : "checkbox"
+                                  }
+                                  id={`option_${index}_${optionIndex}`}
+                                  name={`option_${index}${
+                                    question.jenis === "Jamak" ? "[]" : ""
+                                  }`}
+                                  value={option.value}
+                                  checked={
+                                    question.jenis === "Tunggal"
+                                      ? selectedOptions[index] === option.value
+                                      : selectedOptions[index]?.includes(
+                                          option.value
+                                        )
+                                  }
+                                  onChange={(e) =>
+                                    handleOptionChange(e, index, question.jenis)
+                                  }
+                                  style={{ marginRight: "10px" }}
+                                />
+
+                                {/* Input Label Opsi */}
+                                <input
+                                  type="text"
+                                  value={option.label}
+                                  onChange={(e) =>
+                                    handleOptionLabelChange(
+                                      e,
+                                      index,
+                                      optionIndex
+                                    )
+                                  }
+                                  readOnly={question.type === "answer"}
+                                  style={{
+                                    marginRight: "10px",
+                                    padding: "5px",
+                                    borderRadius: "10px",
+                                    border: "1px solid grey",
+                                  }}
+                                />
+
+                                {/* Tombol Hapus Opsi */}
+                                <Button
+                                  iconName="delete"
+                                  label="Hapus"
+                                  classType="btn-sm ms-2 px-2 py-1"
+                                  onClick={() =>
+                                    handleDeleteOption(index, optionIndex)
+                                  }
+                                  style={{
+                                    marginRight: "10px",
+                                    backgroundColor: "red",
+                                    color: "white",
+                                  }}
+                                />
+
+                                {/* Input Poin hanya tampil jika opsi dipilih */}
+                                {(question.jenis === "Tunggal" &&
+                                  selectedOptions[index] === option.value) ||
+                                (question.jenis === "Jamak" &&
+                                  selectedOptions[index]?.includes(
+                                    option.value
+                                  )) ? (
+                                  <input
+                                    type="number"
+                                    id={`optionPoint_${index}_${optionIndex}`}
+                                    value={option.point}
+                                    className="btn-sm ms-2 px-2 py-0"
+                                    onChange={(e) =>
+                                      handleOptionPointChange(
+                                        e,
+                                        index,
+                                        optionIndex
+                                      )
+                                    }
+                                    style={{ width: "50px" }}
+                                  />
+                                ) : null}
+                              </div>
+                            ))}
+
+                            {/* Tombol Tambah Opsi Baru */}
+                            <Button
+                              onClick={() => handleAddOption(index)}
+                              iconName="add"
+                              classType="success btn-sm px-3 py-2 mt-2 rounded-3"
+                              label="Opsi Baru"
+                            />
+                          </div>
+                        </>
                       )}
 
                       <div className="d-flex justify-content-between my-2 mx-1">
@@ -1443,24 +1598,28 @@ export default function MasterPreTestAdd({ onChangePage }) {
                             <Button
                               iconName="trash"
                               label="Hapus"
-                              classType="btn-sm ms-2 px-3 py-1"
+                              classType="btn-sm ms-2 px-3 py-2 fw-semibold rounded-3"
+                              style={{ backgroundColor: "red", color: "white" }}
                               onClick={() => handleDeleteQuestion(index)}
                             />
                           </div>
-                          <div className="mr-3">
-                          <Button
-                            iconName="duplicate"
-                            label="Duplikat"
-                            classType="btn-sm ms-2 px-3 py-1"
-                            onClick={() => handleDuplicateQuestion(index)}
-                          />
+                          <div className="mr-4">
+                            <Button
+                              iconName="duplicate"
+                              label="Duplikat"
+                              classType="primary btn-sm ms-2 px-3 py-2 fw-semibold rounded-3 "
+                              onClick={() => handleDuplicateQuestion(index)}
+                            />
                           </div>
-                          <Button
-                            iconName="plus"
-                            label="Tambah Soal"
-                            classType="btn-sm ms-2 px-3 py-1"
-                            onClick={() => addQuestion("Essay")}
-                          />
+                          <div className="">
+                            <Button
+                              title="Tambah Pertanyaan"
+                              onClick={() => addQuestion("Essay")}
+                              iconName="plus"
+                              label="Tambah Soal"
+                              classType="primary btn-sm px-3 py-2 fw-semibold rounded-3"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1471,11 +1630,11 @@ export default function MasterPreTestAdd({ onChangePage }) {
           </div>
           <div className="d-flex justify-content-between my-4 mx-1 mt-0">
             <div className="ml-4">
-              {/* <Button
-            classType="outline-secondary me-2 px-4 py-2"
-            label="Kembali"
-            onClick={() => onChangePage("sharingAdd")}
-          /> */}
+              <Button
+                classType="outline-secondary me-2 px-4 py-2"
+                label="Sebelumnya"
+                onClick={handleSebelumnya}
+              />
             </div>
             <div className="d-flex mr-4">
               <div className="mr-2">

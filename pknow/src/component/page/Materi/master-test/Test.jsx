@@ -23,6 +23,7 @@ import { RFC_2822 } from "moment/moment";
 import he from "he";
 import Cookies from "js-cookie";
 import { decryptId } from "../../../util/Encryptor";
+import Search from "../../../part/Search";
 
 const ButtonContainer = styled.div`
   bottom: 35px;
@@ -443,7 +444,13 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
 
   return (
   <>
-    <div className="d-flex" style={{marginTop:"100px", marginLeft:"100px", marginRight:"100px"}}>
+    <Search
+            title="Kuis Materi"
+            description="Berdoalah terlebih dahulu, pastikan anda menjawab jawaban yang paling tepat bagi anda. Penialaian anda akan menjadi bahan evaluasi pada materi ini."
+            placeholder="Cari Kelompok Keahlian"
+            showInput={false}
+          />
+    <div className="d-flex mt-3" style={{ marginLeft:"100px", marginRight:"100px"}}>
       <div className=" p-3 d-flex ">
         <div className="mb-3 d-flex" style={{ overflowX: 'auto' }}>
           {currentData.map((item, index) => {
@@ -544,10 +551,11 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
                   </div>
                 )}
           <form onSubmit={handleAdd}>
-          <div className="">
+          <div className="mt-4">
             <ButtonContainer>
               <Button
-                style={{backgroundColor:"grey"}}
+                style={{backgroundColor:"transparent"}}
+                classType="outline-secondary me-2 px-4 py-2"
                 label="Sebelumnya"
                 onClick={selectPreviousQuestion}
               />

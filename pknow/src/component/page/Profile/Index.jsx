@@ -15,7 +15,7 @@ import BackPage from "../../../../assets/backPage.png";
 import Konfirmasi from "../../../part/Konfirmasi";
 import { Editor } from "@tinymce/tinymce-react";
 
-export default function TambahKK({ onChangePage }) {
+export default function ChangeProfile({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -24,8 +24,6 @@ export default function TambahKK({ onChangePage }) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isBackAction, setIsBackAction] = useState(false);  
   const [isFormDisabled, setIsFormDisabled] = useState(false);
-
-  const deskripsiRef = useRef(null);
 
   const handleGoBack = () => {
     setIsBackAction(true);  
@@ -95,43 +93,19 @@ export default function TambahKK({ onChangePage }) {
 
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
-  
-    if (name === "deskripsi") {
-      const cursorPosition = deskripsiRef.current.selectionStart;
-  
-      try {
-        if (value === "") {
-          setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
-        } else {
-          await userSchema.validateAt(name, { [name]: value });
-          setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
-        }
-      } catch (error) {
-        setErrors((prevErrors) => ({ ...prevErrors, [name]: error.message }));
+
+    try {
+      if (name === "personInCharge" && value === "") {
+        setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
+      } else {
+        await userSchema.validateAt(name, { [name]: value });
+        setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
       }
-  
-      formDataRef.current[name] = value;
-  
-      // Mengembalikan posisi cursor setelah update
-      setTimeout(() => {
-        if (deskripsiRef.current) {
-          deskripsiRef.current.setSelectionRange(cursorPosition, cursorPosition);
-        }
-      }, 0);
-    } else {
-      try {
-        if (name === "personInCharge" && value === "") {
-          setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
-        } else {
-          await userSchema.validateAt(name, { [name]: value });
-          setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
-        }
-      } catch (error) {
-        setErrors((prevErrors) => ({ ...prevErrors, [name]: error.message }));
-      }
-  
-      formDataRef.current[name] = value;
+    } catch (error) {
+      setErrors((prevErrors) => ({ ...prevErrors, [name]: error.message }));
     }
+
+    formDataRef.current[name] = value;
   };
 
   const getListProdi = async () => {
@@ -367,7 +341,6 @@ export default function TambahKK({ onChangePage }) {
                       placeholder="Deskripsi/Ringkasan Mengenai Kelompok Keahlian"
                       isRequired
                       errorMessage={errors.deskripsi}
-                      ref={deskripsiRef} // Menambahkan ref di sini
                     />
                   </div>
                 

@@ -1,6 +1,6 @@
 import Button from "./Button copy";
 
-export default function Filter({ children, handleSearch }) {
+export default function Filter({ children, handleSearch, name = 'Filter' }) {
   return (
     <>
       <Button
@@ -18,7 +18,7 @@ export default function Filter({ children, handleSearch }) {
               classType="primary px-4 d-flex justify-content-end rounded-3"
               title="Cari"
               onClick={handleSearch}
-              label="Filter"
+              label={name}
             />
       </div>
     </>

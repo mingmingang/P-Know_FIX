@@ -12,6 +12,20 @@ import Search from "../../../part/Search";
 import he from "he";
 import maskotPknow from "../../../../assets/pknowmaskot.png";
 
+const cleanText = (html) => {
+  // Decode HTML entities
+  const decoded = he.decode(html);
+  
+  // Hapus tag HTML
+  const tmp = document.createElement('DIV');
+  tmp.innerHTML = decoded;
+  const text = tmp.textContent || tmp.innerText || '';
+  
+  // Ganti non-breaking spaces dengan spasi biasa dan hapus spasi berlebih
+  return text.replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
+
 export default function Forum({ onChangePage, isOpen }) {
   let activeUser = "";
   const cookie = Cookies.get("activeUser");
@@ -269,11 +283,11 @@ export default function Forum({ onChangePage, isOpen }) {
       const replyCount = currentData.filter(reply => reply.ChildDetailId === item.DetailId).length;
 
       return (
-        <div key={item.DetailId} className="text-right">
+        <div key={item.DetailId} className="">
           <div className="card p-3 mb-3">
-            <div className="d-flex align-items-center mb-3">
+            <div className="d-flex align-items-center ">
               <div>
-                <img src={maskotPknow} alt="" width="50px" className="mr-3"/>
+                <img src={maskotPknow} alt="" width="45px" className="mr-3"/>
               </div>
               <div className="">
                 <h6 style={{ fontSize: "16px", style:"bold", textAlign:"left"}}>
@@ -282,27 +296,14 @@ export default function Forum({ onChangePage, isOpen }) {
                 <h6 style={{fontSize:"12px", color:'grey'}}>{formatDate(item.CreatedDateDetailForum)}</h6> 
               </div>
             </div>
-            <div>
-              <p
-                className="mb-0"
-                style={{
-                  maxWidth: "1500px",
-                  marginBottom: "0px",
-                  fontSize: "14px",
-                  textAlign: "righ",
-                  marginLeft: "10px",
-                  flex: 1
-                }}
-              >
-              </p>
-            </div>
-            <div>
+            <div style={{marginLeft:"62px"}}>
               {item.IsiDetailForum}
             </div>
             <div style={{ display: "flex", justifyContent: "flex-start", marginLeft: "10px", paddingTop:"10px", paddingBottom:"10px" }}>
               <button
                 className="btn btn-outline-primary btn-sm"
                 onClick={() => handleReply(item)}
+                style={{marginLeft:"52px"}}
               >
                 Balas
               </button>
@@ -316,7 +317,6 @@ export default function Forum({ onChangePage, isOpen }) {
                     <div style={{paddingBottom:"20px" }}>
                       <div className="d-flex align-items-center mt-4" >
                         <div
-                         
                         >
                          <img src={maskotPknow} alt="" width="50px" className="mr-3"/>
                         </div>
@@ -349,13 +349,14 @@ export default function Forum({ onChangePage, isOpen }) {
                         }}
                       >
                         <div>
-                          <div className="mt-4" style={{marginLeft:"60px"}} dangerouslySetInnerHTML={{ __html: reply.IsiDetailForum }} />
+                          <div className="" style={{marginLeft:"58px"}} dangerouslySetInnerHTML={{ __html: reply.IsiDetailForum }} />
                         </div>
                       </div>
 
                       <span
                         className="btn btn-outline-primary btn-sm mt-2" 
                         onClick={() => handleReplySub(reply)}
+                        style={{marginLeft:"68px"}}
                       >
                       Balas
                       </span>
@@ -442,7 +443,7 @@ const renderJudulForum = () => {
         >
           <div>
             {/* Menghapus tag HTML dan menampilkan teks */}
-            <p>{removeHtmlTags(he.decode(item.IsiForum))}</p> {/* Cleaned and Decoded Text */}
+            <p>{cleanText(item.IsiForum)}</p> {/* Cleaned and Decoded Text */}
           </div>
         </div>
       </div>
@@ -503,7 +504,7 @@ const renderJudulForum = () => {
 
   return (
     <>
-      <div className="d-flex">
+      <div className="d-flex" style={{minHeight:"100vh"}}>
     <div className="">
       <KMS_Rightbar
        isActivePengenalan={false}

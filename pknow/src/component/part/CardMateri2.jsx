@@ -2,14 +2,15 @@ import { useState } from "react";
 import Icon from "./Icon.jsx";
 import Button from "./Button.jsx";
 import AppContext_master from "../page/Materi/master-proses/MasterContext.jsx";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faBook } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser, faBook } from "@fortawesome/free-solid-svg-icons";
 import AppContext_test from "../page/Materi/master-test/TestContext.jsx";
 import { API_LINK } from "../util/Constants.js";
 import "../../style/KelompokKeahlian.css";
+import review from "../../assets/reviewJawaban.png";
 
-function CardMateri({ 
-  materis, 
+function CardMateri({
+  materis,
   onStatus,
   onDelete,
   onEdit,
@@ -24,7 +25,7 @@ function CardMateri({
   const handleExpandDescription = (bookId) => {
     setExpandDeskripsi((prevState) => ({
       ...prevState,
-      [bookId]: !prevState[bookId]
+      [bookId]: !prevState[bookId],
     }));
   };
 
@@ -61,13 +62,19 @@ function CardMateri({
             return null;
           }
           return (
-            <div className="col-md-4 mb-4"  key={book.Key}>
+            <div className="col-md-4 mb-4" key={book.Key}>
               <div
                 className="bg-white-kk"
-                style={{ borderColor: book.Status === "Aktif" ? "blue" : "grey"}}
+                style={{
+                  borderColor: book.Status === "Aktif" ? "blue" : "grey",
+                }}
               >
                 <div className="">
-                  <img  className="cover-daftar-kk" src={book.Gambar} alt="gambar" />
+                  <img
+                    className="cover-daftar-kk"
+                    src={book.Gambar}
+                    alt="gambar"
+                  />
                   <div>
                     <h3
                       className="text-xl font-bold text-blue-600 mt-3"
@@ -75,8 +82,8 @@ function CardMateri({
                     >
                       {book.Judul}
                     </h3>
-                    <div className="mb-1 mt-3" style={{ fontSize: "16px"}}>
-                    <FontAwesomeIcon
+                    <div className="mb-1 mt-3" style={{ fontSize: "16px" }}>
+                      <FontAwesomeIcon
                         icon={faBook}
                         style={{
                           marginRight: "10px",
@@ -85,13 +92,23 @@ function CardMateri({
                           color: "black",
                         }}
                       />
-                      <span style={{ color: "black", fontSize: "16px", fontWeight: "600" }}>
+                      <span
+                        style={{
+                          color: "black",
+                          fontSize: "16px",
+                          fontWeight: "600",
+                        }}
+                      >
                         {book.Kategori}
                       </span>
                     </div>
                     <div
                       className="mb-1 mt-3"
-                      style={{ color: "black", fontSize: "16px", fontWeight: "600" }}
+                      style={{
+                        color: "black",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                      }}
                     >
                       <FontAwesomeIcon
                         icon={faUser}
@@ -102,58 +119,90 @@ function CardMateri({
                           color: "black",
                         }}
                       />
-                      <span>{book.Uploader} • {book.Creadate?.slice(0, 10)}</span>
+                      {book.Uploader} •{" "}
+                      {book.Creadate
+                        ? new Intl.DateTimeFormat("id-ID", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          }).format(new Date(book.Creadate))
+                        : "Tanggal Tidak Tersedia"}
                     </div>
                     <p
                       className="card-text p-0 mt-3 mb-1"
                       style={{
                         fontSize: "15px",
-                        
+
                         overflow: "hidden",
-                        textAlign: 'justify',
-                        marginLeft: '16px',
-                        color:'grey'
+                        textAlign: "justify",
+                        marginLeft: "16px",
+                        color: "grey",
                       }}
                     >
-                      {book.Keterangan.length > MAX_DESCRIPTION_LENGTH && !expandDeskripsi[book.Key] ? (
-                        <>
-                          {book.Keterangan.slice(0, MAX_DESCRIPTION_LENGTH) + " ..."}
-                          <a
-                            className="btn btn-link text-decoration-none p-0"
-                            onClick={() => handleExpandDescription(book.Key)}
-                            style={{ fontSize: "12px" }}
-                          >
-                            Baca Selengkapnya <Icon name={"caret-down"} />
-                          </a>
-                        </>
-                      ) : (
-                        <>
-                          {book.Keterangan}
-                          {expandDeskripsi[book.Key] && (
-                            <a
-                              className="btn btn-link text-decoration-none p-0"
-                              onClick={() => handleExpandDescription(book.Key)}
-                              style={{ fontSize: "12px" }}
-                            >
-                              Tutup <Icon name={"caret-up"} />
-                            </a>
-                          )}
-                        </>
-                      )}
+                    {
+  book.Keterangan.length > MAX_DESCRIPTION_LENGTH ? (
+    !expandDeskripsi[book.Key] ? (
+      <>
+        {/* Tampilkan hanya 100 karakter pertama */}
+        {book.Keterangan.slice(0, MAX_DESCRIPTION_LENGTH) + " ..."}
+        <a
+          className="btn btn-link text-decoration-none p-0"
+          onClick={() => handleExpandDescription(book.Key)}
+          style={{ fontSize: "12px" }}
+        >
+          Baca Selengkapnya <Icon name={"caret-down"} />
+        </a>
+      </>
+    ) : (
+      <>
+        {/* Tampilkan seluruh teks */}
+        {book.Keterangan}
+        <a
+          className="btn btn-link text-decoration-none p-0"
+          onClick={() => handleExpandDescription(book.Key)}
+          style={{ fontSize: "12px" }}
+        >
+          Tutup <Icon name={"caret-up"} />
+        </a>
+      </>
+    )
+  ) : (
+    // Jika teks <= 100 karakter, tampilkan apa adanya
+    <>{book.Keterangan}</>
+  )
+}
                     </p>
                   </div>
                 </div>
-               
-                <div className="card-footer d-flex justify-content-end bg-white mr-4 mb-4" style={{borderRadius:"14px", fontSize:"18px", marginBottom:"15px", height:"70px"}}>
+
+                <div
+                  className="card-footer d-flex justify-content-end bg-white mr-4 mb-4"
+                  style={{
+                    borderRadius: "14px",
+                    fontSize: "18px",
+                    marginBottom: "15px",
+                    height: "70px",
+                  }}
+                >
                   {isNonEdit === false ? (
                     <>
                       {book.Status === "Aktif" && (
                         <button
                           className="btn btn-sm text-primary"
                           title="Edit Materi"
-                          onClick={() => onEdit("pengenalanEdit", AppContext_test.DetailMateriEdit = book, AppContext_test.DetailMateri = book, AppContext_master.DetailMateri = book)}
+                          onClick={() =>
+                            onEdit(
+                              "pengenalanEdit",
+                              (AppContext_test.DetailMateriEdit = book),
+                              (AppContext_test.DetailMateri = book),
+                              (AppContext_master.DetailMateri = book)
+                            )
+                          }
                         >
-                          <i className="fas fa-edit" style={{fontSize:"20px"}} ></i>
+                          <i
+                            className="fas fa-edit"
+                            style={{ fontSize: "20px" }}
+                          ></i>
                         </button>
                       )}
                       <button
@@ -163,39 +212,43 @@ function CardMateri({
                         {book.Status === "Aktif" ? (
                           <i
                             className="fas fa-toggle-on text-primary"
-                            style={{ fontSize: '20px' }}
+                            style={{ fontSize: "20px" }}
                           ></i>
                         ) : (
                           <i
                             className="fas fa-toggle-off text-red"
-                            style={{ fontSize: '20px' }}
+                            style={{ fontSize: "20px" }}
                           ></i>
                         )}
                       </button>
                       <button
                         className="btn btn-sm text-primary"
                         title="Review Jawaban"
-                        onClick={() => handleReviewJawaban(book)}>
-                        <i className="fas fa-file" style={{fontSize:"20px"}} ></i>
+                        onClick={() => handleReviewJawaban(book)}
+                      >
+                        <img src={review} alt="" width="25px" />
                       </button>
                       <button
                         className="btn btn-sm"
-                        style={{color:"red"}}
+                        style={{ color: "red" }}
                         title="Review Jawaban"
                         onClick={() => handleDeleteMateri(book)}
                       >
-                        <i className="fas fa-trash" style={{fontSize:"20px"}} ></i>
+                        <i
+                          className="fas fa-trash"
+                          style={{ fontSize: "20px" }}
+                        ></i>
                       </button>
                     </>
                   ) : (
                     <div className="">
-                    <button
-                      className="btn btn-outline-primary"
-                      type="button"
-                      onClick={() => handleBacaMateri(book)}
-                    >
-                      Baca Materi
-                    </button>
+                      <button
+                        className="btn btn-outline-primary"
+                        type="button"
+                        onClick={() => handleBacaMateri(book)}
+                      >
+                        Baca Materi
+                      </button>
                     </div>
                   )}
                 </div>

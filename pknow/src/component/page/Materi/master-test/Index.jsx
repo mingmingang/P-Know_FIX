@@ -43,16 +43,19 @@ const dataFilterSort = [
   { Value: "[Judul] DESC", Text: "Nama Materi [↓]" },
 ];
 
-const dataFilterJenis = [
-  { Value: "Pemrograman", Text: "Pemrograman" },
-  { Value: "Basis Data", Text: "Basis Data" },
-  { Value: "Jaringan Komputer", Text: "Jaringan Komputer" },
-  // Tambahkan jenis lainnya jika diperlukan
+const dataFilterSortDate = [
+  { Value: "ASC", Text: "Tanggal [↑]" },
+  { Value: "DESC", Text: "Tanggal [↓]" },
 ];
 
 const dataFilterStatus = [
   { Value: "Aktif", Text: "Aktif" },
   { Value: "Tidak Aktif", Text: "Tidak Aktif" },
+];
+
+const dataFilterTanggal = [
+  { Value: "[Creadate] ASC", Text: "Tanggal [↑]" },
+  { Value: "[Creadate] DESC", Text: "Tanggal [↓]" },
 ];
 
 export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
@@ -67,11 +70,13 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
     query: "",
     sort: "Judul",
     order: "asc",
+    date: "",
   });
 
   const searchQuery = useRef(null);
   const searchFilterSort = useRef(null);
   const searchFilterStatus = useRef(null);
+  const searchFilterTanggal = useRef(null);
 
   const handleGoBack = () => {
     setIsBackAction(true);
@@ -127,20 +132,19 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
 
   function handleSearch() {
     setIsLoading(true);
-    setCurrentFilter((prevFilter) => {
-      return {
-        ...prevFilter,
-        page: 1,
-        query: searchQuery.current.value,
-      };
-    });
+    setCurrentFilter((prevFilter) => ({
+      ...prevFilter,
+      query: searchQuery.current.value,
+      page: 1, // Reset ke halaman pertama
+    }));
   }
 
   function handleStatusChange(event) {
     const { value } = event.target;
-    const newStatus = value === "" ? "Semua" : value;
     setCurrentFilter((prevFilter) => ({
       ...prevFilter,
+      status: value || "Semua",
+      page: 1, // Reset ke halaman pertama
     }));
   }
 
@@ -151,6 +155,18 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
       ...prevFilter,
       sort,
       order,
+      page: 1, // Reset ke halaman pertama
+    }));
+  }
+
+  function handleDateChange(event) {
+    const { value } = event.target;
+    const [sort, order] = value.split(" ");
+    setCurrentFilter((prevFilter) => ({
+      ...prevFilter,
+      sort,
+      order,
+      page: 1, // Reset ke halaman pertama
     }));
   }
 
@@ -171,10 +187,11 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
       setIsLoading(true);
       for (let i = 0; i < retries; i++) {
         try {
-          const data = await UseFetch(
-            API_LINK + "Materi/GetDataMateri",
-            currentFilter
-          );
+          console.log("Fetching data with filters:", currentFilter); // Debug
+          const data = await UseFetch(API_LINK + "Materi/GetDataMateri", {
+            ...currentFilter,
+          });
+          console.log("Data fetched:", data);
           if (data.length != 0) {
             setCurrentData(inisialisasiData);
             const formattedData = data.map((value) => ({
@@ -189,7 +206,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
                 )
                   .then((response) => {
                     if (!response.ok) {
-                      throw new Error(`HTTP error! status: ${response.status}`);
+                      throw new Error('HTTP error! status: `${response.status}`');
                     }
                     value.gbr = value.Gambar;
                     value.Gambar = API_LINK + `Upload/GetFile/${value.Gambar}`;
@@ -218,6 +235,8 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
               .catch((error) => {
                 console.error("Error updating currentData:", error);
               });
+          } else {
+            setCurrentData([]);
           }
         } catch (error) {
           // setIsError(true);
@@ -295,7 +314,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
               <div className="left-feature">
                 <div className="tes" style={{ display: "flex" }}>
                   <div className="mr-2">
-                    <Filter>
+                  <Filter>
                       <DropDown
                         ref={searchFilterSort}
                         forInput="ddUrut"
@@ -303,7 +322,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
                         type="none"
                         arrData={dataFilterSort}
                         defaultValue="[Judul] ASC"
-                        // onChange={handleSortChange}
+                        onChange={handleSortChange}
                       />
                       <DropDown
                         ref={searchFilterStatus}
@@ -312,7 +331,23 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
                         type="semua"
                         arrData={dataFilterStatus}
                         defaultValue="Semua"
-                        // onChange={handleStatusChange}
+                        onChange={handleStatusChange}
+                      />
+                      <DropDown
+                        ref={searchFilterSort}
+                        forInput="ddUrutTanggal"
+                        label="Urut Berdasarkan Tanggal"
+                        type="none"
+                        arrData={dataFilterSortDate}
+                        defaultValue="DESC"
+                        onChange={(e) => {
+                          const { value } = e.target;
+                          setCurrentFilter((prevFilter) => ({
+                            ...prevFilter,
+                            dateOrder: value, // Simpan pilihan ASC atau DESC
+                            page: 1,
+                          }));
+                        }}
                       />
                     </Filter>
                   </div>
@@ -325,26 +360,46 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
               <Loading />
             ) : (
               <div className="">
-              {currentData.length === 0 && (
-                <div className="alert alert-warning mt-0 mb-4" style={{margin:"80px"}}>
-                  Tidak ada data Materi yang tersedia.
-                </div>
-              )}
-            
-              {currentFilter.status === "Semua" && currentData.length > 0 && (
-                <CardMateri
-                  materis={currentData.filter(
-                    (materi) => materi.Status === "Aktif"
+                {!isLoading && currentData.length === 0 && (
+                  <div className="" style={{ margin: "5px 20px" }}>
+                    <Alert type="warning" message="Tidak ada data!" />
+                  </div>
+                )}
+                {currentFilter.status === "Semua" && currentData.length > 0 && (
+                  <CardMateri
+                    materis={currentData}
+                    onDetail={onChangePage}
+                    onEdit={onChangePage}
+                    onReviewJawaban={onChangePage}
+                    onStatus={handleSetStatus}
+                    isNonEdit={true}
+                    onBacaMateri={onChangePage}
+                  />
+                )}
+                {currentFilter.status === "Aktif" && currentData.length > 0 && (
+                  <CardMateri
+                    materis={currentData}
+                    onDetail={onChangePage}
+                    onEdit={onChangePage}
+                    onReviewJawaban={onChangePage}
+                    onStatus={handleSetStatus}
+                    isNonEdit={true}
+                    onBacaMateri={onChangePage}
+                  />
+                )}
+                {currentFilter.status === "Tidak Aktif" &&
+                  currentData.length > 0 && (
+                    <CardMateri
+                      materis={currentData}
+                      onDetail={onChangePage}
+                      onEdit={onChangePage}
+                      onReviewJawaban={onChangePage}
+                      onStatus={handleSetStatus}
+                      isNonEdit={true}
+                      onBacaMateri={onChangePage}
+                    />
                   )}
-                  onDetail={onChangePage}
-                  onEdit={onChangePage}
-                  onReviewJawaban={onChangePage}
-                  onStatus={handleSetStatus}
-                  isNonEdit={true}
-                  onBacaMateri={onChangePage}
-                />
-              )}
-            </div>
+              </div>
             )}
             {/* {currentData.length > 0 && currentData[0].Count > 10 && (
               <Paging
@@ -355,27 +410,31 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
                 className="mt-3"
               />
             )} */}
-             <div className="mb-4 d-flex justify-content-center">
-            <div className="d-flex">
-              <Paging
-                pageSize={PAGE_SIZE}
-                pageCurrent={currentFilter.page}
-                totalData={currentData[0]?.Count || 0}
-                navigation={handleSetCurrentPage}
-              />
+            <div className="mb-4 d-flex justify-content-center">
+              <div className="d-flex">
+                <Paging
+                  pageSize={PAGE_SIZE}
+                  pageCurrent={currentFilter.page}
+                  totalData={currentData[0]?.Count || 0}
+                  navigation={handleSetCurrentPage}
+                />
+              </div>
             </div>
-          </div>
           </div>
         </div>
       </div>
       {showConfirmation && (
         <Konfirmasi
           title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
-          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          pesan={
+            isBackAction
+              ? "Apakah anda ingin kembali?"
+              : "Anda yakin ingin simpan data?"
+          }
           onYes={handleConfirmYes}
           onNo={handleConfirmNo}
         />
-        )}
+      )}
     </div>
   );
 }

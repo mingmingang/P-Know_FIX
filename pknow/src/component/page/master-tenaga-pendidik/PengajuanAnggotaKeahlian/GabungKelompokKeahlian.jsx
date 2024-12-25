@@ -405,12 +405,14 @@ export default function PengajuanAdd({ onChangePage, withID }) {
                           Contoh: SertifikasiMicrosoft_DataScience_CandraBagus
                         </p>
                         </div>
+                        <div className="">
                         <Button
                           iconName="add"
-                          classType="primary btn-sm mb-3"
+                          classType="primary btn-sm mb-3 rounded-4 py-2"
                           label="Tambah Lampiran"
                           onClick={handleTambahLampiran}
                         />
+                        </div>
                         </div>
                         {[...Array(lampiranCount)].map((_, index) => (
                           <div key={index}>
@@ -431,6 +433,7 @@ export default function PengajuanAdd({ onChangePage, withID }) {
                                 (lampiranRefs.current[index] =
                                   React.createRef())
                               }
+                              style={{width:"197%"}}
                             />
                             {fileInfos[index] && (
                               <div className="mt-2">

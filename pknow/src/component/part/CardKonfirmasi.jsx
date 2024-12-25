@@ -7,6 +7,8 @@ import { API_LINK } from "../util/Constants";
 function CardKonfirmasi({ data, onChangePage, isShow }) {
   const [showAllText, setShowAllText] = useState(isShow);
 
+  console.log("dta", data)
+
   const handleToggleText = () => {
     setShowAllText(!showAllText);
   };

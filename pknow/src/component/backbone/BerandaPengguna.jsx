@@ -8,6 +8,9 @@ export default function BerandaPengguna({
   maskotHeight,
   marginLeft,
 }) {
+  const handleKnowledgeDatabase = () => {
+    window.location.replace("/daftar_pustaka"); // Redirect to login page
+}
   return (
     <div>
       <section
@@ -22,7 +25,7 @@ export default function BerandaPengguna({
             efisien. Mari kita mulai dengan menjelajahi fitur-fitur yang
             tersedia dengan mengakses menu yang disediakan.”
           </p>
-          <button>Knowledge Database</button>
+          <button onClick={handleKnowledgeDatabase}>Knowledge Database</button>
         </div>
 
         <div

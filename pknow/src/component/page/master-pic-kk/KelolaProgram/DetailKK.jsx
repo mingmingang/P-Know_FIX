@@ -227,17 +227,13 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                   <div>
                     {listAnggota.map((ag, index) => (
                       <div
-                        className="card-profile mb-3 d-flex justify-content-between shadow-sm"
+                        className="card-profile mb-3 d-flex justify-content-between shadow-sm rounded-3"
                         key={ag.Key}
                       >
                         <div className="d-flex w-100">
-                          <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
+                          <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold " style={{color:"#0A5EA8"}}>
                             {index + 1}
                           </p>
-                          <div
-                            className="bg-primary"
-                            style={{ width: "1.5%" }}
-                          ></div>
                           <div className="p-1 ps-2 d-flex">
                             <img
                               src={pknowMaskot}
@@ -245,8 +241,8 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                               className="img-fluid rounded-circle"
                               width="45"
                             />
-                            <div className="ps-3">
-                              <p className="mb-0">{ag["Nama Anggota"]}</p>
+                            <div className="ps-3" style={{color:"#0A5EA8"}}>
+                              <p className="mb-0 fw-bold">{ag["Nama Anggota"]}</p>
                               <p className="mb-0" style={{ fontSize: "13px" }}>
                                 {ag.Prodi}
                               </p>
@@ -257,7 +253,8 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                     ))}
                     <div className="text-end">
                       <Button
-                        classType="light btn-sm text-primary text-decoration-underline px-3 mt-2"
+                        classType="text-decoration-none px-3 mt-2"
+                        style={{color:"white", backgroundColor:"#0A5EA8"}}
                         type="submit"
                         label="Lihat Semua"
                         data-bs-toggle="modal"
@@ -271,7 +268,7 @@ export default function KKDetailProgram({ onChangePage, withID }) {
               )}
             </div>
           </div>
-          <h5 className="text-primary pt-2">
+          <h5 className="pt-2" style={{color:"#0A5EA8"}}>
             Daftar Program dalam Kelompok Keahlian{" "}
             <strong>{formData.nama}</strong>
           </h5>
@@ -305,6 +302,7 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                     </p>
                     <div className="row row-cols-3">
                       {data.kategori.map((kat, indexKat) => (
+                        <>
                         <div className="col">
                           <div className="card card-kategori-program mt-3">
                             <div className="card-body">
@@ -329,6 +327,7 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                             </div>
                           </div>
                         </div>
+                        </>
                       ))}
                     </div>
                   </div>
@@ -341,26 +340,26 @@ export default function KKDetailProgram({ onChangePage, withID }) {
         </div>
       </div>
       <div
-        class="modal fade"
+        className="modal fade"
         id="modalAnggota"
         tabindex="-1"
         aria-labelledby="Anggota Kelompok Keahlian"
         aria-hidden="true"
       >
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="modalAnggotaKK" style={{color:"#0A5EA8"}}>
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="modalAnggotaKK" style={{color:"#0A5EA8"}}>
                 Anggota Kelompok Keahlian
               </h1>
               <button
                 type="button"
-                class="btn-close"
+                className="btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"
               ></button>
             </div>
-            <div class="modal-body">
+            <div className="modal-body">
               {/* <div className="input-group mb-4">
                 <Input
                   //   ref={searchQuery}
@@ -406,17 +405,13 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                 ) : (
                   listAnggota.map((ag, index) => (
                     <div
-                      className="card-profile mb-3 d-flex justify-content-between shadow-sm"
+                      className="card-profile mb-3 d-flex justify-content-between shadow-sm rounded-3"
                       key={ag.Key}
                     >
                       <div className="d-flex w-100">
                         <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
                           {index + 1}
                         </p>
-                        <div
-                          className="bg-primary"
-                          style={{ width: "1.5%" }}
-                        ></div>
                         <div className="p-1 ps-2 d-flex">
                           <img
                             src={pknowMaskot}
@@ -424,8 +419,8 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                             className="img-fluid rounded-circle"
                             width="45"
                           />
-                          <div className="ps-3">
-                            <p className="mb-0">{ag["Nama Anggota"]}</p>
+                          <div className="ps-3" style={{color:"#0A5EA8"}}>
+                            <p className="mb-0 fw-bold">{ag["Nama Anggota"]}</p>
                             <p className="mb-0" style={{ fontSize: "13px" }}>
                               {ag.Prodi}
                             </p>

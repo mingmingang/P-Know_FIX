@@ -159,7 +159,7 @@ export default function MasterTestIndex({
 
   return (
     <>
-      <div className="d-flex">
+      <div className="d-flex" style={{minHeight:"100vh"}}>
         <div className="">
           <KMS_Rightbar
             isActivePengenalan={true}

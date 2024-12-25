@@ -29,7 +29,6 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
     width: 500px;
-    height: 310px;
 
 }
 
@@ -230,18 +229,43 @@
     border-top: 1px solid #e0e0e0;
   }
 
-  .captcha{
-    display: flex;
-  }
+/* Login.css */
 
-  #captchaValue{
-    height: 40px;
-    padding: 10px;
-    line-height: 20px;
-    background-color: #fff;
-    border-radius: 10px;
+/* Styling untuk container CAPTCHA */
+/* Login.css */
 
-  }
+/* Styling untuk container CAPTCHA */
+.captcha-container {
+  align-items: flex-start;
+}
+
+/* Styling untuk angka CAPTCHA */
+.captcha-number {
+  font-weight: bold;
+  letter-spacing: 5px;
+  background-color: #0A5EA8;
+  border-radius: 5px;
+  display: inline-block;
+  user-select: none;
+}
+
+/* Styling untuk tombol refresh CAPTCHA */
+.captcha-container button {
+  padding: 5px 10px;
+  border: none;
+  background-color: #0A5EA8;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Styling untuk pesan error */
+.error-message {
+  font-size: 14px;
+  color: red;
+  margin-top: 5px;
+}
+
+
   
   /* Fade-in animation */
   @keyframes fadeIn {

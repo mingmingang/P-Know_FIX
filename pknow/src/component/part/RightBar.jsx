@@ -58,7 +58,10 @@ export default function KMS_Rightbar({
   const [currentFilter, setCurrentFilter] = useState([]);
   const [idMateri, setIdMateri] = useState("");
   const [sections, setSections] = useState([]);
-
+const [showMateriFile, setShowMateriFile] = useState(false);
+const [showMateriVideo, setShowMateriVideo] = useState(false);
+const [showSharingExpertFile, setShowSharingExpertFile] = useState(false);
+const [showSharingExpertVideo, setShowSharingExpertVideo] = useState(false);
 
   useEffect(() => {}, [AppContext_test]);
 
@@ -110,63 +113,7 @@ console.log("cek materi", materiId);
     fetchData();
   }, [AppContext_test.materiId, AppContext_test.refreshPage]);
   //
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      let materiData = null;
-      let maxRetries = 10;
-      let retryCount = 0;
-
-      if (AppContext_test.materiId != null) {
-        console.log("test");
-        while (!materiData && retryCount < maxRetries) {
-          try {
-            const [materiResponse] = await Promise.all([fetchDataMateri()]);
-            if (materiResponse) {
-              materiData = materiResponse;
-            }
-            if (materiData) {
-              setCurrentDataMateri(materiData);
-            } else {
-              console.error("Response data is undefined or null");
-            }
-          } catch (error) {
-            setIsError(true);
-            console.error("Fetch error:", error);
-          }
-
-          retryCount++;
-          if (!materiData) {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-        }
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [AppContext_test.materiId]);
-
-  const fetchDataMateri = async () => {
-    let success = false;
-    while (!success) {
-      try {
-        const response = await axios.post(
-          API_LINK + "Materi/GetDataMateriById",
-          {
-            materiId: AppContext_test.materiId,
-          }
-        );
-        
-        if (response.data != 0) {
-          success = true;
-          return response.data;
-        }
-      } catch (error) {
-        console.error("Error fetching quiz data:", error);
-        return null;
-      }
-    }
-  };
+ 
 
   const fetchProgresMateri = async () => {
     let success = false;
@@ -191,7 +138,29 @@ console.log("cek materi", materiId);
     }
   };
 
+  useEffect(() => {
+    const fetchMateriData = async () => {
+      try {
+        // Fetch Materi data by ID
+        const response = await axios.post(`${API_LINK}Materi/GetDataMateriById`, {
+          materiId: materiId,
+        });
+        if (response.data) {
+          // setCurrentDataMateri(response.data);
 
+          // Check if PDF or Video exist in the response
+          const { File_pdf, File_video } = response.data[0];
+          setShowMateriFile(!!File_pdf); // Show Materi File if File_pdf exists
+          setShowMateriVideo(!!File_video); // Show Materi Video if File_video exists
+        }
+      } catch (error) {
+        console.error("Error fetching Materi data:", error);
+      }
+    };
+
+    if (materiId) fetchMateriData();
+  }, [materiId]);
+  
   useEffect(() => {
     const fetchSections = async () => {
       setIsLoading(true);
@@ -202,11 +171,16 @@ console.log("cek materi", materiId);
         });
         if (response.data) {
           setSections(response.data);
-          // Determine button visibility based on sec_type
+          // cek munculin button berdasarkan sec_type
           const secTypes = response.data.map(section => section.SectionType);
           setShowPreTest(secTypes.includes("Pre-Test"));
           setShowSharing(secTypes.includes("Sharing Expert"));
           setShowPostTest(secTypes.includes("Post-Test"));
+          // cek untuk sharing expert file dan video
+          const hasExpertFile = response.data.some(section => section.ExpertFile);
+          const hasExpertVideo = response.data.some(section => section.ExpertVideo);
+          setShowSharingExpertFile(hasExpertFile);
+          setShowSharingExpertVideo(hasExpertVideo);
         }
       } catch (err) {
         console.error("Error fetching sections:", err);
@@ -312,6 +286,8 @@ console.log("cek materi", materiId);
   const [showForum, setShowForum] = useState(false);
   const [showPostTest, setShowPostTest] = useState(false);
   const [showSharing, setShowSharing] = useState(false);
+  const [filePdf, setFilePdf] = useState(null);
+  const [fileVideo, setFileVideo] = useState(null);
 
   useEffect(() => {
     if (currentDataMateri[0]?.File_video != "") {
@@ -602,36 +578,35 @@ console.log("cek materi", materiId);
 
             {showMateriOptions && (
               <>
-                <div className="ml-3 mr-3 mt-3">
-                  <button
-                    className="buttonRightBar"
-                    style={{
-                      backgroundColor: isActiveMateriPDF
-                        ? "#0A5EA8"
-                        : "transparent",
-                      color: isActiveMateriPDF ? "white" : "black",
-                    }}
-                    label="Materi PDF"
-                    onClick={onClick_materiPDF}
-                  >
-                    Materi File
-                  </button>
-                </div>
-                <div className="ml-3 mr-3 mt-3">
-                  <button
-                    className="buttonRightBar"
-                    style={{
-                      backgroundColor: isActiveMateriVideo
-                        ? "#0A5EA8"
-                        : "transparent",
-                      color: isActiveMateriVideo ? "white" : "black",
-                    }}
-                    label="Materi Video"
-                    onClick={onClick_materiVideo}
-                  >
-                    Materi Video
-                  </button>
-                </div>
+                 {showMateriFile && (
+        <div className="ml-3 mr-3 mt-3">
+          <button
+            className="buttonRightBar"
+            style={{
+              backgroundColor: isActiveMateriPDF ? "#0A5EA8" : "transparent",
+              color: isActiveMateriPDF ? "white" : "black",
+            }}
+            onClick={onClick_materiPDF}
+          >
+            Materi File
+          </button>
+        </div>
+      )}
+
+      {showMateriVideo && (
+        <div className="ml-3 mr-3 mt-3">
+          <button
+            className="buttonRightBar"
+            style={{
+              backgroundColor: isActiveMateriVideo ? "#0A5EA8" : "transparent",
+              color: isActiveMateriVideo ? "white" : "black",
+            }}
+            onClick={onClick_materiVideo}
+          >
+            Materi Video
+          </button>
+        </div>
+      )}
               </>
             )}
 
@@ -650,37 +625,37 @@ console.log("cek materi", materiId);
             </div>
           )}
           {showSharingOptions && (
-            <>
-              <div className="ml-3 mr-3 mt-3">
-                <button
-                  className="buttonRightBar"
-                  style={{
-                    backgroundColor: isActiveSharingPDF
-                      ? "#0A5EA8"
-                      : "transparent",
-                    color: isActiveSharingPDF ? "white" : "black",
-                  }}
-                  onClick={onClick_sharingPDF}
-                >
-                  Sharing Expert File
-                </button>
-              </div>
-              <div className="ml-3 mr-3 mt-3">
-                <button
-                  className="buttonRightBar"
-                  style={{
-                    backgroundColor: isActiveSharingVideo
-                      ? "#0A5EA8"
-                      : "transparent",
-                    color: isActiveSharingVideo ? "white" : "black",
-                  }}
-                  onClick={onClick_sharingVideo}
-                >
-                  Sharing Expert Video
-                </button>
-              </div>
-            </>
-          )}
+  <>
+    {showSharingExpertFile && (
+      <div className="ml-3 mr-3 mt-3">
+        <button
+          className="buttonRightBar"
+          style={{
+            backgroundColor: isActiveSharingPDF ? "#0A5EA8" : "transparent",
+            color: isActiveSharingPDF ? "white" : "black",
+          }}
+          onClick={onClick_sharingPDF}
+        >
+          Sharing Expert File
+        </button>
+      </div>
+    )}
+    {showSharingExpertVideo && (
+      <div className="ml-3 mr-3 mt-3">
+        <button
+          className="buttonRightBar"
+          style={{
+            backgroundColor: isActiveSharingVideo ? "#0A5EA8" : "transparent",
+            color: isActiveSharingVideo ? "white" : "black",
+          }}
+          onClick={onClick_sharingVideo}
+        >
+          Sharing Expert Video
+        </button>
+      </div>
+    )}
+  </>
+)}
           {showPostTest && (
             <div className="ml-3 mr-3 mt-3">
               <button

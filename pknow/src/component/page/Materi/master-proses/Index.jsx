@@ -497,7 +497,7 @@ export default function MasterProsesIndex({ onChangePage }) {
               <div className="">
               <Button
                   iconName="add"
-                  classType="primary py-2" 
+                  classType="primary py-2 rounded-4" 
                   title="Tambah Materi"
                   label="Tambah Materi"
                   onClick={handleButtonClick}

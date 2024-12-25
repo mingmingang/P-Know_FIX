@@ -13,6 +13,7 @@ import SweetAlert from "../../../../util/SweetAlert";
 import he from "he";
 import Cookies from "js-cookie";
 import { decryptId } from "../../../../util/Encryptor";
+import Search from "../../../../part/Search";
 
 export default function MasterMateriReviewJawaban({ onChangePage, status, withID }) {
   let activeUser = "";
@@ -303,7 +304,16 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
 
   if (isError) {
     return (
-      <div className="flex-fill mb-0" style={{margin:"100px"}}>
+      <>
+       <div className="">
+        <Search
+            title="Review Quiz Materi"
+            description="Tenaga Pendidik dapat memeriksa jawaban dari peserta yang telah mengerjakan Pre-Test dan Post-Test yang tersedia didalam materi."
+            placeholder="Cari Kelompok Keahlian"
+            showInput={false}
+          />
+    </div>
+      <div className="flex-fill mb-0 mt-3" style={{marginRight:"100px", marginLeft:"100px"}}>
           <Alert
           type="warning"
           message="Belum terdapat peserta yang mengerjakan test"
@@ -316,6 +326,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
           />
       </div>
     </div>
+    </>
     );
   }
 
@@ -371,7 +382,16 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
   
 
   return (
-    <div className="container" style={{marginTop:'120px'}}>
+    <>
+   <div className="">
+        <Search
+            title="Review Quiz Materi"
+            description="Tenaga Pendidik dapat memeriksa jawaban dari peserta yang telah mengerjakan Pre-Test dan Post-Test yang tersedia didalam materi."
+            placeholder="Cari Kelompok Keahlian"
+            showInput={false}
+          />
+    </div>
+    <div className="container">
       <Card className="mb-4">
         <Card.Header className="bg-primary text-light d-flex align-items-center justify-content-between">
           <div className="header-left">
@@ -430,7 +450,6 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
             {currentQuestions.map((question, questionIndex) => {
               const currentRespondent = currentData[currentRespondentIndex];
               const matchedAnswer = currentRespondent?.answer?.[questionIndex]?.ans_jawaban_pengguna;
-
               return (
                 <Card key={question.Key} className="mb-4">
                   <Card.Header className="d-flex align-items-center">
@@ -532,6 +551,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
       />
     </div>
     </div>
+    </>
   );
 }
 

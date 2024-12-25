@@ -103,7 +103,7 @@ export default function PengenalanBefore({ onChangePage }) {
     mat_file_pdf: string(),
     mat_file_video: string(),
     mat_pengenalan: string().required('Pengenalan materi harus diisi'),
-    mat_keterangan: string().required('Keterangan materi harus diisi'),
+    mat_keterangan: string().required('Keterangan materi harus diisi').min(100,"minimum 100 karakter").max(200,"maksimum 200 karakter"),
     kry_id: string(),
     mat_kata_kunci: string().required('Kata kunci materi harus diisi'),
     mat_gambar: string(),
@@ -217,14 +217,14 @@ export default function PengenalanBefore({ onChangePage }) {
           const data = response.data;
           console.log(data)
           if (data[0].hasil === "OK") {
-            SweetAlert("Sukses", "Pengenalan Materi berhasil disimpan", "success");
+           // SweetAlert("Sukses", "Pengenalan Materi berhasil disimpan", "success");
             setIsFormDisabled(false);
             AppContext_master.formSavedMateri = false;
-            SweetAlert(
-              "Sukses",
-              "Pengenalan Materi berhasil diubah",
-              "success"
-            );
+            // SweetAlert(
+            //   "Sukses",
+            //   "Pengenalan Materi berhasil diubah",
+            //   "success"
+            // );
             onChangePage("materiAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1, AppContext_master.dataIDMateri);
           } else {
             setIsError(prevError => ({

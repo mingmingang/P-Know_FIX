@@ -196,7 +196,7 @@ export default function KKDetailDraft({ onChangePage, withID }) {
       )}
       <div
         className="back-and-title"
-        style={{ display: "flex", marginLeft: "80px", marginTop: "40px" }}
+        style={{ display: "flex", marginLeft: "80px", marginTop: "100px" }}
       >
         <button
           style={{ backgroundColor: "transparent", border: "none" }}

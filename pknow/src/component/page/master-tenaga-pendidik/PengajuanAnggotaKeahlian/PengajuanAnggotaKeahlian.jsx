@@ -301,7 +301,7 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
               />
               <Button2
                 iconName="search"
-                classType="primary px-4"
+                classType="px-4"
                 title="Cari"
                 onClick={handleSearch}
                 style={{ backgroundColor: "transparent", color: "#08549F" }}
@@ -364,7 +364,7 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
                         {dataAktif["Nama Kelompok Keahlian"]}
                       </h3>
                       <h5 className="fw-semibold">
-                      <FontAwesomeIcon icon={faGraduationCap} className="icon-style" />
+                      <FontAwesomeIcon icon={faGraduationCap} className="icon-style mr-2" />
                         {dataAktif?.Prodi}
                       </h5>
                       <p
@@ -388,7 +388,7 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
                             
                               <div key={linkIndex}>
                                 <h5 className="mb-3" style={{marginTop:"15px"}}>{`Lampiran ${linkIndex + 1}`}</h5>
-                                <a href={link.trim()} target="_blank" rel="noopener noreferrer">
+                                <a href={link.trim()} target="_blank" rel="noopener noreferrer" style={{ padding:"5px", marginTop:"20px", textDecoration:"none", borderRadius:"10px", color:"white", backgroundColor:"#0A5EA8"}}> 
                                   {`Lampiran ${linkIndex + 1} ${dataAktif["Nama Kelompok Keahlian"]}`}
                                 </a>
                               </div>

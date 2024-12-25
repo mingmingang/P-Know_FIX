@@ -18,6 +18,9 @@ import PDF_Viewer from "../../../part/PDF_Viewer";
 import KMS_Rightbar from "../../../part/RightBar";
 import Cookies from "js-cookie";
 import { decryptId } from "../../../util/Encryptor";
+import WordViewer from "../../../part/DocumentViewer";
+import ExcelViewer from "../../../part/ExcelViewer";
+
 
   const inisialisasiData = [
     {
@@ -73,24 +76,46 @@ export default function MasterTestIndex({ onChangePage,materiId }) {
 
 
 
-const getFileData = async (retries = 3, delay = 1000) => {
-  for (let i = 0; i < retries; i++) {
+  const getFileData = async (retries = 3, delay = 1000) => {
+    for (let i = 0; i < retries; i++) {
       try {
-          const response = await axios.post(API_LINK + "Materi/GetDataMateriById", {
-              id: AppContext_test.materiId,
-          });
-          if (response.data.length !== 0) {
-              const { File_pdf, Judul, Nama, Creadate } = response.data[0];
-              setFileData({
-                  file: File_pdf || "",
-                  judul: Judul || "Tidak ada judul",
-                  uploader: Nama || "Tidak ada uploader",
-                  creadate: Creadate || "Tanggal tidak tersedia",
-              });
-              const ext = File_pdf.split(".").pop().toLowerCase();
-              setFileExtension(ext);
-              return;
+        const response = await axios.post(
+          API_LINK + "Materi/GetDataMateriById",
+          {
+            id: AppContext_test.materiId,
           }
+        );
+        if (response.data.length !== 0) {
+          const { File_pdf, Judul, Nama, Creadate } = response.data[0];
+
+          // Validasi File_pdf dan Judul
+          if (!File_pdf || !Judul) {
+            console.error("File_pdf atau Judul tidak ditemukan!");
+            return;
+          }
+
+          const ext = File_pdf.split(".").pop().toLowerCase(); // Dapatkan ekstensi file
+          const formattedFileName = `${Judul.replace(/\s+/g, "_")}.${ext}`;
+
+          // Perbarui state
+          setFileData({
+            file: File_pdf,
+            judul: Judul,
+            uploader: Nama || "Tidak ada uploader",
+            creadate: Creadate || "Tanggal tidak tersedia",
+            formattedFileName, // Tambahkan nama file yang diformat
+            fileExtension: ext, // Tambahkan ekstensi file
+          });
+
+          setFileExtension(ext);
+          console.log("Judul Materi:", Judul);
+          console.log("File PDF:", File_pdf);
+          console.log("Formatted File Name:", formattedFileName);
+          console.log("File Extension:", ext);
+
+          return; // Keluar dari fungsi setelah selesai
+        }
+
       } catch (error) {
           console.error("Error fetching materi data: ", error);
           if (i < retries - 1) {
@@ -101,6 +126,34 @@ const getFileData = async (retries = 3, delay = 1000) => {
       }
   }
 };
+
+const setupDownload = async (fileUrl, formattedFileName) => {
+  try {
+    // Fetch file dari server
+    const response = await axios.get(fileUrl, {
+      responseType: "blob", // Pastikan menerima data dalam bentuk Blob
+    });
+
+    // Buat URL untuk Blob
+    const blob = new Blob([response.data]);
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    // Buat elemen <a> untuk unduhan
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = formattedFileName; // Tetapkan nama file unduhan
+
+    // Tambahkan ke DOM dan klik untuk memulai unduhan
+    document.body.appendChild(link);
+    link.click();
+
+    // Hapus elemen <a> setelah selesai
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl); // Bersihkan URL Blob
+  } catch (error) {
+    console.error("Error setting up download:", error);
+    }
+  };
 
 const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -129,32 +182,6 @@ useEffect(() => {
     formUpdate.current.statusSharingExpert_Video = "Done";
   }
   console.log("tes materi", AppContext_test.materiId);
-
-//  async function saveProgress() {
-//     let success = false;
-//     let retryCount = 0;
-//     const maxRetries = 5; 
-
-//     while (!success && retryCount < maxRetries) {
-//       try {
-//         const response = await axios.post(API_LINK + "Materis/SaveProgresMateri", formUpdate.current);
-        
-//         if (response.data != 0){
-//           success = true;
-//           console.log(response.data)
-//           AppContext_test.refreshPage += retryCount;
-//           console.log(AppContext_test.refreshPage, "DS")
-//           console.log('ds') 
-//         }
-//       } catch (error) {
-//         console.error("Failed to save progress:", error);
-//         retryCount += 1;
-//         if (retryCount >= maxRetries) {
-//           console.error("Max retries reached. Stopping attempts to save progress.");
-//         }
-//       }
-//     }
-//   }
 
 async function updateProgres() {
   let success = false;
@@ -195,7 +222,7 @@ async function updateProgres() {
 
 return (
   <>
-    <div className="d-flex">
+    <div className="d-flex" style={{minHeight:"100vh"}}>
         <KMS_Rightbar
      isActivePengenalan={false}
      isActiveForum={false}
@@ -257,26 +284,14 @@ return (
           )}
           {/* Anda bisa menambahkan lebih banyak kondisi untuk file lain seperti .docx atau .xlsx */}
           {fileExtension === "docx" && (
-            <div className="">
-            <p style={{marginLeft:"25px", marginTop:"20px"}}>
-              Dokumen Word tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
-              {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
-                unduh
-              </a>{" "} */}  
-            </p>
-            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
+            <div className="ml-4">
+            <WordViewer fileUrl={`${API_LINK}Upload/GetFile/${fileData.file}`} fileData={fileData} width="1000px"/>
             </div>
           )}
           {fileExtension === "xlsx" && (
-            <div className="">
-            <p style={{marginLeft:"25px", marginTop:"20px"}}>
-              Dokumen Excel tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
-              {/* <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
-                unduh
-              </a>{" "} */}  
-            </p>
-            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
-            </div>
+           <div className="ml-4">
+           <ExcelViewer fileUrl={`${API_LINK}Upload/GetFile/${fileData.file}`} fileData={fileData} width="1000px" />
+           </div>
           )}
            {fileExtension === "pptx" && (
             <div className="">

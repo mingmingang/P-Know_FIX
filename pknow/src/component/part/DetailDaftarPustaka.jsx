@@ -7,6 +7,11 @@ import Konfirmasi from "./Konfirmasi";
 import { API_LINK } from "../util/Constants";
 import Video_Viewer from "../part/VideoPlayer";
 import ReactPlayer from "react-player";
+import WordViewer from "./DocumentViewer";
+import ExcelViewer from "./ExcelViewer";
+import axios from "axios";
+
+
 
 export default function DetailDaftarPustaka({ onChangePage, withID }) {
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -18,6 +23,7 @@ export default function DetailDaftarPustaka({ onChangePage, withID }) {
   const [fileExtension, setFileExtension] = useState("");
 
   const handleGoBack = () => {
+    console.log("materii", `${API_LINK}Upload/GetFile/${fileData.file}` )
     setIsBackAction(true);
     setShowConfirmation(true);
   };
@@ -41,19 +47,56 @@ export default function DetailDaftarPustaka({ onChangePage, withID }) {
   });
 
   useEffect(() => {
-    if (withID) {
+    if (withID && withID.File && withID.Judul) {
+      // Dapatkan ekstensi file
+      const ext = withID.File.split(".").pop().toLowerCase();
+  
+      // Format nama file dengan mengganti spasi menjadi underscore
+      const formattedFileName = `${withID.Judul.replace(/\s+/g, "_")}.${ext}`;
+  
+      // Set data file
       setFileData({
         key: withID.id,
         judul: withID.Judul,
         deskripsi: withID.Keterangan,
         gambar: withID.Gambar,
         katakunci: withID.kataKunci,
+        formattedFileName, // Nama file yang dikustomisasi
         file: withID.File,
       });
-      const ext = withID.File.split(".").pop().toLowerCase();
+  
+      // Set ekstensi file
       setFileExtension(ext);
     }
   }, [withID]);
+  
+  const setupDownload = async (fileUrl, formattedFileName) => {
+    try {
+      // Fetch file dari server
+      const response = await axios.get(fileUrl, {
+        responseType: "blob", // Pastikan menerima data dalam bentuk Blob
+      });
+
+      // Buat URL untuk Blob
+      const blob = new Blob([response.data]);
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Buat elemen <a> untuk unduhan
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = formattedFileName; // Tetapkan nama file unduhan
+
+      // Tambahkan ke DOM dan klik untuk memulai unduhan
+      document.body.appendChild(link);
+      link.click();
+
+      // Hapus elemen <a> setelah selesai
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl); // Bersihkan URL Blob
+    } catch (error) {
+      console.error("Error setting up download:", error);
+    }
+    };
 
   return (
     <div className="dapus-container">
@@ -102,29 +145,11 @@ export default function DetailDaftarPustaka({ onChangePage, withID }) {
             </div>
           </div>
         </div>
-
-        {/* Menampilkan file berdasarkan ekstensi */}
         <div className="file-preview">
           {fileExtension === "pdf" && (
             <PDF_Viewer pdfFileName={fileData.file} />
           )}
           {fileExtension === "mp4" && (
-            //   <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden", maxWidth: "100%" }}>
-            //   <iframe
-            //     src={`${API_LINK}Upload/GetFile/${fileData.file}`}
-            //     style={{
-            //       position: "absolute",
-            //       top: 0,
-            //       left: 0,
-            //       width: "100%",
-            //       height: "100%",
-            //       objectFit: "contain",
-            //       borderRadius:"20px"
-            //     }}
-            //     title="Video Frame"
-            //   ></iframe>
-            // </div>
-
             <ReactPlayer
               url={`${API_LINK}Upload/GetFile/${fileData.file}`}
               playing={true}
@@ -136,22 +161,46 @@ export default function DetailDaftarPustaka({ onChangePage, withID }) {
           )}
           {/* Anda bisa menambahkan lebih banyak kondisi untuk file lain seperti .docx atau .xlsx */}
           {fileExtension === "docx" && (
-            <p>
-              Dokumen Word tidak dapat ditampilkan di sini. Silahkan{" "}
-              <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
+            <>
+            {/* <p style={{marginLeft:"25px", marginTop:"20px"}}>
+              Dokumen Word tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
+             <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
                 unduh
               </a>{" "}
-              untuk melihatnya.
+            </p> */}
+            {/* <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download="Pustaka_Learning_Database_Sahar_Romansa.docx"  >Unduh Pustaka</a></button> */}
+
+    <WordViewer fileUrl={`${API_LINK}Upload/GetFile/${fileData.file}`} fileData={fileData}/>
+    
+           </>
+          )}
+           {fileExtension === "pptx" && (
+             <>
+            <p style={{marginLeft:"25px", marginTop:"20px"}}>
+              Dokumen Power Point tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
+              
             </p>
+            <button onClick={() => {
+                        setupDownload(
+                          `${API_LINK}Upload/GetFile/${fileData.file}`,
+                          fileData.formattedFileName
+                        );
+                      }}
+ style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px", color:"white"}}>Unduh Pustaka</button>
+           </>
+        // <PowerPointViewerIframe fileUrl={`${API_LINK}Upload/GetFile/${fileData.file}`} fileData={fileData} />
+            
           )}
           {fileExtension === "xlsx" && (
-            <p>
-              File Excel tidak dapat ditampilkan di sini. Silahkan{" "}
-              <a href={`${API_LINK}Upload/GetFile/${fileData.file}`} download>
-                unduh
-              </a>{" "}
-              untuk melihatnya.
+           <>
+            {/* <p style={{marginLeft:"25px", marginTop:"20px"}}>
+              Dokumen Excel tidak dapat ditampilkan di sini. Silahkan klik tombol dibawah ini untuk melihatnya.
+              
             </p>
+            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Pustaka</a></button> */}
+
+            <ExcelViewer fileUrl={`${API_LINK}Upload/GetFile/${fileData.file}`} fileData={fileData} />
+           </>
           )}
         </div>
       </div>

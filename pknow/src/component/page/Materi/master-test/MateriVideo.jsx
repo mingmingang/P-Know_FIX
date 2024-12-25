@@ -178,7 +178,7 @@ export default function MasterTestIndex({ onChangePage, materiId }) {
 
   return (
     <>
-     <div className="d-flex">
+     <div className="d-flex" style={{height:"100vh"}}>
         <KMS_Rightbar
      isActivePengenalan={false}
      isActiveForum={false}

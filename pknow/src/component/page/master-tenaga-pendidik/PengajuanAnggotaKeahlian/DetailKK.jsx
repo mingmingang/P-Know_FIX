@@ -271,6 +271,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                     </p>
                     <div className="row row-cols-3">
                       {data.kategori.map((kat, indexKat) => (
+                        <>
                         <div className="col">
                           <div className="card card-kategori-program mt-3">
                             <div className="card-body">
@@ -295,45 +296,50 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                             </div>
                           </div>
                         </div>
+                        </>
                       ))}
                     </div>
                   </div>
                 </div>
+                
               ))
             )
           ) : (
             <p>Tidak Ada Program</p>
           )}
         </div>
-      </div>
-      <div className="float-end my-4 mx-1">
+        <div className="float-end my-4 mx-1">
+          <div className="d-flex justify-content-end">
         <Button
           classType="secondary me-2 px-4 py-2"
           label="Kembali"
           onClick={() => onChangePage("index")}
         />
+        </div>
       </div>
+      </div>
+     
       <div
-        class="modal fade"
+        className="modal fade"
         id="modalAnggota"
         tabindex="-1"
         aria-labelledby="Anggota Kelompok Keahlian"
         aria-hidden="true"
       >
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="modalAnggotaKK">
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="modalAnggotaKK">
                 Anggota Kelompok Keahlian
               </h1>
               <button
                 type="button"
-                class="btn-close"
+                className="btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"
               ></button>
             </div>
-            <div class="modal-body">
+            <div className="modal-body">
               {/* <div className="input-group mb-4">
                 <Input
                   //   ref={searchQuery}

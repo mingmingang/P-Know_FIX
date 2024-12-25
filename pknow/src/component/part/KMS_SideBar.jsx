@@ -115,7 +115,8 @@ export default function KMS_Sidebar({ onChangePage, questionNumbers, selectedQue
         style={{ width: "90%" }}
       >
         <Button 
-          classType="light py-2" 
+          classType="py-2" 
+          style={{backgroundColor:"red", color:"white"}}
           label="Keluar Review" 
           onClick={exitReview} 
         />

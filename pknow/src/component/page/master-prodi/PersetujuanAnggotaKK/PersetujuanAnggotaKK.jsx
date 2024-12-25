@@ -30,7 +30,7 @@ export default function PersetujuanAnggotaKK({onChangePage}) {
     try {
       while (true) {
         let data = await UseFetch(API_LINK + "KK/GetDataKKbyProdi");
-
+        console.log("data kk", data)
         if (data === "ERROR") {
           throw new Error(
             "Terjadi kesalahan: Gagal mengambil daftar Kelompok Keahlian."

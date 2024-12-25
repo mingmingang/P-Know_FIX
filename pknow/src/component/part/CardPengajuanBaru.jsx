@@ -4,6 +4,15 @@ import Icon from "./Icon";
 import Button from "./Button copy";
 import "../../style/KelompokKeahlian.css";
 import { API_LINK } from "../util/Constants";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faGraduationCap,
+  faUser,
+  faArrowRight,
+  faPeopleGroup,
+  faClock,
+  faUsers,
+} from "@fortawesome/free-solid-svg-icons";
 
 function CardPengajuanBaru({ data, onChangePage, isShow }) {
   const [showAllText, setShowAllText] = useState(isShow);
@@ -70,7 +79,7 @@ function CardPengajuanBaru({ data, onChangePage, isShow }) {
     aksi = (
       <Button
         iconName="list"
-        classType="primary btn-sm"
+        classType="primary btn-sm py-2"
         label="Detail"
         onClick={() => onChangePage("detailPengajuan", data)}
         title="Klik untuk melihat detail pengajuan"
@@ -81,7 +90,7 @@ function CardPengajuanBaru({ data, onChangePage, isShow }) {
     aksi = (
       <Button
         iconName="list"
-        classType="primary btn-sm"
+        classType="primary btn-sm py-2"
         label="Detail"
         onClick={() => onChangePage("detailKK", data)}
         title="Klik untuk melihat detail Kelompok Keahlian"
@@ -96,7 +105,7 @@ function CardPengajuanBaru({ data, onChangePage, isShow }) {
     aksi = (
       <Button
         iconName="plus"
-        classType="primary btn-sm"
+        classType="primary btn-sm py-2"
         label="Gabung"
         onClick={() => onChangePage("add", data)}
         title="Klik untuk bergabung"
@@ -133,13 +142,10 @@ function CardPengajuanBaru({ data, onChangePage, isShow }) {
             >
               {data["Nama Kelompok Keahlian"]}
             </h5>
-            <div className="card-body">
-              <div className="" style={{marginLeft:"-10px"}}>{status}</div>
+            <div className="">
+              <div className="" style={{marginLeft:"-20px"}}>{status}</div>
               <h6 className="card-subtitle mt-1 mb-3">
-                <span
-                  className="bg-primary me-2"
-                  style={{ padding: "2px" }}
-                ></span>
+              <FontAwesomeIcon icon={faGraduationCap} className="icon-style mr-2" />
                 {data.Prodi}
               </h6>
               <p

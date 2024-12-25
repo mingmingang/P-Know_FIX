@@ -132,18 +132,19 @@ export default function MasterForumAdd({ onChangePage }) {
         setIsError({ error: true, message: "Terjadi kesalahan: Gagal menyimpan data Sharing." });
       } else {
         if(steps.length == 3){
-        SweetAlert("Sukses", "Data Forum berhasil disimpan", "success");
+        //SweetAlert("Sukses", "Data Forum berhasil disimpan", "success");
         setIsFormDisabled(false);
         setResetStepper((prev) => !prev + 1);
         AppContext_test.formSavedForum = true;
         setResetStepper((prev) => !prev + 1);
+        SweetAlert("Sukses", "Materi berhasil ditambahkan", "success");
         window.location.reload();
         } else {
-          SweetAlert("Sukses", "Data Forum berhasil disimpan", "success");
           setIsFormDisabled(false);
           setResetStepper((prev) => !prev + 1);
           AppContext_test.formSavedForum = true;
           setResetStepper((prev) => !prev + 1);
+          if(steps.length > 3){
           try {
             axios.post(API_LINK + "Section/CreateSection", dataSection)
             .then(response => {
@@ -153,14 +154,13 @@ export default function MasterForumAdd({ onChangePage }) {
                 AppContext_master.dataIdSection = data[0].newID;
                 console.log("data section new", data[0]);
                 console.log("id section", AppContext_master.dataIdSection);
-                SweetAlert("Sukses", "Data Section berhasil ditambahkan", "success");
                 setIsFormDisabled(false);
                 AppContext_master.formSavedMateri = true;
-                SweetAlert(
-                  "Sukses",
-                  "Data Section berhasil disimpan",
-                  "success"
-                );
+                // SweetAlert(
+                //   "Sukses",
+                //   "Data Section berhasil disimpan",
+                //   "success"
+                // );
                 console.log("step keempat", stepPage[3]);
                 onChangePage(steps[3], AppContext_master.MateriForm = formData, AppContext_master.dataSection = dataSection);
               } else {
@@ -180,6 +180,7 @@ export default function MasterForumAdd({ onChangePage }) {
               }));
             })
             .finally(() => setIsLoading(false));
+            
           } catch (error) {
             setIsError({
               error: true,
@@ -189,6 +190,7 @@ export default function MasterForumAdd({ onChangePage }) {
           }
         }
       }
+    }
     } catch (error) {
       setIsError({
         error: true,
@@ -344,7 +346,7 @@ export default function MasterForumAdd({ onChangePage }) {
           <Button
             classType="primary ms-2 px-4 py-2"
             type="submit"
-            label="Berikutnya"
+            label={steps.length === 3 ? "Simpan" : "Berikutnya"}
             style={{marginRight:"10px"}}
             disabled={false}
           />

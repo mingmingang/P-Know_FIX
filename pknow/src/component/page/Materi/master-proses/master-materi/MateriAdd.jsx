@@ -207,7 +207,7 @@ export default function MastermateriAdd({ onChangePage }) {
           .then((response) => {
             const data = response.data;
             if (data[0].hasil === "OK") {
-              SweetAlert("Sukses", "File Materi berhasil disimpan", "success");
+              // SweetAlert("Sukses", "File Materi berhasil disimpan", "success");
               setIsFileDisabled(false);
               AppContext_master.formSavedMateriFile = true;
               onChangePage(

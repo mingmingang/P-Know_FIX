@@ -167,14 +167,17 @@ function CardKelompokKeahlian({
       let cardContent;
       if (config.footer === "Btn") {
         cardContent = (
-          <div className="d-flex justify-content-end">
+          <div className="d-flex justify-content-between">
+            <div className=""></div>
+            <div className="">
             <Button
               iconName={config.icon}
-              classType={config.className}
+              classType={config.className + 'py-2 mt-3'}
               label={config.label}
               onClick={() => onChangePage("add", data)}
               style={{border:"none"}}
             />
+            </div>
           </div>
         );
       } else if (config.footer === "Draft") {
@@ -334,17 +337,17 @@ function CardKelompokKeahlian({
       </div>
     </>
   ) : <div className=""> {ketButton && (
-    <div className="button-keterangan" style={{marginLeft:"-65px", marginTop:"-10px"}}>
-    <button
-      className="bg-blue-100 text-white px-6 rounded-full open justify-content-end d-flex"
-      aria-label={`Action for ${title}`}
-      style={{width:"180px"}}
-      onClick={() => onChangePage("add", data)}
-    >
-     <i className="fas fa-users" style={{marginRight:"10px", marginTop:"2px"}}></i>
-      {ketButton}
-    </button>
-    </div>
+    <div className="d-flex justify-content-end" style={{marginLeft:"-60px"}}>
+        <button
+          className="bg-blue-100 text-white px-6 rounded-full d-flex align-items-center"
+          aria-label={`Action for ${title}`}
+          style={{ width: "180px" }}
+          onClick={() => onChangePage("add", data)}
+        >
+          <i className="fas fa-users" style={{ marginRight: "10px", marginTop: "2px" }}></i>
+          {ketButton}
+        </button>
+      </div>
   )}</div>}
             </div>
           </div>
@@ -403,7 +406,7 @@ function CardKelompokKeahlian({
               </p>
         </div>
 
-        <div className="card-footer status-open mb-4">
+        <div className="card-footer status-open mb-4 mr-3 ml-3">
                     <div className="card-content" style={{alignItems:"center"}}>
                     {cardContent}
                     </div>

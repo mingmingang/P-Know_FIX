@@ -21,6 +21,10 @@ import backgroundTRL from "../../../assets/BackBeranda/BackgroundTRL.png";
 import backgroundTRPL from "../../../assets/BackBeranda/BackgroundTRPL.png";
 
 export default function Prodi() {
+  const handleKnowledgeDatabase = () => {
+    window.location.replace("/daftar_pustaka"); // Redirect to login page
+}
+
   const slidesData = [
     {
       title: "Program Studi Teknik Produksi Dan Proses Manufaktur",
@@ -119,7 +123,7 @@ export default function Prodi() {
             <div className="text-content">
               <h1>{slide.title}</h1>
               <p>{slide.subtitle}</p>
-              <button className="action-button">{slide.buttonText}</button>
+              <button className="action-button" onClick={handleKnowledgeDatabase}>{slide.buttonText}</button>
             </div>
             <div className="mascot">
               <img src={slide.mascot} alt="Mascot" />

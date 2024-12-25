@@ -1,4 +1,5 @@
-import { forwardRef } from "react";
+// Input.jsx
+import React, { forwardRef } from "react";
 
 const Input = forwardRef(function Input(
   {
@@ -26,7 +27,7 @@ const Input = forwardRef(function Input(
               ""
             )}
           </label>
-          {type === "textarea" && (
+          {type === "textarea" ? (
             <textarea
               rows="5"
               id={forInput}
@@ -37,8 +38,7 @@ const Input = forwardRef(function Input(
               disabled={isDisabled}
               {...props}
             ></textarea>
-          )}
-          {type !== "textarea" && (
+          ) : (
             <input
               id={forInput}
               name={forInput}
@@ -54,7 +54,7 @@ const Input = forwardRef(function Input(
       )}
       {label === "" && (
         <>
-          {type === "textarea" && (
+          {type === "textarea" ? (
             <textarea
               rows="5"
               id={forInput}
@@ -65,8 +65,7 @@ const Input = forwardRef(function Input(
               disabled={isDisabled}
               {...props}
             ></textarea>
-          )}
-          {type !== "textarea" && (
+          ) : (
             <input
               id={forInput}
               name={forInput}
@@ -78,15 +77,13 @@ const Input = forwardRef(function Input(
               {...props}
             />
           )}
-          {errorMessage ? (
+          {errorMessage && (
             <span className="small ms-1 text-danger">
               {placeholder.charAt(0).toUpperCase() +
                 placeholder.substr(1).toLowerCase() +
                 " " +
                 errorMessage}
             </span>
-          ) : (
-            ""
           )}
         </>
       )}

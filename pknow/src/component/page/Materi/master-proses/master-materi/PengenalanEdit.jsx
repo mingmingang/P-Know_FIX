@@ -125,7 +125,7 @@ function getStepContent(stepIndex) {
     mat_file_pdf: string(),
     mat_file_video: string(),
     mat_pengenalan: string().required('Pengenalan materi harus diisi'),
-    mat_keterangan: string().required('Keterangan materi harus diisi'),
+    mat_keterangan: string().required('Keterangan materi harus diisi').min(100,"minimum 100 karakter").max(200,"maksimum 200 karakter"),
     kry_id: string(),
     mat_kata_kunci: string().required('Kata kunci materi harus diisi'),
     mat_gambar: string(),

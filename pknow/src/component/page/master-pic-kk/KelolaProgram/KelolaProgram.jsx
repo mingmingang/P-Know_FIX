@@ -488,16 +488,17 @@ export default function ProgramIndex({ onChangePage }) {
                           <div className="action d-flex">
                             <Button
                               iconName="add"
-                              classType="primary  me-2"
+                              classType="primary  me-2 rounded-3 py-2"
                               style={{marginRight:"10px"}}
                               label="Tambah Program"
                               onClick={() => onChangePage("add", currentData)}
                             />
                             <Button
                               iconName="list"
-                              classType="outline-primary btn-sm px-3 me-2"
+                              classType="btn-sm px-3 me-2"
                               title="Detail Kelompok Keahlian"
                               onClick={() => onChangePage("detailPublish",currentData)}
+                              style={{background:"white", color:"#0A5EA8",  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", fontSize:"18px", padding:"5px 10px" }}
                             />
                           </div>
                         </div>
@@ -544,9 +545,7 @@ export default function ProgramIndex({ onChangePage }) {
                                   </div>
                                 ) : (
                                   <div>
-                                    <p className="text-primary fw-semibold mb-0 mt-2">
-                                      Daftar Kategori Program
-                                    </p>
+                                   
                                     <div className="row row-cols-3">
                                       {listKategoriProgram.map(
                                         (kat, indexKat) => (
@@ -579,30 +578,31 @@ export default function ProgramIndex({ onChangePage }) {
             </div>
           </div>
           <div
-            class="modal fade"
+            className="modal fade"
             id="modalAnggota"
             tabindex="-1"
             aria-labelledby="Anggota Kelompok Keahlian"
             aria-hidden="true"
           >
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h1 class="modal-title fs-5" id="modalAnggotaKK">
+            <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h1 className="modal-title fs-5" id="modalAnggotaKK">
                     Anggota Kelompok Keahlian
                   </h1>
                   <button
                     type="button"
-                    class="btn-close"
+                    className="btn-close"
                     data-bs-dismiss="modal"
                     aria-label="Close"
                   ></button>
                 </div>
-                <div class="modal-body">
+                <div className="modal-body">
                   {listAnggota[0]?.Message ? (
                     <Label title="Tidak ada anggota aktif!" />
                   ) : (
                     listAnggota.map((pr, index) => (
+                      <>
                       <div className="card-profile mb-3 d-flex shadow-sm">
                         <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
                           {index + 1}
@@ -628,6 +628,7 @@ export default function ProgramIndex({ onChangePage }) {
                           </div>
                         </div>
                       </div>
+                      </>
                     ))
                   )}
                 </div>
