@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { FILE_LINK } from "../util/Constants";
+import { FILE_LINK, API_LINK } from "../util/Constants";
 
 const FileUpload = forwardRef(function FileUpload(
   {
@@ -52,8 +52,9 @@ const FileUpload = forwardRef(function FileUpload(
                 <a
                   href={FILE_LINK + hasExisting}
                   className="text-decoration-none"
-                  target="_blank"
                   rel="noopener noreferrer"
+                  target="_blank"
+                  download={hasExisting.split('/').pop()}
                 >
                   [Unduh Berkas]
                 </a>
@@ -68,9 +69,8 @@ const FileUpload = forwardRef(function FileUpload(
             <br />
             {hasExisting && (
               <a
-                href={FILE_LINK + hasExisting}
+              href={FILE_LINK + hasExisting}
                 className="text-decoration-none"
-                target="_blank"
                 rel="noopener noreferrer"
               >
                 Unduh berkas

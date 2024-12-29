@@ -391,9 +391,9 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
             showInput={false}
           />
     </div>
-    <div className="container">
+    <div className="container mb-4" style={{marginTop:"50px"}}>
       <Card className="mb-4">
-        <Card.Header className="bg-primary text-light d-flex align-items-center justify-content-between">
+        <Card.Header className="text-light d-flex align-items-center justify-content-between" style={{background:"#0A5EA8"}}>
           <div className="header-left">
           <h3>
           {currentData.length > 0 && currentData[0].qui_judul} - 
@@ -509,19 +509,49 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
                   <Card.Footer className="text-end">
                   {reviewStatus[currentRespondentIndex][question.Key] == null ? (
                   <>
-                    <Button
-                      variant="success"
-                      className="me-2"
-                      onClick={() => handleReview(question.Key, true, currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
-                    >
-                      Benar
-                    </Button>
-                    <Button
+                  <Button
                       variant="danger"
+                      className="me-2 px-3"
                       onClick={() => handleReview(question.Key, false, currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
                     >
-                      Salah
+                      0
                     </Button>
+                    <Button
+                      className="me-2 px-3" 
+                      style={{background:"#ffa200", border:"none", color:"white"}}
+                      onClick={() => handleReview(question.Key, true, currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
+                    >
+                      1
+                    </Button>
+                    <Button
+                      className="me-2 px-3"
+                      style={{background:"#ffa200", border:"none", color:"white"}}
+                      onClick={() => handleReview(question.Key, true, currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
+                    >
+                      2
+                    </Button>
+                    <Button
+                      className="me-2 px-3"
+                      style={{background:"#ffa200", border:"none", color:"white"}}
+                      onClick={() => handleReview(question.Key, true, currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
+                    >
+                      3
+                    </Button>
+                    <Button
+                    variant="success"
+                      className="me-2 px-3"
+                      onClick={() => handleReview(question.Key, true, currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
+                    >
+                      4
+                    </Button>
+                    <Button
+                      variant="success"
+                      className="me-2 px-3"
+                      onClick={() => handleReview(question.Key, true, currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
+                    >
+                      5
+                    </Button>
+                    
                   </>
                 ) : (
                   <Button

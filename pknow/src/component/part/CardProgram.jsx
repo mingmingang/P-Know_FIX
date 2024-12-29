@@ -77,10 +77,9 @@ const CardProgram = ({
           <div className="mt-3">
           {data.Status === "Draft" ? (
           <div
-            className="d-flex justify-content-between align-items-center mt-1"
+            className="d-flex justify-content-between align-items-center mr-3 "
             style={{
-              width: "10%",
-              background:"white", color:"#0A5EA8",  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", fontSize:"25px", padding:"2px 10px", borderRadius:"10px", height:"50px" 
+              background:"white", color:"#0A5EA8",  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", fontSize:"25px", padding:"2px 10px", borderRadius:"10px", height:"50px", marginTop:"-12px" 
             }}
 
           >
@@ -111,9 +110,6 @@ const CardProgram = ({
         ) : (
           <div
             className="d-flex justify-content-between align-items-center px-3"
-            style={{
-              width: "10%",
-            }}
           >
             <Icon
               name="edit"
@@ -150,7 +146,7 @@ const CardProgram = ({
         <div className="">
           <Button
             iconName={isActive ? "caret-up" : "caret-down"}
-            classType="btn-sm px-2 rounded-3"
+            classType="btn-sm px-2 rounded-3 mt-1"
             onClick={onClick}
             title="Detail Kelompok Keahlian"
             style={{background:"white", color:"#0A5EA8",  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", fontSize:"25px", padding:"5px 10px" }}

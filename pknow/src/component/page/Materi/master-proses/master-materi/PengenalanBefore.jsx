@@ -82,14 +82,14 @@ export default function PengenalanBefore({ onChangePage }) {
   const formDataRef = useRef({
     mat_id: AppContext_master.dataIDMateri,
     kat_id: AppContext_master.KategoriIdByKK,
-    mat_judul: Materi.current.mat_judul,
-    mat_file_pdf: Materi.current.mat_file_pdf,
-    mat_file_video: Materi.current.mat_file_video,
-    mat_pengenalan: Materi.current.mat_pengenalan,
-    mat_keterangan: Materi.current.mat_keterangan,
+    mat_judul: Materi.mat_judul,
+    mat_file_pdf: Materi.mat_file_pdf,
+    mat_file_video: Materi.mat_file_video,
+    mat_pengenalan: Materi.mat_pengenalan,
+    mat_keterangan: Materi.mat_keterangan,
     kry_id: AppContext_test.karyawanId,
-    mat_kata_kunci: Materi.current.mat_kata_kunci,
-    mat_gambar: Materi.current.mat_gambar,
+    mat_kata_kunci: Materi.mat_kata_kunci,
+    mat_gambar: Materi.mat_gambar,
     createdby: AppContext_test.activeUser
   });
 
@@ -225,7 +225,7 @@ export default function PengenalanBefore({ onChangePage }) {
             //   "Pengenalan Materi berhasil diubah",
             //   "success"
             // );
-            onChangePage("materiAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1, AppContext_master.dataIDMateri);
+            onChangePage("materiAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1, AppContext_master.dataIDMateri, AppContext_test.ForumForm);
           } else {
             setIsError(prevError => ({
               ...prevError,
@@ -406,7 +406,7 @@ export default function PengenalanBefore({ onChangePage }) {
                           }}
                         >
                           <img
-                            src={NoImage} 
+                            src={`${API_LINK}Upload/GetFile/${formDataRef.current.mat_gambar}`}
                             alt="No Preview Available"
                             style={{
                               width: "200px",
@@ -497,7 +497,7 @@ export default function PengenalanBefore({ onChangePage }) {
                     id="mat_pengenalan"
                     value={formDataRef.current.mat_pengenalan}
                     onEditorChange={(content) => handleInputChange({ target: { name: 'mat_pengenalan', value: content } })}
-                    apiKey="tmy3owot5w57uflfn2dtbss6kolqjiypl3nkdoi72g1vxl2u"
+                    apiKey="444kasui9s3azxih6ix4chynoxmhw6y1urkpmfhufvrbernz"
                     init={{
                       height: 300,
                       menubar: false,

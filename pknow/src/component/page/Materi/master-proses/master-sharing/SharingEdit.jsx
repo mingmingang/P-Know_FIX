@@ -14,7 +14,7 @@ import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 import FileUpload from "../../../../part/FileUpload";
 import uploadFile from "../../../../util/UploadFile";
-import { Stepper, Step, StepLabel, Box  } from '@mui/material';
+import { Stepper, Step, StepLabel, Box  } from '@mui/material'; 
 import Konfirmasi from "../../../../part/Konfirmasi";
 import BackPage from "../../../../../assets/backPage.png";
 import Cookies from "js-cookie";
@@ -97,9 +97,6 @@ export default function MasterSharingEdit({ onChangePage }) {
 
   const Materi = AppContext_test.DetailMateriEdit;
 
-  console.log("id materi", Materi)
- 
-
   async function fetchSectionData() {
     try {
       const response = await axios.post(API_LINK + 'Section/GetDataSectionByMateri', {
@@ -111,19 +108,12 @@ export default function MasterSharingEdit({ onChangePage }) {
       // Handle the response
       if (response.status === 200) {
         const data = response.data;
-        console.log('Fetched data:', data);
-
-        // Extract sec_id and mat_id if needed
         const secId = data[0].SectionId;
         const materialId = Materi.Key;
-
-        console.log('Section ID:', secId);
-        console.log('Material ID:', materialId);
-
         formDataRef.current.sec_id = secId;
         formDataRef.current.mat_id = materialId;
-
-        // Return or process the data as needed
+        AppContext_test.sharingExpertPDF = data[0].ExpertFile;
+        AppContext_test.sharingExpertVideo = data[0].ExpertVideo;
         return { secId, materialId};
       } else {
         console.error('Failed to fetch data, status:', response.status);
@@ -183,10 +173,6 @@ export default function MasterSharingEdit({ onChangePage }) {
     setShowConfirmation(false);  
   };
 
-  
-
-  console.log("data materi", Materi)
-
   const formDataRef = useRef({
     sec_id: "",
     mat_id: "",
@@ -203,7 +189,7 @@ export default function MasterSharingEdit({ onChangePage }) {
 
   });
 
-  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf", 10);
+  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf,docx,xlsx,pptx", 10);
   const handleVideoChange = () => handleFileChange(vidioInputRef, "mp4,mov", 250);
   const handleFileChange = async (ref, extAllowed, maxFileSize) => {
     const { name, value } = ref.current;
@@ -248,8 +234,6 @@ export default function MasterSharingEdit({ onChangePage }) {
       }));
       return;
     }
-
-    console.log("formDataRef.current:", formDataRef.current);
     
     if (
       Object.values(validationErrors).every((error) => !error) &&
@@ -349,9 +333,9 @@ export default function MasterSharingEdit({ onChangePage }) {
                   <FileUpload
                     ref={fileInputRef}
                     forInput="mat_sharing_expert_pdf"
-                    label="File Sharing Expert (.pdf)"
-                    formatFile=".pdf"
-                    onChange={() => handlePdfChange(fileInputRef, "pdf")}
+                    label="File Sharing Expert (.pdf, .docx, .xlsx, .pptx)"
+                    formatFile=".pdf,.docx,.xlsx,.pptx,.mp4"
+                    onChange={() => handlePdfChange(fileInputRef, "pdf,docx,xlsx,pptx")}
                     errorMessage={errors.mat_sharing_expert_pdf}
                   />
                   {AppContext_test.sharingExpertPDF && (
@@ -397,8 +381,8 @@ export default function MasterSharingEdit({ onChangePage }) {
                   <div className="">
           <Button
             classType="outline-secondary me-2 px-4 py-2"
-            label="Kembali"
-            onClick={() => onChangePage("pretestEdit")}
+            label="Sebelumnya"
+            onClick={() => onChangePage("forumEdit", AppContext_test.ForumForm, AppContext_test.MateriForm , AppContext_master.count += 1)}
           />
           </div>
           <div className="d-flex">
@@ -407,26 +391,47 @@ export default function MasterSharingEdit({ onChangePage }) {
               <Button
                   classType="primary ms-2 px-4 py-2"
                   type="submit"
-                  label="Simpan"
+                  label="Edit"
               />
               </div>
           ) : (
             null  
           )}
-          <Button
-            classType="dark ms-3 px-4 py-2"
+           <Button
+            classType="primary ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("forumEdit")}
+            onClick={() => onChangePage("pretestEdit", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
           />
           </div>
         </div>
               </div>
             ) : (
+              <>
+              <div className="" style={{marginLeft:"20px", marginRight:"20px"}}>
               <Alert type="warning" message={(
                 <span>
                   Data Sharing Expert belum ditambahkan. <a onClick={() => onChangePage("sharingEditNot", AppContext_master.MateriForm = AppContext_test.DetailMateriEdit)} className="text-primary">Tambah Data</a>
                 </span>
               )} />
+              </div>
+                <div className="d-flex justify-content-between ">
+            <div className="ml-4">
+            <Button
+            classType="outline-secondary me-2 px-4 py-2"
+            label="Sebelumnya"
+            onClick={() => onChangePage("forumEdit", AppContext_test.ForumForm, AppContext_test.MateriForm , AppContext_master.count += 1)}
+          />
+          </div>
+          <div className="d-flex mr-4" >
+          <Button
+            classType="primary ms-3 px-4 py-2"
+            label="Berikutnya"
+            onClick={() => onChangePage("pretestEdit", AppContext_master.MateriForm, AppContext_master.count += 1)}
+          />
+          </div>
+        </div>
+            </>
+              
             )}
           </div>
         </div>

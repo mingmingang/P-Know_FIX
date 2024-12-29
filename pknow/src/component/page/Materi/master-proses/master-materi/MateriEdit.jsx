@@ -1,21 +1,16 @@
-import { useRef, useState, useEffect, lazy } from "react";
+import { useRef, useState, useEffect } from "react";
 import { object, string } from "yup";
 import { API_LINK } from "../../../../util/Constants";
 import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
 import SweetAlert from "../../../../util/SweetAlert";
 import UseFetch from "../../../../util/UseFetch";
 import Button from "../../../../part/Button copy";
-import DropDown from "../../../../part/Dropdown";
-import Input from "../../../../part/Input";
 import FileUpload from "../../../../part/FileUpload";
 import uploadFile from "../../../../util/UploadFile";
-import Loading from "../../../../part/Loading";
 import Alert from "../../../../part/Alert";
-// import { Stepper } from 'react-form-stepper';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 import axios from "axios";
-import { Editor } from "@tinymce/tinymce-react";
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import BackPage from "../../../../../assets/backPage.png";
 import Konfirmasi from "../../../../part/Konfirmasi";
@@ -130,6 +125,8 @@ export default function MastermateriEdit({ onChangePage}) {
 
   const Materi = AppContext_master.MateriForm;
   const kategori = AppContext_master.KategoriIdByKK;
+  AppContext_test.materiPdf = Materi.File_pdf
+  AppContext_test.materiVideo = Materi.File_video
 
   // Referensi ke form data menggunakan useRef
   const formDataRef = useRef({
@@ -161,9 +158,8 @@ export default function MastermateriEdit({ onChangePage}) {
     modifiedBy: string(),
   });
 
-  // const handleGambarChange = () => handleFileChange(gambarInputRef, "jpg,png", 5);
-  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf", 5);
-  const handleVideoChange = () => handleFileChange(vidioInputRef, "mp4,mov", 100);
+  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf,docx,xlsx,pptx", 10);
+  const handleVideoChange = () => handleFileChange(vidioInputRef, "mp4,mov", 250);
   const handleFileChange = async (ref, extAllowed, maxFileSize) => {
     const { name, value } = ref.current;
     const file = ref.current.files[0];
@@ -187,17 +183,6 @@ export default function MastermateriEdit({ onChangePage}) {
       ...prevErrors,
       [validationError.name]: error,
     }));
-  };
-
-  
-  const fetchDataMateriById = async (id) => {
-    try {
-      const response = await axios.post(API_LINK + "Materi/GetDataMateriById", id);
-      return response.data;
-    } catch (error) {
-      console.error('Terjadi kesalahan saat mengambil data materi:', error);
-      throw error;
-    }
   };
 
   // Handle form submit
@@ -341,20 +326,6 @@ export default function MastermateriEdit({ onChangePage}) {
   // Render form
   const dataSimpan = AppContext_master.formSavedMateriFile; // Menyimpan nilai AppContext_master.formSavedMateri untuk menentukan apakah form harus di-disable atau tidak
 
-  const [activeStep, setActiveStep] = useState(0);
-
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
   const handlePageChange = (content) => {
     onChangePage(content);
   };
@@ -402,10 +373,10 @@ export default function MastermateriEdit({ onChangePage}) {
                 <FileUpload
                   ref={fileInputRef}
                   forInput="mat_file_pdf"
-                  label="File Materi (.pdf)"
-                  formatFile=".pdf"
+                  label="File Materi (.pdf, .docx, .xlsx, .pptx)"
+                  formatFile=".pdf,.docx,.xlsx,.pptx,.mp4"
                   onChange={() =>
-                    handlePdfChange(fileInputRef, "pdf")
+                    handlePdfChange(fileInputRef, "pdf,docx,xlsx,pptx")
                   }
                   errorMessage={errors.mat_file_pdf}
                   disabled={isFileDisabled || dataSimpan}
@@ -432,7 +403,7 @@ export default function MastermateriEdit({ onChangePage}) {
                   forInput="mat_file_video"
                   label="File Materi (.mp4, .mov)"
                   formatFile=".mp4,.mov"
-                  maxFileSize={100}
+                  maxFileSize={250}
                   onChange={() =>
                     handleVideoChange(vidioInputRef, "mp4,mov")
                   }
@@ -491,10 +462,9 @@ export default function MastermateriEdit({ onChangePage}) {
             style={{marginRight:"10px"}}
           />
           <Button
-            classType="dark ms-3 px-4 py-2"
+            classType="primary ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("forumEdit", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
-            // isDisabled={!isFormSubmitted}
+            onClick={() => onChangePage("forumEdit", AppContext_master.MateriForm, AppContext_master.count += 1)}
           />
           </div>
         </div>

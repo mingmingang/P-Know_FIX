@@ -96,8 +96,6 @@ function getStepContent(stepIndex) {
   const kategori = AppContext_test.KategoriIdByKK;
   const Materi = AppContext_test.DetailMateriEdit;
 
-  console.log("materii",AppContext_test.DetailMateriEdit )
-
   const stripHTMLTags = (htmlContent) => {
     const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
     return doc.body.textContent || "";
@@ -230,7 +228,6 @@ useEffect(() => {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    console.log("data",formDataRef.current)
     const validationErrors = await validateAllInputs(
         formDataRef.current,
         userSchema,
@@ -445,7 +442,7 @@ useEffect(() => {
                     id="mat_pengenalan"
                     value={formDataRef.current.mat_pengenalan}
                     onEditorChange={(content) => handleInputChange({ target: { name: 'mat_pengenalan', value: content } })}
-                    apiKey='tmy3owot5w57uflfn2dtbss6kolqjiypl3nkdoi72g1vxl2u'
+                    apiKey='444kasui9s3azxih6ix4chynoxmhw6y1urkpmfhufvrbernz'
                     init={{
                       height: 300,
                       menubar: false,
@@ -468,11 +465,11 @@ useEffect(() => {
             </div>
             <div className="d-flex justify-content-between my-4 mx-1 mt-0">
           <div className="ml-4">
-          <Button
+          {/* <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Kembali"
             onClick={() => onChangePage("kk")}
-          />
+          /> */}
           </div>
           <div className="d-flex mr-4" >
             <div className="mr-2">
@@ -483,7 +480,7 @@ useEffect(() => {
           />
           </div>
           <Button
-            classType="dark ms-3 px-4 py-2"
+            classType="primary ms-3 px-4 py-2"
             label="Berikutnya"
             onClick={() => onChangePage("materiEdit", AppContext_master.MateriForm = AppContext_test.DetailMateriEdit, AppContext_master.count += 1)}
           />

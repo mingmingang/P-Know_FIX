@@ -66,7 +66,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
   const [isBackAction, setIsBackAction] = useState(false);
   const [currentFilter, setCurrentFilter] = useState({
     page: 1,
-    status: "Semua",
+    status: "Aktif",
     query: "",
     sort: "Judul",
     order: "asc",
@@ -324,7 +324,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
                         defaultValue="[Judul] ASC"
                         onChange={handleSortChange}
                       />
-                      <DropDown
+                      {/* <DropDown
                         ref={searchFilterStatus}
                         forInput="ddStatus"
                         label="Status"
@@ -332,7 +332,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
                         arrData={dataFilterStatus}
                         defaultValue="Semua"
                         onChange={handleStatusChange}
-                      />
+                      /> */}
                       <DropDown
                         ref={searchFilterSort}
                         forInput="ddUrutTanggal"

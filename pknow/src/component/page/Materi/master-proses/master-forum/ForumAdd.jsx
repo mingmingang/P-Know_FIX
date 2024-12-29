@@ -19,12 +19,10 @@ import CustomStepper from "../../../../part/Stepp";
 
 const userSchema = object({
   forumJudul: string().max(100, "maksimum 100 karakter").required("harus diisi"),
-  forumIsi: string().required("harus diisi"),
+  forumIsi: string().required("Forum harus diisi"),
 });
 
 export default function MasterForumAdd({ onChangePage }) {
-
-
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +46,6 @@ export default function MasterForumAdd({ onChangePage }) {
     createdby: AppContext_test.activeUser,
     secType: ""
   });
-
   const handleGoBack = () => {
     console.log(AppContext_test.activeUser);
     setIsBackAction(true);  
@@ -64,9 +61,6 @@ export default function MasterForumAdd({ onChangePage }) {
   const handleConfirmNo = () => {
     setShowConfirmation(false);  
   };
-
-  console.log("materi form", AppContext_master.MateriForm)
-
 
   const [resetStepper, setResetStepper] = useState(0);
 
@@ -145,52 +139,51 @@ export default function MasterForumAdd({ onChangePage }) {
           AppContext_test.formSavedForum = true;
           setResetStepper((prev) => !prev + 1);
           if(steps.length > 3){
-          try {
-            axios.post(API_LINK + "Section/CreateSection", dataSection)
-            .then(response => {
-              const data = response.data;
-              console.log("data section", dataSection);
-              if (data[0].hasil === "OK") {
-                AppContext_master.dataIdSection = data[0].newID;
-                console.log("data section new", data[0]);
-                console.log("id section", AppContext_master.dataIdSection);
-                setIsFormDisabled(false);
-                AppContext_master.formSavedMateri = true;
-                // SweetAlert(
-                //   "Sukses",
-                //   "Data Section berhasil disimpan",
-                //   "success"
-                // );
+          // try {
+          //   axios.post(API_LINK + "Section/CreateSection", dataSection)
+          //   .then(response => {
+          //     const data = response.data;
+          //     console.log("data section", dataSection);
+          //     if (data[0].hasil === "OK") {
+          //       AppContext_master.dataIdSection = data[0].newID;
+          //       console.log("data section new", data[0]);
+          //       console.log("id section", AppContext_master.dataIdSection);
+          //       setIsFormDisabled(false);
+          //       AppContext_master.formSavedMateri = true;
                 console.log("step keempat", stepPage[3]);
-                onChangePage(steps[3], AppContext_master.MateriForm = formData, AppContext_master.dataSection = dataSection);
-              } else {
-                setIsError(prevError => ({
-                  ...prevError,
-                  error: true,
-                  message: "Terjadi kesalahan: Gagal menyimpan data Materi."
-                }));
+                onChangePage(steps[3], AppContext_master.MateriForm, AppContext_test.ForumForm = formData);
+            //   } else {
+            //     setIsError(prevError => ({
+            //       ...prevError,
+            //       error: true,
+            //       message: "Terjadi kesalahan: Gagal menyimpan data Materi."
+            //     }));
+            //   }
+            // })
+            // .catch(error => {
+            //   console.error('Terjadi kesalahan:', error);
+            //   setIsError(prevError => ({
+            //     ...prevError,
+            //     error: true,
+            //     message: "Terjadi kesalahan: " + error.message
+            //   }));
+            // })
+            // .finally(() => setIsLoading(false));
+                  }
+                }
               }
-            })
-            .catch(error => {
-              console.error('Terjadi kesalahan:', error);
-              setIsError(prevError => ({
-                ...prevError,
-                error: true,
-                message: "Terjadi kesalahan: " + error.message
-              }));
-            })
-            .finally(() => setIsLoading(false));
             
-          } catch (error) {
-            setIsError({
-              error: true,
-              message: "Failed to save forum data: " + error.message,
-            });
-            setIsLoading(false);
-          }
-        }
-      }
-    }
+            
+      //     } catch (error) {
+      //       setIsError({
+      //         error: true,
+      //         message: "Failed to save forum data: " + error.message,
+      //       });
+      //       setIsLoading(false);
+      //     }
+      //   }
+      // }
+  
     } catch (error) {
       setIsError({
         error: true,
@@ -209,24 +202,6 @@ export default function MasterForumAdd({ onChangePage }) {
   //   //   setIsFormDisabled(false);
   //   // }
   // }, [AppContext_test.ForumForm, AppContext_test.formSavedForum]);
-
-  const [activeStep, setActiveStep] = useState(3);
-
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
-  const handlePageChange = (content) => {
-    onChangePage(content);
-  };
 
   const initialSteps = ["Pengenalan", "Materi", "Forum"];
   const additionalSteps = ["Sharing Expert", "Pre-Test", "Post-Test"];
@@ -311,7 +286,7 @@ export default function MasterForumAdd({ onChangePage }) {
                     id="forumIsi"
                     value={formData.forumIsi}
                     onEditorChange={(content) => handleInputChange({ target: { name: 'forumIsi', value: content } })}
-                    apiKey='tmy3owot5w57uflfn2dtbss6kolqjiypl3nkdoi72g1vxl2u'
+                    apiKey='444kasui9s3azxih6ix4chynoxmhw6y1urkpmfhufvrbernz'
                     init={{
                       height: 300,
                       menubar: false,

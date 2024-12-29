@@ -43,6 +43,8 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
   const [questionNumbers, setQuestionNumbers] = useState(0);
   const [nilai, setNilai] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(false);
+  const [fileAnswers, setFileAnswers] = useState({});
+
   const formDataRef = useRef({
     trqId: AppContext_test.dataIdTrQuiz,
     quizId: quizId,
@@ -138,9 +140,36 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
   };
 
 
-  const handleFileChange = async (ref, extAllowed, fileUpload, currentIndex, id_question) => {
-    handleValueAnswer("", "", "", "", currentIndex, fileUpload, id_question);
-  };
+  const handleFileChange = (ref, extAllowed, event, currentIndex, id_question) => {
+    const file = event.target.files[0];
+
+    if (file) {
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        if (!extAllowed.includes(fileExtension)) {
+            Swal.fire({
+                title: "Format tidak valid!",
+                text: `Harap unggah file dengan format yang diizinkan: ${extAllowed.join(', ')}`,
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+            return;
+        }
+
+        // Simpan file ke state
+        setFileAnswers((prev) => ({
+            ...prev,
+            [`${currentIndex}-${id_question}`]: file,
+        }));
+
+        // Panggil handleValueAnswer (jika diperlukan)
+        handleValueAnswer("", "", "", "", currentIndex, event, id_question);
+    }
+};
+
+const getUploadedFile = (currentIndex, id_question) => {
+  return fileAnswers[`${currentIndex}-${id_question}`]?.name || "Tidak ada file yang dipilih";
+};
+
 
   useEffect(() => {
     const checkStatus = () => {
@@ -486,13 +515,15 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
 
                 {/* Jawaban */}
                 {item.type === "Praktikum" ? (
-                  <FileUpload
-                    forInput="jawaban_file"
-                    label="Jawaban (.zip)"
-                    formatFile=".zip"
-                    onChange={(event) => handleFileChange(fileInputRef, "zip", event, index + 1, item.id)}
-                    style={{ width: '105vh' }}
-                  />
+                <FileUpload
+                forInput="jawaban_file"
+                label="Jawaban (.zip)"
+                formatFile=".zip" // Format file yang diizinkan
+                hasExisting={getUploadedFile(index + 1, item.id)} // Menampilkan nama file yang dipilih
+                onChange={(event) => handleFileChange(fileInputRef, ["zip"], event, index + 1, item.id)}
+                style={{ width: "105vh" }}
+            />
+            
                 ) : item.type === "Essay" ? (
                   <Input
                     name="essay_answer"

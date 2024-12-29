@@ -4,21 +4,21 @@
 }
 
 .login-background {
-    background-image: url('../assets/backgroundLogin.png');
+    background-image: url('../assets/backgroundTMS.png');
     width: 100%; 
-    height: 100vh; 
+    height: 80vh; 
     margin-left: 0;
     flex-shrink: 0;
     background-size: cover;
-    background-color: var(--primary-color);
+    background-color: white;
     background-position: center; 
 }
 
 .login-container {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    align-items: flex-end;
+    height: 80vh;
 }
 
 /* Style the form box */
@@ -29,6 +29,7 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
     width: 500px;
+    margin-bottom: 120px;
 
 }
 
@@ -100,6 +101,7 @@
     overflow-y: auto; /* Enable scrolling if content overflows */
     padding: 10px;
 }
+
 
 .modal-title {
     font-size: 18px;

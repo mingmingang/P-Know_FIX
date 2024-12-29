@@ -120,6 +120,7 @@ export default function MasterTestPreTest({
         try {
           const data = await fetchDataWithRetry_posttest();
           if (isMounted) {
+            console.log("hasill", data)
             if (data != "") {
               if (Array.isArray(data)) {
                 if (data.length != 0) {
@@ -333,11 +334,11 @@ export default function MasterTestPreTest({
         </div>
         <div className="d-flex flex-column">
           {isError && (
-            <Alert
-              type="warning"
-              message="Terjadi kesalahan: Gagal mengambil data Test."
-            />
-          )}
+            // <Alert
+            //   type="warning"
+            //   message="Terjadi kesalahan: Gagal mengambil data Test."
+            // />
+            <div className=""></div>          )}
           {isLoading ? (
             <Loading message="Sedang memuat data..." />
           ) : currentData ? ( // Periksa currentData ada atau tidak

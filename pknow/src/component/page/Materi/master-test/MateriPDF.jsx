@@ -214,6 +214,8 @@ async function updateProgres() {
   }
 }
 
+
+
   useEffect(() => {
     //saveProgress();
     updateProgres();
@@ -301,7 +303,12 @@ return (
                 unduh
               </a>{" "} */}  
             </p>
-            <button  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}> <a style={{color:"white"}} href={`${API_LINK}Upload/GetFile/${fileData.file}`} className="text-decoration-none" download>Unduh Materi</a></button>
+            <button onClick={() => {
+                        setupDownload(
+                          `${API_LINK}Upload/GetFile/${fileData.file}`,
+                          fileData.formattedFileName
+                        );
+                      }}  style={{border:"none",backgroundColor:"#0E6EFE", borderRadius:"10px", padding:"10px", marginLeft:"25px"}}>Unduh Materi</button>
             </div>
           )}
                         

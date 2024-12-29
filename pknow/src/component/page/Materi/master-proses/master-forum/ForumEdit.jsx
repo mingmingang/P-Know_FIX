@@ -19,6 +19,8 @@ const userSchema = object({
 import { Stepper, Step, StepLabel, Box } from '@mui/material';
 import BackPage from "../../../../../assets/backPage.png";
 import Konfirmasi from "../../../../part/Konfirmasi";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../../util/Encryptor";
 
 const steps = ["Pengenalan", "Materi", "Forum", "Sharing Expert", "Pre Test", "Post Test"];
 
@@ -82,6 +84,9 @@ function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
 }
 
 export default function MasterForumEdit({ onChangePage }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,10 +120,7 @@ export default function MasterForumEdit({ onChangePage }) {
     return doc.body.textContent || "";
   };
   
-  const cleanedForum = stripHTMLTags(Materi.current);
-
-
-  console.log("materi", Materi)
+  const cleanedForum = stripHTMLTags(Materi);
 
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
@@ -135,9 +137,8 @@ export default function MasterForumEdit({ onChangePage }) {
 
       try {
         const data = await UseFetch(API_LINK + "Forum/GetDataForumByMateri", {
-          p1: Materi.current.mat_id
+          p1: Materi.Key
         });
-        console.log("data forum", data)
         if (data === "ERROR") {
           setIsError(true);
         } else {
@@ -185,10 +186,10 @@ export default function MasterForumEdit({ onChangePage }) {
 
     try {
       const response = await axios.post(API_LINK + "Forum/EditDataForum", {
-        p1: Materi.current.mat_id,
+        p1: Materi.Key,
         p2: formData.forumJudul,
         p3: formData.forumIsi,
-        p4: Materi.current.modifiedBy,
+        p4: activeUser,
       });
       console.log("FormData being sent:", Materi.current.mat_id,formData,AppContext_test.displayName,);
       if (response.status === 200) {
@@ -288,7 +289,7 @@ export default function MasterForumEdit({ onChangePage }) {
                       id="forumIsi"
                       value={formData.forumIsi}
                       onEditorChange={(content) => setFormData({ ...formData, forumIsi: content })}
-                      apiKey='tmy3owot5w57uflfn2dtbss6kolqjiypl3nkdoi72g1vxl2u'
+                      apiKey='444kasui9s3azxih6ix4chynoxmhw6y1urkpmfhufvrbernz'
                       init={{
                         height: 300,
                         menubar: false,
@@ -311,23 +312,23 @@ export default function MasterForumEdit({ onChangePage }) {
               </div>
             </div>
           )}
-   <div className="d-flex justify-content-between my-4 mx-1 mt-0">
-          <div className="ml-4">
+          <div className="d-flex justify-content-between my-4 mx-1 mt-0">
+          <div className="">
           <Button
-            classType="dark ms-3 px-4 py-2"
+            classType="outline-secondary ms-3 px-4 py-2"
             label="Sebelumnya"
-            onClick={() => onChangePage("materiEdit", AppContext_master.MateriForm = AppContext_test.DetailMateriEdit, AppContext_master.count += 1)}
+            onClick={() => onChangePage("materiEdit", AppContext_master.MateriForm, AppContext_master.count += 1)}
           />
           </div>
           <div className="d-flex mr-4" >
           <Button
             classType="primary ms-2 px-4 py-2"
             type="submit"
-            label="Simpan"
+            label="Edit"
             style={{marginRight:"10px"}}
           />
           <Button
-            classType="dark ms-3 px-4 py-2"
+            classType="primary ms-3 px-4 py-2"
             label="Berikutnya"
             onClick={() => onChangePage("sharingEdit", AppContext_test.ForumForm = formData, AppContext_master.MateriForm = AppContext_test.DetailMateriEdit, AppContext_master.count += 1)}
           />
@@ -344,7 +345,6 @@ export default function MasterForumEdit({ onChangePage }) {
           onNo={handleConfirmNo}
         />
         )}
-        
       </form>
       
     </>

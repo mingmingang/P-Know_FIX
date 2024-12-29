@@ -46,6 +46,9 @@ export default function MastermateriAdd({ onChangePage }) {
     setShowConfirmation(false);
   };
 
+  console.log("forum", AppContext_test.ForumForm)
+  const Forum = AppContext_test.ForumForm;
+
   const previewFile = async (namaFile) => {
     try {
       namaFile = namaFile.trim();
@@ -168,6 +171,19 @@ export default function MastermateriAdd({ onChangePage }) {
 
       let hasPdfFile = false;
       let hasVideoFile = false;
+      const isPdfEmpty = !fileInputRef.current.files.length;
+      const isVideoEmpty = !vidioInputRef.current.files.length;
+
+      if(AppContext_test.materiVideo === "" && AppContext_test.materiPdf === ""){
+        if (isPdfEmpty && isVideoEmpty) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          mat_file_pdf: "Pilih salah satu antara PDF atau Video",
+          mat_file_video: "Pilih salah satu antara PDF atau Video",
+        }));
+        return;
+      }
+    }
 
       if (fileInputRef.current && fileInputRef.current.files.length > 0) {
         uploadPromises.push(
@@ -189,6 +205,8 @@ export default function MastermateriAdd({ onChangePage }) {
         );
       }
 
+     
+
       Promise.all(uploadPromises).then(() => {
         if(AppContext_test.materiVideo == null || AppContext_test.materiPdf == null){
         if (!hasPdfFile && !hasVideoFile) {
@@ -201,7 +219,6 @@ export default function MastermateriAdd({ onChangePage }) {
           return;
         }
       }
-
         axios
           .post(API_LINK + "Materi/UpdateSaveDataMateri", formDataRef.current)
           .then((response) => {
@@ -210,11 +227,22 @@ export default function MastermateriAdd({ onChangePage }) {
               // SweetAlert("Sukses", "File Materi berhasil disimpan", "success");
               setIsFileDisabled(false);
               AppContext_master.formSavedMateriFile = true;
-              onChangePage(
-                "forumAdd",
-                (AppContext_master.MateriForm),
-                (AppContext_master.count += 1)
-              );
+              if (typeof Forum === "undefined" || Forum.forumIsi === "") {
+                onChangePage(
+                  "forumAdd",
+                  AppContext_master.MateriForm,
+                  (AppContext_master.count += 1), 
+                  AppContext_test.ForumForm
+                );
+              } else {
+                onChangePage(
+                  "forumBefore",
+                  AppContext_master.MateriForm,
+                  (AppContext_master.count += 1), 
+                  AppContext_test.ForumForm
+                );
+              }
+              
             } else {
               setIsError((prevError) => ({
                 ...prevError,

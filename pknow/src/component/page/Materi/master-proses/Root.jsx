@@ -11,6 +11,7 @@ import PengenalanBefore from "./master-materi/PengenalanBefore";
 import MasterPreTestAdd from "./master-pretest/PreTestAdd";
 // import MasterPreTestAddNot from "./master-pretest/PreTestAddNot";
 import MasterPreTestEdit from "./master-pretest/PreTestEdit";
+import MasterPreTestEditNot from "./master-pretest/PreTestEditNot";
 import MasterPreTestDetail from "./master-pretest/PreTestDetail";
 // // Materi
 import MasterMateriAdd from "./master-materi/MateriAdd";
@@ -32,8 +33,8 @@ import MasterForumEdit from "./master-forum/ForumEdit";
 // import MasterForumDetail from "./master-forum/ForumDetail";
 // // Post Test
 import MasterPostTestAdd from "./master-posttest/PostTestAdd";
-// import MasterPostTestEdit from "./master-posttest/PostTestEdit";
-// import MasterPostTestEditNot from "./master-posttest/PostTestEditNot";
+import MasterPostTestEdit from "./master-posttest/PostTestEdit";
+import MasterPostTestEditNot from "./master-posttest/PostTestEditNot";
 // import MasterPostTestDetail from "./master-posttest/PostTestDetail";
 // // Kelompok Keahlian
 import PilihKelompokKeahlian from "./Kelompok_Keahlian";
@@ -75,6 +76,10 @@ export default function MasterProses() {
         return <MasterPreTestEdit 
                 onChangePage={handleSetPageMode} 
                 withID={dataID}/>;
+      case "pretestEditNot":
+                  return <MasterPreTestEditNot
+                          onChangePage={handleSetPageMode} 
+                          withID={dataID}/>;
       // case "pretestDetail":
       //   return <MasterPreTestDetail 
       //           onChangePage={handleSetPageMode} 
@@ -155,14 +160,14 @@ export default function MasterProses() {
         return <MasterPostTestAdd 
                 onChangePage={handleSetPageMode} 
                 withID={dataID}/>;
-      // case "posttestEdit":
-      //   return <MasterPostTestEdit 
-      //           onChangePage={handleSetPageMode}
-      //           withID={dataID}/>;
-      // case "posttestEditNot":
-      //   return <MasterPostTestEditNot
-      //           onChangePage={handleSetPageMode}
-      //           withID={dataID}/>;
+      case "posttestEdit":
+        return <MasterPostTestEdit 
+                onChangePage={handleSetPageMode}
+                withID={dataID}/>;
+      case "posttestEditNot":
+        return <MasterPostTestEditNot
+                onChangePage={handleSetPageMode}
+                withID={dataID}/>;
       // case "posttestDetail":
       //   return <MasterPostTestDetail 
       //           onChangePage={handleSetPageMode} 

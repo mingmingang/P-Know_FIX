@@ -19,6 +19,8 @@ import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import Konfirmasi from "../../../../part/Konfirmasi";
 import BackPage from "../../../../../assets/backPage.png";
 import CustomStepper from "../../../../part/Stepp";
+import Cookies from "js-cookie";
+import { decryptId } from "../../../../util/Encryptor";
 
 const steps = ["Sharing Expert", "Pretest", "Post Test"];
 
@@ -36,6 +38,10 @@ function getStepContent(stepIndex) {
 }
 
 export default function MasterSharingAdd({ onChangePage }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -54,16 +60,16 @@ export default function MasterSharingAdd({ onChangePage }) {
     secType: "",
   });
 
-  useEffect(() => {
-    if (AppContext_master?.dataSection) {
-      setDataSection({
-        materiId: AppContext_master?.dataIDMateri || "",
-        secJudul: "Section Materi " + (AppContext_master?.dataIDMateri || ""),
-        createdby: AppContext_master?.dataSection?.createdby || "",
-        secType: "Pre-Test",
-      });
-    }
-  }, [AppContext_master?.dataSection]);
+  // useEffect(() => {
+  //   if (AppContext_master?.dataSection) {
+  //     setDataSection({
+  //       materiId: AppContext_master?.dataIDMateri || "",
+  //       secJudul: "Section Materi " + (AppContext_master?.dataIDMateri || ""),
+  //       createdby: AppContext_master?.dataSection?.createdby || "",
+  //       secType: "Pre-Test",
+  //     });
+  //   }
+  // }, [AppContext_master?.dataSection]);
 
   const storedSteps = sessionStorage.getItem("steps");
   const steps = storedSteps ? JSON.parse(storedSteps) : initialSteps;
@@ -88,19 +94,22 @@ export default function MasterSharingAdd({ onChangePage }) {
     window.location.reload();
   };
 
-  useEffect(() => {
-    formDataRef.current.sec_id = AppContext_master.dataIdSection;
-    formDataRef.current.mat_id = AppContext_test.dataIDMateri;
-  }, [AppContext_master.dataIdSection, AppContext_test.dataIDMateri]);
+  // useEffect(() => {
+  //   formDataRef.current.sec_id = AppContext_master.dataIdSection;
+  //   formDataRef.current.mat_id = AppContext_test.dataIDMateri;
+  // }, [AppContext_master.dataIdSection, AppContext_test.dataIDMateri]);
 
   const formDataRef = useRef({
-    sec_id: AppContext_master.dataIdSection,
-    mat_id: AppContext_test.dataIDMateri,
+    materiId: AppContext_master.dataIDMateri,
+    secJudul: "Section Materi " + AppContext_master.dataIDMateri,
+    createdby: activeUser,
+    secType: "Sharing Expert",
     mat_sharing_expert_pdf: "",
     mat_sharing_expert_video: "",
-    dataSection: "",
-    secType: "Sharing Expert",
   });
+
+  
+
 
   const handleGoBack = () => {
     console.log(AppContext_master.dataIdSection);
@@ -118,12 +127,12 @@ export default function MasterSharingAdd({ onChangePage }) {
   };
 
   const userSchema = object({
-    sec_id: string(),
-    mat_id: string().required("ID Materi tidak boleh kosong"),
+    materiId: string(),
+    secJudul: string(),
+    createdby: string(),
+    secType: string(),
     mat_sharing_expert_pdf: string(),
     mat_sharing_expert_video: string(),
-    dataSection: string(),
-    secType: string(),
   });
 
   const previewFile = async (namaFile) => {
@@ -191,9 +200,12 @@ export default function MasterSharingAdd({ onChangePage }) {
       setErrors
     );
 
+    console.log("data shring", formDataRef)
+
     const isPdfEmpty = !fileInputRef.current.files.length;
     const isVideoEmpty = !vidioInputRef.current.files.length;
 
+    if(typeof AppContext_test.sharingExpertVideo === "undefined" && typeof AppContext_test.sharingExpertPDF === "undefined"){
     if (isPdfEmpty && isVideoEmpty) {
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -202,11 +214,12 @@ export default function MasterSharingAdd({ onChangePage }) {
       }));
       return;
     }
+  }
 
     if (
-      Object.values(validationErrors).every((error) => !error) &&
-      (!isPdfEmpty || !isVideoEmpty)
+      Object.values(validationErrors).every((error) => !error)
     ) {
+      console.log("addd")
       setIsLoading(true);
       setIsError({ error: false, message: "" });
       setErrors({});
@@ -230,14 +243,19 @@ export default function MasterSharingAdd({ onChangePage }) {
           })
         );
       }
+      console.log("app video", AppContext_test.sharingExpertVideo)
+      console.log("app pdf", AppContext_test.sharingExpertPDF)
 
+      if(typeof AppContext_test.sharingExpertVideo === "undefined" && typeof AppContext_test.sharingExpertPDF === "undefined"){
       Promise.all(uploadPromises).then(() => {
         UseFetch(
-          API_LINK + "SharingExpert/SaveDataSharing",
+          API_LINK + "Section/CreateSection",
           formDataRef.current
         )
           .then((data) => {
-            console.log("id section", AppContext_master.dataIdSection);
+            AppContext_master.dataIdSectionSharing = data[0].newID;
+            console.log("section", data);
+            console.log("id section", AppContext_master.dataIdSectionSharing);
             console.log("kirim sharing", formDataRef.current);
             console.log("step count",stepCount.length);
             if (data === "ERROR") {
@@ -246,11 +264,7 @@ export default function MasterSharingAdd({ onChangePage }) {
                 message: "Terjadi kesalahan: Gagal menyimpan data Sharing.",
               });
             } else {
-              SweetAlert(
-                "Sukses",
-                "Data Sharing Expert berhasil disimpan",
-                "success"
-              );
+              AppContext_master.dataSectionSharing = formDataRef;
               // onChangePage("index", kategori);
               if (steps.length == 4) {
                 window.location.reload();
@@ -268,23 +282,13 @@ export default function MasterSharingAdd({ onChangePage }) {
                               "id section",
                               AppContext_master.dataIdSection
                             );
-                            SweetAlert(
-                              "Sukses",
-                              "Data Section berhasil ditambahkan",
-                              "success"
-                            );
                             // setIsFormDisabled(true);
                             AppContext_master.formSavedMateri = true;
-                            SweetAlert(
-                              "Sukses",
-                              "Data section berhasil disimpan",
-                              "success"
-                            );
                             onChangePage(
                               steps[4],
-                              (AppContext_master.MateriForm = formDataRef),
+                              AppContext_master.MateriForm,
                               (AppContext_master.count += 1),
-                              AppContext_master.dataIdSection
+                              AppContext_master.dataIdSection, AppContext_master.dataSectionSharing, AppContext_master.dataIdSectionSharing
                             );
                           } else {
                             setIsError((prevError) => ({
@@ -324,23 +328,152 @@ export default function MasterSharingAdd({ onChangePage }) {
                             "id section",
                             AppContext_master.dataIdSection
                           );
-                          SweetAlert(
-                            "Sukses",
-                            "Data Section berhasil ditambahkan",
-                            "success"
+                          // setIsFormDisabled(true);
+                          AppContext_master.formSavedMateri = true;
+                          onChangePage(
+                            steps[5],
+                            AppContext_master.Materi,
+                            (AppContext_master.count += 1),
+                            AppContext_master.dataIdSection, AppContext_master.dataSectionSharing, AppContext_master.dataIdSectionSharing
+                          );
+                        } else {
+                          setIsError((prevError) => ({
+                            ...prevError,
+                            error: true,
+                            message:
+                              "Terjadi kesalahan: Gagal menyimpan data Materi.",
+                          }));
+                        }
+                      })
+                      .catch((error) => {
+                        console.error("Terjadi kesalahan:", error);
+                        setIsError((prevError) => ({
+                          ...prevError,
+                          error: true,
+                          message: "Terjadi kesalahan: " + error.message,
+                        }));
+                      })
+                      .finally(() => setIsLoading(false));
+                  } catch (error) {
+                    setIsError({
+                      error: true,
+                      message: "Failed to save forum data: " + error.message,
+                    });
+                    setIsLoading(false);
+                  }
+                } else if (sharingExpertIndex == 5) {
+                  window.location.reload();
+                } else {
+                  window.location.reload();
+                }
+              }
+            }
+            //handleSection();
+          })
+          .catch((err) => {
+            setIsError({
+              error: true,
+              message: "Terjadi kesalahan: " + err.message,
+            });
+          })
+          .finally(() => setIsLoading(false));
+      });
+    } else {
+      Promise.all(uploadPromises).then(() => {
+        UseFetch(
+          API_LINK + "SharingExpert/SaveDataSharing",
+          {
+            secId : AppContext_master.dataIdSectionSharing,
+            matId: "",
+            sharingPdf : formDataRef.current.mat_sharing_expert_pdf,
+            sharingVideo : formDataRef.current.mat_sharing_expert_video,
+            dataSection : "",
+            secType : "Sharig Expert",
+            karyawan : activeUser
+          }
+        )
+          .then((data) => {
+            console.log("response", data)
+            console.log("id section", AppContext_master.dataIdSectionSharing);
+            console.log("kirim sharing", formDataRef.current);
+            console.log("step count",stepCount.length);
+            if (data === "ERROR") {
+              setIsError({
+                error: true,
+                message: "Terjadi kesalahan: Gagal menyimpan data Sharing.",
+              });
+            } else {
+              AppContext_master.dataSectionSharing = formDataRef;
+              // onChangePage("index", kategori);
+              if (steps.length == 4) {
+                window.location.reload();
+              } else {
+                if (sharingExpertIndex == 3 && steps.length > 4) {
+                    try {
+                      axios
+                        .post(API_LINK + "Section/CreateSection", dataSection)
+                        .then((response) => {
+                          const data = response.data;
+                          console.log("data section", dataSection);
+                          if (data[0].hasil === "OK") {
+                            AppContext_master.dataIdSection = data[0].newID;
+                            console.log(
+                              "id section",
+                              AppContext_master.dataIdSection
+                            );
+                            // setIsFormDisabled(true);
+                            AppContext_master.formSavedMateri = true;
+                            onChangePage(
+                              steps[4],
+                              AppContext_master.Materi,
+                              (AppContext_master.count += 1),
+                              AppContext_master.dataIdSection, AppContext_master.dataSectionSharing, AppContext_master.dataIdSectionSharing
+                            );
+                          } else {
+                            setIsError((prevError) => ({
+                              ...prevError,
+                              error: true,
+                              message:
+                                "Terjadi kesalahan: Gagal menyimpan data Materi.",
+                            }));
+                          }
+                        })
+                        .catch((error) => {
+                          console.error("Terjadi kesalahan:", error);
+                          setIsError((prevError) => ({
+                            ...prevError,
+                            error: true,
+                            message: "Terjadi kesalahan: " + error.message,
+                          }));
+                        })
+                        .finally(() => setIsLoading(false));
+                    } catch (error) {
+                      setIsError({
+                        error: true,
+                        message: "Failed to save forum data: " + error.message,
+                      });
+                      setIsLoading(false);
+                    }
+                } else if (sharingExpertIndex == 4 && steps.length > 5) {
+                  try {
+                    axios
+                      .post(API_LINK + "Section/CreateSection", dataSection)
+                      .then((response) => {
+                        const data = response.data;
+                        console.log("data section", dataSection);
+                        if (data[0].hasil === "OK") {
+                          AppContext_master.dataIdSection = data[0].newID;
+                          console.log(
+                            "id section",
+                            AppContext_master.dataIdSection
                           );
                           // setIsFormDisabled(true);
                           AppContext_master.formSavedMateri = true;
-                          SweetAlert(
-                            "Sukses",
-                            "Data section berhasil disimpan",
-                            "success"
-                          );
                           onChangePage(
                             steps[5],
-                            (AppContext_master.MateriForm = formDataRef),
+                            AppContext_master.Materi,
                             (AppContext_master.count += 1),
-                            AppContext_master.dataIdSection
+                            AppContext_master.dataIdSection, AppContext_master.dataSectionSharing, AppContext_master.dataIdSectionSharing
                           );
                         } else {
                           setIsError((prevError) => ({
@@ -385,39 +518,28 @@ export default function MasterSharingAdd({ onChangePage }) {
           .finally(() => setIsLoading(false));
       });
     }
+    }
   };
 
   const handleSebelumnya = () => {
     if (steps.length == 4) {
-      onChangePage("forumBefore", AppContext_test.MateriForm, AppContext_test.ForumForm);
+      onChangePage("forumBefore", AppContext_test.MateriForm, AppContext_test.ForumForm, AppContext_master.dataSectionSharing);
+    } else if(steps.length == 5 && sharingExpertIndex === 3){
+      onChangePage(
+        steps[3],
+        (AppContext_master.MateriForm),
+        AppContext_test.ForumForm,
+        (AppContext_master.count += 1),
+        AppContext_master.dataIdSection, AppContext_master.dataSectionSharing
+      );
+    } 
+    if(steps.length > 4 && sharingExpertIndex == 3){
+      onChangePage("forumBefore", AppContext_master.Materi, AppContext_test.ForumForm, AppContext_master.dataSectionSharing);
     }
-  };
-
-
-  const [activeStep, setActiveStep] = useState(2);
-
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
-  const handlePageChange = (content) => {
-    onChangePage(content);
   };
 
   const initialSteps = ["Pengenalan", "Materi", "Forum"];
   const additionalSteps = ["Sharing Expert", "Pre-Test", "Post-Test"];
-
-  const handleStepChanges = (index) => {
-    console.log("Step aktif:", index);
-  };
 
   const handleStepAdded = (stepName) => {
     console.log("Step ditambahkan:", stepName);
@@ -567,7 +689,13 @@ export default function MasterSharingAdd({ onChangePage }) {
               <Button
                 classType="primary ms-2 px-4 py-2"
                 type="submit"
-                label="Simpan"
+                label={
+                  (steps.length === 4 && sharingExpertIndex === 3) ||
+                  (steps.length === 5 && sharingExpertIndex === 4) ||
+                  (steps.length === 6 && sharingExpertIndex === 5)
+                    ? "Simpan"
+                    : "Berikutnya"
+                }
                 style={{ marginRight: "10px" }}
               />
               {/* <Button

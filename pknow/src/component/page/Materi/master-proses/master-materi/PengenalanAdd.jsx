@@ -260,22 +260,12 @@ export default function Pengenalan({ onChangePage }) {
         await Promise.all(uploadPromises);
         axios.post(API_LINK + "Materi/SaveDataMateri", formDataRef.current)
         .then(response => {
-          console.log(formDataRef.current)
           const data = response.data;
-          console.log(data)
           if (data[0].hasil === "OK") {
-            console.log("new materi",formDataRef.current);
             AppContext_master.dataIDMateri = data[0].newID;
-            console.log("id materi", AppContext_master.dataIDMateri);
-            //SweetAlert("Sukses", "Pengenalan Materi berhasil disimpan", "success");
             setIsFormDisabled(false);
             AppContext_master.formSavedMateri = true;
-            // SweetAlert(
-            //   "Sukses",
-            //   "Pengenalan Materi berhasil disimpan",
-            //   "success"
-            // );
-            onChangePage("materiAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1,AppContext_master.dataIDMateri);
+            onChangePage("materiAdd", AppContext_master.MateriForm = formDataRef.current, AppContext_master.count += 1,AppContext_master.dataIDMateri, AppContext_test.ForumForm);
           } else {
             setIsError(prevError => ({
               ...prevError,
@@ -574,7 +564,7 @@ export default function Pengenalan({ onChangePage }) {
                     id="mat_pengenalan"
                     value={formDataRef.current.mat_pengenalan}
                     onEditorChange={(content) => handleInputChange({ target: { name: 'mat_pengenalan', value: content } })}
-                    apiKey="tmy3owot5w57uflfn2dtbss6kolqjiypl3nkdoi72g1vxl2u"
+                    apiKey="444kasui9s3azxih6ix4chynoxmhw6y1urkpmfhufvrbernz"
                     init={{
                       height: 300,
                       menubar: false,

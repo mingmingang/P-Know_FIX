@@ -15,7 +15,6 @@ export default function PDF_Viewer({ pdfFileName, width = "1080px", height="1050
   useEffect(() => {
     if (pdfFileName) {
       setIsLoading(true);
-      // Menggunakan URL file PDF yang diberikan sebagai prop
       const fileUrl = `${API_LINK}Upload/GetFile/${pdfFileName}`; // Anda bisa mengubah URL ini sesuai kebutuhan
       setPdfUrl(fileUrl);
       setIsLoading(false);

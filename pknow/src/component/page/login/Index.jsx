@@ -9,6 +9,7 @@ import Cookies from "js-cookie";
 import ReCAPTCHA from "react-google-recaptcha";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMinus, faPlus, faDownload, faSyncAlt } from '@fortawesome/free-solid-svg-icons';
+import maskot from "../../../assets/loginMaskotTMS.png";
 
 import {
   API_LINK,
@@ -224,6 +225,11 @@ const [userCaptchaInput, setUserCaptchaInput] = useState("");
         <main>
           <section className="login-background">
             <div className="login-container">
+            <div className="maskotlogin mr-5" style={{color:"#0A5EA8"}}>
+              <h3 className="fw-bold" style={{width:"600px", textAlign:"center"}}>Mulai langkah awal pembelajaranmu dengan P-KNOW</h3>
+              <img src={maskot} alt="" width="600px"/>
+            </div>
+          
               <div className="login-box">
                 <img
                   src={logoPknow}
@@ -387,10 +393,10 @@ const [userCaptchaInput, setUserCaptchaInput] = useState("");
         <Modal title="Pilih Peran" ref={modalRef} size="small">
           <div className="">
             {listRole.map((value, index) => (
-              <div key={index} className="d-flex justify-content-between mr-2 ml-2 fw-normal">
+              <div key={index} className="d-flex justify-content-between mr-2 ml-2 fw-normal mb-3">
                 <button
                   type="button"
-                  className="list-group-item list-group-item-action mb-3"
+                  className="list-group-item list-group-item-action"
                   onClick={() =>
                     handleLoginWithRole(value.RoleID, value.Nama, value.Role)
                   }

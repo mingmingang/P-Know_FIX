@@ -10,7 +10,6 @@ export default function Button({
   isDisabled = false,
   ...props
 }) {
-  console.log("type", classType)
   return (
     <button
       type={type}

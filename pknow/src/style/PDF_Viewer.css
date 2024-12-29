@@ -21,3 +21,12 @@
 .rpv-core__minimal-button span{
     color: white;
 }
+
+
+.rpv-core__popover-body {
+    background-color: #0A5EA8;
+}
+
+.rpv-core__menu-item-label {
+    color: white;
+}

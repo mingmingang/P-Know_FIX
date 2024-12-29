@@ -3,59 +3,221 @@ import Button from "../../../../part/Button copy";
 import { object, string } from "yup";
 import Input from "../../../../part/Input";
 import Loading from "../../../../part/Loading";
-import * as XLSX from 'xlsx';
-import axios from 'axios';
-import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
+import * as XLSX from "xlsx";
+import axios from "axios";
+import {
+    validateAllInputs,
+    validateInput,
+} from "../../../../util/ValidateForm";
 import { API_LINK } from "../../../../util/Constants";
 import FileUpload from "../../../../part/FileUpload";
-import Swal from 'sweetalert2';
-import { Editor } from '@tinymce/tinymce-react';
-import AppContext_master from "../MasterContext";
+import { Editor } from "@tinymce/tinymce-react";
+import Swal from "sweetalert2";
+import AppContext_master from "../../master-test/TestContext";
 import AppContext_test from "../../master-test/TestContext";
-import { Stepper, Step, StepLabel,Box } from '@mui/material';
-import Konfirmasi from "../../../../part/Konfirmasi";
-import BackPage from "../../../../../assets/backPage.png";
-import UploadFile from "../../../../util/UploadFile";
-import CustomStepper from "../../../../part/Stepp";
-import SweetAlert from "../../../../util/SweetAlert";
+import Alert from "../../../../part/Alert";
 import Cookies from "js-cookie";
 import { decryptId } from "../../../../util/Encryptor";
+import { Stepper, Step, StepLabel, Box } from "@mui/material";
+import BackPage from "../../../../../assets/backPage.png";
+import Konfirmasi from "../../../../part/Konfirmasi";
 import NoImage from "../../../../../assets/NoImage.png";
+import UploadFile from "../../../../util/UploadFile";
+
+const steps = [
+  "Pengenalan",
+  "Materi",
+  "Forum",
+  "Sharing Expert",
+  "Pre Test",
+  "Post Test",
+];
+
+function getStepContent(stepIndex) {
+  switch (stepIndex) {
+    case 0:
+      return 'pengenalanEdit';
+    case 1:
+      return 'materiEdit';
+    case 2:
+      return 'forumEdit';
+      case 3:
+      return 'sharingEdit';
+    case 4:
+      return 'pretestEdit';
+      case 5:
+      return 'posttestEdit';
+    default:
+      return 'Unknown stepIndex';
+  }
+}
+
+function CustomStepper({ activeStep, steps, onChangePage, getStepContent }) {
+  return (
+    <Box sx={{ width: "100%", mt: 2 }}>
+      <Stepper activeStep={activeStep} alternativeLabel>
+        {steps.map((label, index) => (
+          <Step
+            key={label}
+            onClick={() => onChangePage(getStepContent(index))}
+            sx={{
+              cursor: "pointer",
+              "& .MuiStepIcon-root": {
+                fontSize: "1.5rem",
+                color: index <= activeStep ? "primary.main" : "grey.300",
+                "&.Mui-active": {
+                  color: "primary.main",
+                },
+                "& .MuiStepIcon-text": {
+                  fill: "#fff",
+                  fontSize: "1rem",
+                },
+              },
+            }}
+          >
+            <StepLabel
+              sx={{
+                "& .MuiStepLabel-label": {
+                  typography: "body1",
+                  color: index <= activeStep ? "primary.main" : "grey.500",
+                },
+              }}
+            >
+              {label}
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
+  );
+}
 
 
-export default function MasterPostTestAdd({ onChangePage }) {
+
+export default function MasterPreTestEditNot({ onChangePage, withID }) {
+  const [formContent, setFormContent] = useState([]);
   let activeUser = "";
   const cookie = Cookies.get("activeUser");
   if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
 
-  const [formContent, setFormContent] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
-  const [isBackAction, setIsBackAction] = useState(false); 
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [timer, setTimer] = useState('');
+  const [timer, setTimer] = useState("");
   const gambarInputRef = useRef(null);
-  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [resetStepper, setResetStepper] = useState(0);
+  const [isBackAction, setIsBackAction] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [filePreview, setFilePreview] = useState(false);
   const [filePreviews, setFilePreviews] = useState({});
+  const Materi = AppContext_master.MateriForm;
+  const handleGoBack = () => {
+    setIsBackAction(true);
+    setShowConfirmation(true);
+  };
 
-  const [dataSection, setDataSection] = useState({
+  const handleConfirmYes = () => {
+    setShowConfirmation(false);
+    window.location.reload();
+  };
+
+  const handleConfirmNo = () => {
+    setShowConfirmation(false);
+  };
+
+  const [formData, setFormData] = useState({
     materiId: AppContext_master.dataIDMateri,
-    secJudul: "Section Materi " + AppContext_master.dataIDMateri,
+    sec_id: AppContext_master.dataIdSection,
+    quizDeskripsi: "",
+    quizTipe: "Pretest",
+    tanggalAwal: "",
+    tanggalAkhir: "",
+    timer: "",
+    status: "Aktif",
     createdby: activeUser,
-    secType:""
+    type: "Pre-Test",
   });
 
-  const handleChange = (name, value) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
+  const handlePointChange = (e, index) => {
+    const { value } = e.target;
+
+    // Update point pada formContent
+    const updatedFormContent = [...formContent];
+    updatedFormContent[index].point = value;
+    setFormContent(updatedFormContent);
+
+    // Update nilaiChoice pada formChoice
+    setFormChoice((prevFormChoice) => ({
+      ...prevFormChoice,
+      nilaiChoice: value,
     }));
+  };
+
+  const addQuestion = (questionType) => {
+    const newQuestion = {
+      type: questionType,
+      jenis: "Tunggal",
+      text: `Pertanyaan ${formContent.length + 1}`,
+      options: [],
+      point: 0,
+      correctAnswer: "",
+    };
+    setFormContent([...formContent, newQuestion]);
+    setSelectedOptions([...selectedOptions, ""]);
+  };
+
+
+  const [formQuestion, setFormQuestion] = useState({
+    quizId: "",
+    soal: "",
+    tipeQuestion: "Essay",
+    gambar: null,
+    // questionDeskripsi: '',
+    status: "Aktif",
+    quecreatedby: activeUser,
+  });
+
+  formData.timer = timer;
+
+  const [formChoice, setFormChoice] = useState({
+    urutanChoice: "",
+    isiChoice: "",
+    questionId: "",
+    nilaiChoice: "",
+    quecreatedby: activeUser,
+  });
+
+  const userSchema = object({
+    materiId: string(),
+    sec_id: string(),
+    quizJudul: string(),
+    quizDeskripsi: string().required("Quiz deskripsi harus diisi"),
+    quizTipe: string(),
+    tanggalAwal: string(),
+    tanggalAkhir: string(),
+    timer: string().required("Durasi harus diisi"),
+    status: string(),
+    createdby: string(),
+    type: string(),
+  });
+
+  const initialFormQuestion = {
+    quizId: "",
+    soal: "",
+    tipeQuestion: "Essay",
+    gambar: null,
+    questionDeskripsi: "",
+    status: "Aktif",
+    quecreatedby: activeUser,
+  };
+
+  const handleQuestionTypeChange = (e, index) => {
+    const updatedFormContent = [...formContent];
+    updatedFormContent[index].type = e.target.value;
+    setFormContent(updatedFormContent);
   };
 
   const handleJenisTypeChange = (e, questionIndex) => {
@@ -82,115 +244,6 @@ export default function MasterPostTestAdd({ onChangePage }) {
   };
 
 
-  useEffect(() => {
-    setResetStepper((prev) => !prev + 1);
-  });
-  const handlePointChange = (e, index) => {
-    const { value } = e.target;
-
-    // Update point pada formContent
-    const updatedFormContent = [...formContent];
-    updatedFormContent[index].point = value;
-    setFormContent(updatedFormContent);
-
-    // Update nilaiChoice pada formChoice
-    setFormChoice((prevFormChoice) => ({
-      ...prevFormChoice,
-      nilaiChoice: value,
-    }));
-  };
-
-  const handleGoBack = () => {
-    setIsBackAction(true);  
-    setShowConfirmation(true);  
-  };
-
-  const handleConfirmYes = () => {
-    setShowConfirmation(false); 
-    window.location.reload();
-  };
-
-
-  const handleConfirmNo = () => {
-    setShowConfirmation(false);  
-  };
-
-  const addQuestion = (questionType) => {
-    const newQuestion = {
-      type: questionType,
-      jenis: "Tunggal",
-      text: `Pertanyaan ${formContent.length + 1}`,
-      options: [],
-      point: 0,
-      correctAnswer: "",
-    };
-    setFormContent([...formContent, newQuestion]);
-    setSelectedOptions([...selectedOptions, ""]);
-  };
-
-  const [formData, setFormData] = useState({
-    materiId: AppContext_master.dataIDMateri,
-    sec_id: AppContext_master.dataIdSection,
-    quizDeskripsi: "",
-    quizTipe: "Pretest",
-    tanggalAwal: "",
-    tanggalAkhir: "",
-    timer: "",
-    status: "Aktif",
-    createdby: activeUser,
-    type: "Pre-Test",
-  });
-
-  const [formQuestion, setFormQuestion] = useState({
-    quizId: '',
-    soal: '',
-    tipeQuestion: 'Essay',
-    gambar: null,
-    //questionDeskripsi: '',
-    status: 'Aktif',
-    quecreatedby: activeUser,
-  });
-  formData.timer = timer;
-
-  const [formChoice, setFormChoice] = useState({
-    urutanChoice: '',
-    isiChoice: '',
-    questionId: '',
-    nilaiChoice: '',
-    quecreatedby: activeUser,
-  });
-
-  const userSchema = object({
-    materiId: string(),
-    sec_id: string(),
-    quizJudul: string(),
-    quizDeskripsi: string().required("Quiz deskripsi harus diisi"),
-    quizTipe: string(),
-    tanggalAwal: string(),
-    tanggalAkhir: string(),
-    timer: string().required("Durasi harus diisi"),
-    status: string(),
-    createdby: string(),
-    type: string(),
-  });
-
-
-  const initialFormQuestion = {
-    quizId: '',
-    soal: '',
-    tipeQuestion: 'Essay',
-    gambar: null,
-    questionDeskripsi: '',
-    status: 'Aktif',
-    quecreatedby: activeUser,
-  };
-
-  const handleQuestionTypeChange = (e, index) => {
-    const updatedFormContent = [...formContent];
-    updatedFormContent[index].type = e.target.value;
-    setFormContent(updatedFormContent);
-  };
-
   const handleAddOption = (index) => {
     const updatedFormContent = [...formContent];
     if (updatedFormContent[index].type === "Pilgan") {
@@ -199,17 +252,42 @@ export default function MasterPostTestAdd({ onChangePage }) {
     }
   };
 
-  const storedSteps = sessionStorage.getItem("steps");
-  const steps = storedSteps ? JSON.parse(storedSteps) : initialSteps;
-  const posttest = steps.findIndex((step) => step === "Post-Test");
+  const handleDeleteOption = (questionIndex, optionIndex) => {
+    const optionValue = formContent[questionIndex].options[optionIndex].value;
 
-const isStartDateBeforeEndDate = (startDate, endDate) => {
+    setFormContent((prevFormContent) => {
+      const updatedFormContent = [...prevFormContent];
+      updatedFormContent[questionIndex].options.splice(optionIndex, 1);
+      return updatedFormContent;
+    });
+
+    setSelectedOptions((prevSelected) => {
+      const updatedSelected = [...prevSelected];
+
+      if (formContent[questionIndex].jenis === "Tunggal") {
+        if (updatedSelected[questionIndex] === optionValue) {
+          updatedSelected[questionIndex] = "";
+        }
+      } else if (formContent[questionIndex].jenis === "Jamak") {
+        updatedSelected[questionIndex] = updatedSelected[questionIndex].filter(
+          (v) => v !== optionValue
+        );
+      }
+
+      return updatedSelected;
+    });
+  };
+
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
+  const isStartDateBeforeEndDate = (startDate, endDate) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     return start <= end;
   };
 
   const fileGambarRef = useRef(null);
+
 
   const handleFileChangeGambar = (ref, index, extAllowed) => {
     const { name, value } = ref.current;
@@ -247,6 +325,15 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
       [validationError.name]: error,
     }));
   };
+
+  console.log("data materi", AppContext_test.activeUser)
+
+  const [dataSection, setDataSection] = useState({
+    materiId: Materi.Key,
+    secJudul: "Section Materi " + Materi.Key,
+    createdby: AppContext_test.activeUser,
+    secType: "",
+  });
 
 
   const handleAdd = async (e) => {
@@ -308,25 +395,24 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
 
         if (sectionData[0]?.hasil === "OK") {
             const sectionId = sectionData[0].newID;
+
             AppContext_master.dataIdSectionPretest = sectionId;
             console.log("id section:", sectionId);
             formData.timer = convertTimeToSeconds(timer);
-            // Step 2: Save Data Quiz
             console.log("Timer setelah konversi:", formData.timer);
+
             const quizResponse = await axios.post(API_LINK + "Quiz/SaveDataQuiz", {
-                materiId: AppContext_master.dataIDMateri,
+                materiId: Materi.Key,
                 sec_id: sectionId, // Menggunakan nilai yang baru dibuat
                 quizDeskripsi: formData.quizDeskripsi,
-                quizTipe: "Posttest",
+                quizTipe: "Pretest",
                 tanggalAwal: "",
                 tanggalAkhir: "",
                 timer: formData.timer,
                 status: "Aktif",
                 createdby: activeUser,
-                type: "Post-Test",
+                type: "Pre-Test",
             });
-
-            console.log("data quiz", formData);
 
             if (quizResponse.data.length === 0) {
                 Swal.fire({
@@ -364,34 +450,10 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                   } else {
                     formQuestion.gambar = "";
                   }
-                  //   if (question.selectedFile) {
-                  //     try {
-                  //       const uploadResult = await uploadFile(question.selectedFile);
-                  //       if (uploadResult !== "ERROR" && uploadResult?.newFileName) {
-                  //         formQuestion.gambar = uploadResult.newFileName;
-                  //       } else {
-                  //         formQuestion.gambar = null; // Atur default jika gagal
-                  //         console.error("Gagal mengunggah file.");
-                  //       }
-                  //     } catch (uploadError) {
-                  //       console.error('Gagal mengunggah gambar:', uploadError);
-                  //       Swal.fire({
-                  //       title: 'Gagal!',
-                  //       text: 'Gagal untuk mengunggah gambar',
-                  //       icon: 'error',
-                  //       confirmButtonText: 'OK'
-                  //     });
-                  //       return;
-                  //     }
-                  //   } else {
-                  //     // Jika tidak ada file yang dipilih, atur question.gambar menjadi null
-                  //     formQuestion.gambar = null;
-                  //   }
                 } else if (question.type === "Pilgan") {
                   formQuestion.gambar = "";
                 }
 
-                console.log("formm question", formQuestion)
                 try {
                   await Promise.all(uploadPromises);
                   const questionResponse = await axios.post(
@@ -479,7 +541,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
               }
               Swal.fire({
                 title: "Berhasil!",
-                text: "Post Test berhasil ditambahkan",
+                text: "Pretest berhasil ditambahkan",
                 icon: "success",
                 confirmButtonText: "OK",
             }).then(() => {
@@ -488,28 +550,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                 setErrors({});
                 setTimer("");
                 setIsButtonDisabled(true);
-                if (steps.length == 4) {
-                  window.location.reload();
-                } else if(steps.length > 4){
-                  if(posttest === 3){
-                    onChangePage(
-                      steps[4],
-                      AppContext_master.MateriForm,
-                      (AppContext_master.count += 1),
-                      AppContext_master.dataIdSection, AppContext_master.dataSectionSharing, AppContext_master.dataIdSectionSharing
-                    );
-                  } else if(posttest === 4){
-                    onChangePage(
-                      steps[5],
-                      AppContext_master.MateriForm,
-                      (AppContext_master.count += 1),
-                      AppContext_master.dataIdSection, AppContext_master.dataSectionSharing, AppContext_master.dataIdSectionSharing
-                    );
-                  } else {
-                    window.location.reload();
-                  }
-                 
-                }
+                onChangePage("pretestEdit", AppContext_master.DetailMateriEdit = AppContext_master.MateriForm, AppContext_master.count += 1)
             });
         } else {
             Swal.fire({
@@ -529,19 +570,17 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
         });
     }
 };
-  const handleQuestionTextChange = (e, index) => {
-    const { value } = e.target;
-    const updatedFormContent = [...formContent];
-    updatedFormContent[index].text = value;
-    setFormContent(updatedFormContent);
-  };
 
   const handleOptionLabelChange = (e, questionIndex, optionIndex) => {
     const { value } = e.target;
-    const updatedFormContent = [...formContent];
-    updatedFormContent[questionIndex].options[optionIndex].label = value;
-    setFormContent(updatedFormContent);
+
+    setFormContent((prevFormContent) => {
+      const updatedFormContent = [...prevFormContent];
+      updatedFormContent[questionIndex].options[optionIndex].label = value;
+      return updatedFormContent;
+    });
   };
+
 
   const handleOptionChange = (e, questionIndex, optionIndex) => {
     const { checked } = e.target;
@@ -565,17 +604,18 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
     setFormContent(updatedFormContent);
   };
 
-  const handleChangeQuestion = (index) => {
-  const updatedFormContent = [...formContent];
-  const question = updatedFormContent[index];
 
-  if (question.type === "Essay") {
-    // Simpan jawaban benar untuk pertanyaan Essay ke state
-    setCorrectAnswers((prevCorrectAnswers) => ({
-      ...prevCorrectAnswers,
-      [index]: question.correctAnswer,
-    }));
-  }
+  const handleChangeQuestion = (index) => {
+    const updatedFormContent = [...formContent];
+    const question = updatedFormContent[index];
+
+    if (question.type === "Essay") {
+      // Simpan jawaban benar untuk pertanyaan Essay ke state
+      setCorrectAnswers((prevCorrectAnswers) => ({
+        ...prevCorrectAnswers,
+        [index]: question.correctAnswer,
+      }));
+    }
 
     const newType =
       question.type !== "answer"
@@ -583,17 +623,17 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
           ? "answer"
           : "answer"
         : question.options.length > 0
-          ? "Pilgan"
-          : "Pilgan";
+        ? "Pilgan"
+        : "Pilgan";
 
-  updatedFormContent[index] = {
-    ...question,
-    type: newType,
-    options: newType === "Essay" ? [] : question.options,
+    updatedFormContent[index] = {
+      ...question,
+      type: newType,
+      options: newType === "Essay" ? [] : question.options,
+    };
+
+    setFormContent(updatedFormContent);
   };
-
-  setFormContent(updatedFormContent);
-};
 
   const handleDuplicateQuestion = (index) => {
     const duplicatedQuestion = { ...formContent[index] };
@@ -609,12 +649,6 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
     });
   };
 
-  const handleDeleteOption = (questionIndex, optionIndex) => {
-    const updatedFormContent = [...formContent];
-    updatedFormContent[questionIndex].options.splice(optionIndex, 1);
-    setFormContent(updatedFormContent);
-  };
-
   const handleDeleteQuestion = (index) => {
     const updatedFormContent = [...formContent];
     updatedFormContent.splice(index, 1);
@@ -622,85 +656,73 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
     const updatedSelectedOptions = [...selectedOptions];
     updatedSelectedOptions.splice(index, 1);
     setSelectedOptions(updatedSelectedOptions);
-    // Hapus correctAnswer dari state saat pertanyaan dihapus
     const updatedCorrectAnswers = { ...correctAnswers };
     delete updatedCorrectAnswers[index];
     setCorrectAnswers(updatedCorrectAnswers);
   };
 
   const parseExcelData = (data) => {
-    const questions = data.map((row, index) => {
-      // Skip header row (index 0) and the row below it (index 1)
-      if (index < 2) return null;
-
-      const options = row[3] ? row[3].split(',') : [];
-      const points = typeof row[4] === 'string' ? row[4].split(',') : [];
-      
-      return {
-        text: row[1],
-        type: row[2].toLowerCase() === 'essay' ? 'Essay' : (row[2].toLowerCase() === 'praktikum' ? 'Praktikum' : 'Pilgan'),
-        options: options.map((option, idx) => ({ label: option, value: String.fromCharCode(65 + idx), point: points[idx] ? points[idx].trim() : null })),
-        point: row[5],
-       
-      };
-    }).filter(Boolean); // Filter out null values
+    const questions = data
+      .map((row, index) => {
+        if (index < 2) return null;
+        const options = row[3] ? row[3].split(",") : [];
+        const points = typeof row[4] === "string" ? row[4].split(",") : [];
+        return {
+          text: row[1],
+          type:
+            row[2].toLowerCase() === "essay"
+              ? "Essay"
+              : row[2].toLowerCase() === "praktikum"
+              ? "Praktikum"
+              : "Pilgan",
+          options: options.map((option, idx) => ({
+            label: option,
+            value: String.fromCharCode(65 + idx),
+            point: points[idx] ? points[idx].trim() : null,
+          })),
+          point: row[5],
+        };
+      })
+      .filter(Boolean);
 
     const initialSelectedOptions = questions.map((question, index) => {
-      if (question.type === 'Pilgan') {
-        // Temukan indeks jawaban benar di dalam options
-        const correctIndex = question.options.findIndex((option) => option.value === question.correctAnswer);
+      if (question.type === "Pilgan") {
+        const correctIndex = question.options.findIndex(
+          (option) => option.value === question.correctAnswer
+        );
 
         if (correctIndex !== -1) {
-          // Jika jawaban benar ditemukan, pilih radio button tersebut
           return question.options[correctIndex].value;
         } else {
-          // Jika jawaban benar tidak ditemukan, tetapkan nilai kosong
           return "";
         }
       } else {
-        // Tidak ada pilihan awal untuk pertanyaan Essay
         return "";
       }
     });
 
     setSelectedOptions(initialSelectedOptions);
     setFormContent(questions);
-  };
-
-  const handleFileChange = (e, index) => {
-    const file = e.target.files[0];
-    const updatedFormContent = [...formContent];
-    updatedFormContent[index].selectedFile = file;
-  
-    // Buat objek FileReader
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const image = new Image();
-      image.onload = () => {
-        // Perbarui ukuran gambar dalam state
-        updatedFormContent[index].imageWidth = image.width;
-        updatedFormContent[index].imageHeight = image.height;
-        setFormContent(updatedFormContent);
-      };
-      image.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
+    console.log("ddsds", questions);
   };
 
   const handleFileExcel = (event) => {
     const file = event.target.files[0];
-    
+
     if (!file) return;
 
-    const allowedTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-    
+    const allowedTypes = [
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ];
+
     if (!allowedTypes.includes(file.type)) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Format Berkas Tidak Valid',
-        text: 'Silahkan unggah berkas dengan format: .xls atau .xlsx',
+        icon: "warning",
+        title: "Format Berkas Tidak Valid",
+        text: "Silahkan unggah berkas dengan format: .xls atau .xlsx",
       });
-      event.target.value = '';
+      event.target.value = "";
       return;
     }
     setSelectedFile(file);
@@ -711,7 +733,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const data = e.target.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
+        const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const parsedData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
@@ -719,42 +741,33 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
       };
       reader.readAsBinaryString(selectedFile);
       Swal.fire({
-        title: 'Berhasil!',
-        text: 'File Excel berhasil ditambahkan',
-        icon: 'success',
-        confirmButtonText: 'OK'
+        title: "Berhasil!",
+        text: "File Excel berhasil ditambahkan",
+        icon: "success",
+        confirmButtonText: "OK",
       });
     } else {
       Swal.fire({
-        title: 'Gagal!',
-        text: 'Pilih file Excel terlebih dahulu!',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Gagal!",
+        text: "Pilih file Excel terlebih dahulu!",
+        icon: "warning",
+        confirmButtonText: "OK",
       });
     }
   };
 
   const handleDownloadTemplate = () => {
-    const link = document.createElement('a');
-    link.href = '/template.xlsx'; 
-    link.download = 'template.xlsx';
+    const link = document.createElement("a");
+    link.href = "/template.xlsx";
+    link.download = "template.xlsx";
     link.click();
   };
-
-  
 
   const updateFormQuestion = (name, value) => {
     setFormQuestion((prevFormQuestion) => ({
       ...prevFormQuestion,
       [name]: value,
     }));
-  };
-
-  const handleTimerChange = (e) => {
-    const { value } = e.target;
-    setTimer(value);
-    console.log(convertTimeToSeconds(timer))
-
   };
 
   const handleOptionPointChange = (e, questionIndex, optionIndex) => {
@@ -765,7 +778,6 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
     if (updatedFormContent[questionIndex].options[optionIndex].isChecked) {
       updatedFormContent[questionIndex].options[optionIndex].point = parseInt(value, 10);
     }
-  
     setFormContent(updatedFormContent);
   };
 
@@ -786,110 +798,27 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
     }));
   };
   const convertTimeToSeconds = () => {
-      return parseInt(hours) * 3600 + parseInt(minutes) * 60;
+    return parseInt(hours) * 3600 + parseInt(minutes) * 60;
   };
-  
-  const [hours, setHours] = useState('00');
-  const [minutes, setMinutes] = useState('00');
-  
+
+  const [hours, setHours] = useState("00");
+  const [minutes, setMinutes] = useState("00");
+
   const handleHoursChange = (e) => {
-      setHours(e.target.value);
+    setHours(e.target.value);
   };
 
   const handleMinutesChange = (e) => {
-      setMinutes(e.target.value);
-  };
-  
-  const convertSecondsToTimeFormat = (seconds) => {
-      const formatHours = Math.floor(seconds / 3600).toString().padStart(2, '0');
-      const formatMinutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-
-      setHours(formatHours);
-      setMinutes(formatMinutes);
-      return `${formatHours}:${formatMinutes}`;
-  };
-  const [activeStep, setActiveStep] = useState(4);
-
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    setMinutes(e.target.value);
   };
 
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
-  const handlePageChange = (content) => {
-    onChangePage(content);
-  };
-
-  const initialSteps = ["Pengenalan", "Materi", "Forum"];
-  const additionalSteps = ["Sharing Expert", "Pre-Test", "Post-Test"];
-
-  const handleStepChanges = (index) => {
-    console.log("Step aktif:", index);
-  };
-
-  const handleStepAdded = (stepName) => {
-    console.log("Step ditambahkan:", stepName);
-  };
-
-  const handleStepRemoved = (stepName) => {
-    console.log("Step dihapus:", stepName);
-  };
-
-  const handleStepChange = (stepContent) => {
-    onChangePage(stepContent);
-    };
-  
-    const [stepCount, setStepCount] = useState(0);
-
-    const handleStepCountChange = (count) => {
-      setStepCount(count);
-    };
-
-    const [stepPage, setStepPage] = useState([]);
-    const handleAllStepContents = (allSteps) => {
-      setStepPage(allSteps);
-      //console.log("Semua Step Contents:", allSteps);
-    };
-  
-
-    const handleSebelumnya = () => {
-      if (steps.length == 4) {
-        onChangePage("forumBefore", AppContext_master.Materi, AppContext_test.ForumForm, AppContext_master.count += 1,
-          AppContext_master.dataIdSectionSharing);
-      } else if(steps.length == 5 && posttest == 4){
-        onChangePage(
-          steps[3],
-          AppContext_master.Materi,
-          AppContext_test.ForumForm,
-          AppContext_master.count += 1,
-          AppContext_master.dataIdSectionSharing
-        );
-      } else if(steps.length == 5 && posttest == 3){
-        onChangePage("forumBefore", AppContext_master.Materi, AppContext_test.ForumForm, AppContext_master.count += 1,
-          AppContext_master.dataIdSectionSharing);
-      } else if(steps.length == 6 && posttest == 3){
-        onChangePage("forumBefore", AppContext_master.Materi, AppContext_test.ForumForm, AppContext_master.count += 1,
-          AppContext_master.dataIdSectionSharing);
-      }
-      else if(steps.length == 6 && posttest == 4){
-        onChangePage(
-          steps[3],
-          AppContext_master.Materi,
-          AppContext_test.ForumForm,
-          AppContext_master.count += 1,
-          AppContext_master.dataIdSectionSharing
-        );
-      }
-    };
 
 
   if (isLoading) return <Loading />;
+
+  const handlePageChange = (content) => {
+    onChangePage(content);
+};
 
   return (
     <>
@@ -926,37 +855,57 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
           }
         `}
       </style>
-      <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
-            <div className="back-and-title" style={{display:"flex"}}>
-              <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
-                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Post Test</h4>
-              </div>
-                <div className="ket-draft">
-                <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
-                </div>
-              </div>
+      <div
+        className=""
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: "100px",
+          marginLeft: "70px",
+          marginRight: "70px",
+        }}
+      >
+        <div className="back-and-title" style={{ display: "flex" }}>
+          <button
+            style={{ backgroundColor: "transparent", border: "none" }}
+            onClick={handleGoBack}
+          >
+            <img src={BackPage} alt="" />
+          </button>
+          <h4
+            style={{
+              color: "#0A5EA8",
+              fontWeight: "bold",
+              fontSize: "30px",
+              marginTop: "10px",
+              marginLeft: "20px",
+            }}
+          >
+            Tambah Pre-Test
+          </h4>
+        </div>
+        <div className="ket-draft">
+          <span className="badge text-bg-dark " style={{ fontSize: "16px" }}>
+            Draft
+          </span>
+        </div>
+      </div>
       <form id="myForm" onSubmit={handleAdd}>
-        <div>
-        <div style={{margin:"20px 100px"}}>
-        <CustomStepper
-        initialSteps={initialSteps}
-        additionalSteps={additionalSteps}
-        onChangeStep={posttest}
-        onStepAdded={handleStepAdded}
-        onStepRemoved={handleStepRemoved}
-        onChangePage={handleStepChange}
-        onStepCountChanged={handleStepCountChange}
-        onAllStepContents={handleAllStepContents}
-      />
+      <div>
+          <CustomStepper
+            activeStep={4}
+            steps={steps}
+            onChangePage={handlePageChange}
+            getStepContent={getStepContent}
+          />
         </div>
-        </div>
-        <div className="card mt-4 " style={{margin:"100px"}}>
-        <div className="card-body p-4">
+        <div className="card mt-4" style={{ margin: "100px" }}>
+          <div className="card-body p-4">
             <div className="row mb-3">
               <div className="col-lg-7">
                 <Input
                   type="text"
-                  label="Deskripsi Post Test"
+                  label="Deskripsi"
                   forInput="quizDeskripsi"
                   value={formData.quizDeskripsi}
                   onChange={handleInputChange}
@@ -1006,6 +955,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
               </div>
             </div>
             <div className="row mb-4">
+              <div className="mb-2"></div>
               <div className="d-flex justify-content-between">
                 <div className="d-flex">
                   <div className="">
@@ -1019,7 +969,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                     <input
                       type="file"
                       id="fileInput"
-                      style={{ display: 'none' }}
+                      style={{ display: "none" }}
                       onChange={handleFileExcel}
                       accept=".xls, .xlsx"
                     />
@@ -1030,7 +980,9 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                       iconName="upload"
                       label="Tambah File Excel"
                       classType="primary btn-sm mx-2 px-3 py-2 rounded-3 fw-semibold"
-                      onClick={() => document.getElementById('fileInput').click()} // Memicu klik pada input file
+                      onClick={() =>
+                        document.getElementById("fileInput").click()
+                      } // Memicu klik pada input file
                     />
                   </div>
                 </div>
@@ -1049,34 +1001,38 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                     />
                   </div>
                   <div className="">
-                  <Button
-                    iconName="download"
-                    label="Unduh Template"
-                    classType="warning btn-sm px-3 py-2 mx-2 rounded-3 fw-semibold"
-                    onClick={handleDownloadTemplate}
-                    title="Unduh Template Excel"
-                  />
+                    <Button
+                      iconName="download"
+                      label="Unduh Template"
+                      classType="warning btn-sm px-3 py-2 mx-2 rounded-3 fw-semibold"
+                      onClick={handleDownloadTemplate}
+                      title="Unduh Template Excel"
+                    />
                   </div>
-
-            </div>
-            </div>
+                </div>
+              </div>
             </div>
             {formContent.map((question, index) => (
               <div key={index} className="card mb-4">
                 <div className="card-header bg-white fw-medium text-black d-flex justify-content-between align-items-center">
                   <span>Pertanyaan</span>
                   <span>
-                    Skor: {
-                      question.type === 'Pilgan' 
-                        ? (question.options || []).reduce((acc, option) => acc + parseInt(option.point), 0)
-                        : parseInt(question.point)
-                    }
+                    Skor:{" "}
+                    {question.type === "Pilgan"
+                      ? (question.options || []).reduce(
+                          (acc, option) => acc + parseInt(option.point),
+                          0
+                        )
+                      : parseInt(question.point)}
                   </span>
-                  
+
                   <div className="col-lg-2">
-                    <select className="form-select" aria-label="Default select example"
+                    <select
+                      className="form-select"
+                      aria-label="Default select example"
                       value={question.type}
-                      onChange={(e) => handleQuestionTypeChange(e, index)}>
+                      onChange={(e) => handleQuestionTypeChange(e, index)}
+                    >
                       <option value="Essay">Essay</option>
                       <option value="Pilgan">Pilihan Ganda</option>
                       <option value="Praktikum">Praktikum</option>
@@ -1096,8 +1052,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                             const updatedFormContent = [...formContent];
                             updatedFormContent[index].text = e.target.value;
                             setFormContent(updatedFormContent);
-                            // Update formQuestion with the new question text
-                            updateFormQuestion('soal', e.target.value);
+                            updateFormQuestion("soal", e.target.value);
                           }}
                           isRequired={true}
                         />
@@ -1106,17 +1061,22 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                       <div className="col-lg-12">
                         <div className="form-check">
                           {question.options.map((option, optionIndex) => (
-                            <div key={optionIndex} >
+                            <div key={optionIndex}>
                               <input
                                 type="radio"
                                 id={`option_${index}_${optionIndex}`}
                                 name={`option_${index}`}
                                 value={option.value}
-                                checked={selectedOptions[index] === option.value}
+                                // Checked hanya jika value di selectedOptions sama dengan value dari option
+                                checked={
+                                  selectedOptions[index] === option.value
+                                }
                                 onChange={(e) => handleOptionChange(e, index)}
-                                style={{ marginRight: '5px' }}
+                                style={{ marginRight: "5px" }}
                               />
-                              <label htmlFor={`option_${index}_${optionIndex}`}>{option.label}</label>
+                              <label htmlFor={`option_${index}_${optionIndex}`}>
+                                {option.label}
+                              </label>
                             </div>
                           ))}
                         </div>
@@ -1137,93 +1097,48 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                   ) : (
                     <div className="row">
                       <div className="col-lg-12 question-input">
-                      <label htmlFor="deskripsiMateri" className="form-label fw-bold">
-                      Pertanyaan <span style={{color:"Red"}}> *</span>
-                      </label>
-                        {/* <textarea
+                        <label
+                          htmlFor="deskripsiMateri"
+                          className="form-label fw-bold"
+                        >
+                          Pertanyaan <span style={{ color: "Red" }}> *</span>
+                        </label>
+                        <Editor
                           id={`pertanyaan_${index}`}
                           value={question.text}
-                          label="Pertanyaan"
-                          onChange={(e) => {
+                          onEditorChange={(content) => {
                             const updatedFormContent = [...formContent];
-                            updatedFormContent[index].text = e.target.value;
+                            updatedFormContent[index].text = content;
                             setFormContent(updatedFormContent);
 
                             // Update formQuestion.soal
                             setFormQuestion((prevFormQuestion) => ({
                               ...prevFormQuestion,
-                              soal: e.target.value
+                              soal: content,
                             }));
                           }}
-                          className="form-control" // Optional: Add any necessary CSS classes
-                          rows={4} // Optional: Adjust the number of rows for the textarea
-                        /> */}
-                        {/* <Editor
-                          id={`pertanyaan_${index}`}
-                          value={question.text}
-                          label="Pertanyaan"
-                          onChange={(e) => {
-                            const updatedFormContent = [...formContent];
-                            updatedFormContent[index].text = e.target.value;
-                            setFormContent(updatedFormContent);
-
-                            // Update formQuestion.soal
-                            setFormQuestion((prevFormQuestion) => ({
-                              ...prevFormQuestion,
-                              soal: e.target.value
-                            }));
-                          }}
-                          apiKey='la2hd1ehvumeir6fa5kxxltae8u2whzvx1jptw6dqm4dgf2g'
+                          apiKey="444kasui9s3azxih6ix4chynoxmhw6y1urkpmfhufvrbernz"
                           init={{
                             height: 300,
                             menubar: false,
                             plugins: [
-                              'advlist autolink lists link image charmap print preview anchor',
-                              'searchreplace visualblocks code fullscreen',
-                              'insertdatetime media table paste code help wordcount'
+                              "advlist autolink lists link image charmap print preview anchor",
+                              "searchreplace visualblocks code fullscreen",
+                              "insertdatetime media table paste code help wordcount",
                             ],
                             toolbar:
-                              'undo redo | formatselect | bold italic backcolor | \
-                              alignleft aligncenter alignright alignjustify | \
-                              bullist numlist outdent indent | removeformat | help'
+                              "undo redo | formatselect | bold italic backcolor | " +
+                              "alignleft aligncenter alignright alignjustify | " +
+                              "bullist numlist outdent indent | removeformat | help",
                           }}
-                        /> */}
-                        <Editor
-                        id={`pertanyaan_${index}`}
-                        value={question.text}
-                        onEditorChange={(content) => {
-                          const updatedFormContent = [...formContent];
-                          updatedFormContent[index].text = content;
-                          setFormContent(updatedFormContent);
-
-                          // Update formQuestion.soal
-                          setFormQuestion((prevFormQuestion) => ({
-                            ...prevFormQuestion,
-                            soal: content,
-                          }));
-                        }}
-                        apiKey="444kasui9s3azxih6ix4chynoxmhw6y1urkpmfhufvrbernz"
-                        init={{
-                          height: 300,
-                          menubar: false,
-                          plugins: [
-                            'advlist autolink lists link image charmap print preview anchor',
-                            'searchreplace visualblocks code fullscreen',
-                            'insertdatetime media table paste code help wordcount',
-                          ],
-                          toolbar:
-                            'undo redo | formatselect | bold italic backcolor | ' +
-                            'alignleft aligncenter alignright alignjustify | ' +
-                            'bullist numlist outdent indent | removeformat | help',
-                        }}
-                      />
+                        />
                       </div>
 
                       {/* Tampilkan tombol gambar dan PDF hanya jika type = Essay */}
-                      {(question.type === "Essay" || question.type === "Praktikum") && (
-                        
+                      {(question.type === "Essay" ||
+                        question.type === "Praktikum") && (
                         <div className="d-flex flex-column w-100">
-                         <div className="preview-img">
+                          <div className="preview-img">
                             {filePreviews[index] ? (
                               <div
                                 style={{
@@ -1260,7 +1175,8 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                               </div>
                             )}
                           </div>
-                    <FileUpload
+
+                          <FileUpload
                             forInput={`gambarMateri_${index}`}
                             label={"Gambar Soal "+question.type+" (.jpg, .png)"}
                             formatFile=".jpg,.png"
@@ -1295,7 +1211,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                               />
                             </div>
                           )}
-                          <div className="mt-2"> {/* Memberikan margin atas kecil untuk jarak yang rapi */}
+                          <div className="mt-2">
                             <Input
                               type="number"
                               label="Skor"
@@ -1305,9 +1221,9 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                             />
                           </div>
                         </div>
-                        
                       )}
-                     {question.type === "Pilgan" && (
+
+                      {question.type === "Pilgan" && (
                         <>
                           {/* Dropdown untuk memilih jenis Pilihan */}
                           <div
@@ -1414,9 +1330,6 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                         </>
                       )}
 
-
-
-
                       <div className="d-flex justify-content-between my-2 mx-1">
                         <div></div>
                         <div className="d-flex">
@@ -1455,45 +1368,41 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
             ))}
           </div>
           <div className="d-flex justify-content-between my-4 mx-1 mt-0">
-          <div className="ml-4">
-          <Button
-            classType="outline-secondary me-2 px-4 py-2"
-            label="Sebelumnya"
-            onClick={handleSebelumnya}
-          />
+            <div className="ml-4">
+            <Button
+                        classType="outline-secondary me-2 px-4 py-2"
+                        label="Sebelumnya"
+                        onClick={() => onChangePage("sharingEdit", AppContext_test.ForumForm, AppContext_test.MateriForm , AppContext_master.count += 1)}
+                      />
+            </div>
+            <div className="d-flex mr-4" >
+            <Button
+                            classType="primary ms-2 px-4 py-2"
+                            type="submit"
+                            label="Simpan"
+                            onClick={handleAdd}
+                        />
+                      <Button
+                        classType="primary ms-3 px-4 py-2"
+                        label="Berikutnya"
+                        onClick={() => onChangePage("posttestEdit", AppContext_master.MateriForm, AppContext_master.count += 1)}
+                      />
+                      </div>
           </div>
-          <div className="d-flex mr-4" >
-            <div className="mr-2">
-          <Button
-            classType="primary ms-2 px-4 py-2"
-            type="submit"
-            label={
-              (steps.length === 4 && posttest === 3) ||
-              (steps.length === 5 && posttest === 4) ||
-              (steps.length === 6 && posttest === 5)
-                ? "Simpan"
-                : "Berikutnya"
-            }
-            disabled={isButtonDisabled}
-          />
-          </div>
-          {/* <Button
-            classType="dark ms-3 px-4 py-2"
-            label="Berikutnya"
-            onClick={() => onChangePage("posttestAdd")}
-          /> */}
-          </div>
-        </div>
         </div>
       </form>
       {showConfirmation && (
         <Konfirmasi
           title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
-          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          pesan={
+            isBackAction
+              ? "Apakah anda ingin kembali?"
+              : "Anda yakin ingin simpan data?"
+          }
           onYes={handleConfirmYes}
           onNo={handleConfirmNo}
         />
-        )}
+      )}
     </>
   );
 }
