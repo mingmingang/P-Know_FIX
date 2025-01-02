@@ -40,6 +40,7 @@ export default function MasterTestPreTest({
 
   function handleDetailAction(action, key) {
     if (action === "detail") {
+      console.log("dsa", key)
       onChangePage("detailtest", "Posttest", AppContext_test.IdQuiz, key);
       AppContext_test.QuizType = "Posttest";
     }
@@ -251,9 +252,10 @@ export default function MasterTestPreTest({
             }
           );
           if (quizResponse.data && quizResponse.data.length > 0) {
+            AppContext_test.IdQuiz = quizResponse.data[0].quizId;
             setCurrentData(quizResponse.data[0]); // Hanya set data pertama
             console.log("data quiz", quizResponse.data[0]); // Debugging
-            break;
+            return quizResponse.data[0];
           }
         } catch (error) {
           console.error("Error fetching quiz data:", error);

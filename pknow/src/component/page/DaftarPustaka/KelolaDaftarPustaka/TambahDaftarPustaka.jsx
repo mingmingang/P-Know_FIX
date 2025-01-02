@@ -63,8 +63,7 @@ export default function MasterDaftarPustakaAdd({ onChangePage, withID }) {
     pus_keterangan: string().required("Isi Keterangan Terlebih Dahulu"),
     pus_gambar: string(),
     pus_status: string(),
-  });
-
+  });  
 
   const resetForm = () => {
     formDataRef.current = {
@@ -151,7 +150,7 @@ export default function MasterDaftarPustakaAdd({ onChangePage, withID }) {
     }));
   };
 
-  const handleDocumentChange = async (ref, extAllowed) => {
+  const handleFileChanges = async (ref, extAllowed, maxFileSize) => {
     const { name, value } = ref.current;
     const file = ref.current.files[0];
     const fileName = file.name;
@@ -160,10 +159,39 @@ export default function MasterDaftarPustakaAdd({ onChangePage, withID }) {
     const validationError = await validateInput(name, value, userSchema);
     let error = "";
 
-    if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
-    else if (!extAllowed.split(",").includes(fileExt))
-      error = "format berkas tidak valid";
+    if (fileSize / 1024 / 1024 > maxFileSize) {
+      error = `Berkas terlalu besar, maksimal ${maxFileSize}MB`;
+      SweetAlert("Error", error, "error");
+    } else if (!extAllowed.split(",").includes(fileExt)) {
+      error = "Format berkas tidak valid";
+      SweetAlert("Error", error, "error");
+    }
 
+    if (error) ref.current.value = "";
+
+    formDataRef.current[name] = fileName;
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [validationError.name]: error,
+    }));
+  };
+
+  const handleDocumentChange = async (ref, extAllowed, maxFileSize) => {
+    const { name, value } = ref.current;
+    const file = ref.current.files[0];
+    const fileName = file.name;
+    const fileSize = file.size;
+    const fileExt = fileName.split(".").pop();
+    const validationError = await validateInput(name, value, userSchema);
+    let error = "";
+
+    if (fileSize / 1024 / 1024 > maxFileSize) {
+      error = `Berkas terlalu besar, maksimal ${maxFileSize}MB`;
+      SweetAlert("Error", error, "error");
+    } else if (!extAllowed.split(",").includes(fileExt)) {
+      error = "Format berkas tidak valid";
+      SweetAlert("Error", error, "error");
+    }
     if (error) ref.current.value = "";
 
     formDataRef.current[name] = fileName;
@@ -174,6 +202,7 @@ export default function MasterDaftarPustakaAdd({ onChangePage, withID }) {
     }));
   };
 
+
   const handleAdd = async (e) => {
     e.preventDefault();
 
@@ -183,13 +212,16 @@ export default function MasterDaftarPustakaAdd({ onChangePage, withID }) {
       setErrors
     );
 
+    
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsError((prevError) => {
         return { ...prevError, error: false };
       });
       setErrors({});
-
+      console.log("gambar ref",fileGambarRef.current.files.length)
       const uploadPromises = [];
+
+      console.log("reffff",fileGambarRef.current )
 
       if (fileGambarRef.current.files.length > 0) {
         uploadPromises.push(
@@ -201,11 +233,16 @@ export default function MasterDaftarPustakaAdd({ onChangePage, withID }) {
 
       if (fileDocumentRef.current.files.length > 0) {
         uploadPromises.push(
-          UploadFile(fileDocumentRef.current).then(
-            (data) => (formDataRef.current["pus_file"] = data.Hasil)
-          )
+          UploadFile(fileDocumentRef.current).then((data) => {
+            if (data.Hasil) {
+              formDataRef.current["pus_file"] = data.Hasil; // Simpan nama file yang berhasil diunggah
+            } else {
+              throw new Error("Upload file gagal");
+            }
+          })
         );
       }
+      
 
       try {
         await Promise.all(uploadPromises);
@@ -397,9 +434,10 @@ export default function MasterDaftarPustakaAdd({ onChangePage, withID }) {
                 <FileUpload
                   ref={fileDocumentRef}
                   forInput="pus_file"
+                  maxFileSize="250"
                   label="File Pustaka (.pdf, .docx, .xlsx, .pptx, .mp4)"
                   formatFile=".pdf,.docx,.xlsx,.pptx,.mp4"
-                  onChange={() => handleDocumentChange(fileDocumentRef, "pdf,docx,xlsx,pptx,mp4")}
+                  onChange={() => handleDocumentChange(fileDocumentRef, "pdf,docx,xlsx,pptx,mp4", 250)}
                   errorMessage={errors.pus_file}
                   isRequired
                 />

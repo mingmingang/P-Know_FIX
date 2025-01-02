@@ -167,7 +167,7 @@ function CardMateri({
       </>
     )
   ) : (
-    // Jika teks <= 100 karakter, tampilkan apa adanya
+
     <>{book.Keterangan}</>
   )
 }
@@ -243,7 +243,7 @@ function CardMateri({
                   ) : (
                     <div className="">
                       <button
-                        className="btn btn-outline-primary"
+                        className="btn btn-outline-primary mt-4 ml-2"
                         type="button"
                         onClick={() => handleBacaMateri(book)}
                       >

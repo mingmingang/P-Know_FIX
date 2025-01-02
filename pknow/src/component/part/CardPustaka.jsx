@@ -7,7 +7,7 @@ import Icon from "../part/Icon";
 import Input from "./Input";
 import Cookies from "js-cookie";
 import { decryptId } from "../util/Encryptor";
-
+import Alert from "./Alert";
 
 function CardPustaka({
   pustakas,
@@ -63,14 +63,13 @@ function CardPustaka({
               <div className="row mt-0 gx-4" style={{
             maxWidth: "100%",
           }}>
-      {pustakas.map((book) => {
-        if (book.Key == null) {
-          return null;
-        }
-        console.log("bukuu", book)
+
+          {pustakas.map((book) => {
+            if (book.Key == null) {
+              return null;
+          }
 
         if(activeUser === book.PemilikKK || uploader === book.Uploader) {
-          console.log("kesini...")
           return(
             <>
             <div className="col-md-4 mb-4" key={book.Key} >
@@ -257,7 +256,16 @@ function CardPustaka({
             </div>
             </>
           );
-        }
+        } 
+        // else {
+        //   return(<>
+        //    <div className="" style={{margin:"5px 20px"}}>
+        //         <Alert type="warning" message="Tidak ada data!" />
+        //         </div>
+        //   </>
+         
+        //         );
+        // }
       })}
       </div>
       
@@ -471,6 +479,15 @@ function CardPustaka({
             </>
         );
       } 
+      // else {
+      //   return(<>
+      //    <div className="" style={{margin:"5px 20px"}}>
+      //         <Alert type="warning" message="Tidak ada data!" />
+      //         </div>
+      //   </>
+       
+      //         );
+      // }
    
       })}
       </div>

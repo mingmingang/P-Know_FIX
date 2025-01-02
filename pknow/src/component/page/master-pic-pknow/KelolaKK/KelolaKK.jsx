@@ -620,6 +620,7 @@ export default function KelolaKK({ onChangePage }) {
                   )
 
                   .map((value) => (
+                    <>
                     <div className="col-md-4 mb-4" key={value.data.id}>
                       <CardKK
                         key={value.data.id}
@@ -631,6 +632,7 @@ export default function KelolaKK({ onChangePage }) {
                         onChangeStatus={handleSetStatus}
                       />
                     </div>
+                    </>
                   ))}
               </div>
               <div className="mb-4 d-flex justify-content-center">
@@ -764,7 +766,6 @@ export default function KelolaKK({ onChangePage }) {
                     (value) =>
                       value.config.footer === "Tidak Aktif"
                   )
-
                   .map((value) => (
                     <div className="col-md-4 mb-4" key={value.data.id}>
                       <CardKK

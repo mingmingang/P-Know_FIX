@@ -46,7 +46,6 @@ export default function MastermateriAdd({ onChangePage }) {
     setShowConfirmation(false);
   };
 
-  console.log("forum", AppContext_test.ForumForm)
   const Forum = AppContext_test.ForumForm;
 
   const previewFile = async (namaFile) => {
@@ -68,7 +67,6 @@ export default function MastermateriAdd({ onChangePage }) {
       console.error("Error fetching file:", error);
     }
   };
-
 
   const kategori = AppContext_master.KategoriIdByKK;
 
@@ -103,7 +101,7 @@ export default function MastermateriAdd({ onChangePage }) {
     createdBy: string(),
   });
 
-  console.log("id materrr",AppContext_master.dataIDMateri)
+  console.log("id materrr", AppContext_master.dataIDMateri);
 
   // const handleGambarChange = () => handleFileChange(gambarInputRef, "jpg,png", 5);
   const handlePdfChange = () =>
@@ -174,16 +172,19 @@ export default function MastermateriAdd({ onChangePage }) {
       const isPdfEmpty = !fileInputRef.current.files.length;
       const isVideoEmpty = !vidioInputRef.current.files.length;
 
-      if(AppContext_test.materiVideo === "" && AppContext_test.materiPdf === ""){
+      if (
+        AppContext_test.materiVideo === "" &&
+        AppContext_test.materiPdf === ""
+      ) {
         if (isPdfEmpty && isVideoEmpty) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          mat_file_pdf: "Pilih salah satu antara PDF atau Video",
-          mat_file_video: "Pilih salah satu antara PDF atau Video",
-        }));
-        return;
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            mat_file_pdf: "Pilih salah satu antara PDF atau Video",
+            mat_file_video: "Pilih salah satu antara PDF atau Video",
+          }));
+          return;
+        }
       }
-    }
 
       if (fileInputRef.current && fileInputRef.current.files.length > 0) {
         uploadPromises.push(
@@ -205,20 +206,21 @@ export default function MastermateriAdd({ onChangePage }) {
         );
       }
 
-     
-
       Promise.all(uploadPromises).then(() => {
-        if(AppContext_test.materiVideo == null || AppContext_test.materiPdf == null){
-        if (!hasPdfFile && !hasVideoFile) {
-          setIsLoading(false);
-          SweetAlert(
-            "Terjadi Kesalahan!",
-            "Harus memilih salah satu file PDF atau file video, tidak boleh keduanya kosong.",
-            "error"
-          );
-          return;
+        if (
+          AppContext_test.materiVideo == null ||
+          AppContext_test.materiPdf == null
+        ) {
+          if (!hasPdfFile && !hasVideoFile) {
+            setIsLoading(false);
+            SweetAlert(
+              "Terjadi Kesalahan!",
+              "Harus memilih salah satu file PDF atau file video, tidak boleh keduanya kosong.",
+              "error"
+            );
+            return;
+          }
         }
-      }
         axios
           .post(API_LINK + "Materi/UpdateSaveDataMateri", formDataRef.current)
           .then((response) => {
@@ -231,18 +233,35 @@ export default function MastermateriAdd({ onChangePage }) {
                 onChangePage(
                   "forumAdd",
                   AppContext_master.MateriForm,
-                  (AppContext_master.count += 1), 
-                  AppContext_test.ForumForm
+                  (AppContext_master.count += 1),
+                  AppContext_test.ForumForm,
+                  AppContext_master.dataIdSection,
+                  AppContext_master.dataSectionSharing,
+                  AppContext_master.dataIdSectionSharing,
+                  AppContext_master.dataIdSectionPretest,
+                  AppContext_master.dataPretest,
+                  AppContext_master.dataQuizPretest,
+                  AppContext_master.dataPostTest,
+                  AppContext_master.dataQuizPostTest,
+                  AppContext_master.dataTimerPostTest
                 );
               } else {
                 onChangePage(
                   "forumBefore",
                   AppContext_master.MateriForm,
-                  (AppContext_master.count += 1), 
-                  AppContext_test.ForumForm
+                  (AppContext_master.count += 1),
+                  AppContext_test.ForumForm,
+                  AppContext_master.dataIdSection,
+                  AppContext_master.dataSectionSharing,
+                  AppContext_master.dataIdSectionSharing,
+                  AppContext_master.dataIdSectionPretest,
+                  AppContext_master.dataPretest,
+                  AppContext_master.dataQuizPretest,
+                  AppContext_master.dataPostTest,
+                  AppContext_master.dataQuizPostTest,
+                  AppContext_master.dataTimerPostTest
                 );
               }
-              
             } else {
               setIsError((prevError) => ({
                 ...prevError,
@@ -318,13 +337,8 @@ export default function MastermateriAdd({ onChangePage }) {
     };
   }, [kategori]);
 
-  useEffect(() => {
-    // if (AppContext_master.formSavedMateriFile === false) {
-    //   setIsFileDisabled(false);
-    // }
-  }, [AppContext_master.MateriForm, AppContext_master.formSavedMateriFile]);
-  // Render form
-  const dataSimpan = AppContext_master.formSavedMateriFile; 
+ 
+  const dataSimpan = AppContext_master.formSavedMateriFile;
 
   const [activeStep, setActiveStep] = useState(0);
 
@@ -358,7 +372,6 @@ export default function MastermateriAdd({ onChangePage }) {
   const handleStepChange = (stepContent) => {
     onChangePage(stepContent);
   };
-
 
   return (
     <>
@@ -411,12 +424,6 @@ export default function MastermateriAdd({ onChangePage }) {
       </div>
       <form onSubmit={handleAdd} style={{ margin: "20px 100px" }}>
         <div className="mb-4">
-          {/* <CustomStepper
-      activeStep={1}
-      steps={steps}
-      onChangePage={handlePageChange}
-      getStepContent={getStepContent}
-    /> */}
           <CustomStepper
             initialSteps={initialSteps}
             additionalSteps={additionalSteps}
@@ -486,29 +493,29 @@ export default function MastermateriAdd({ onChangePage }) {
             </div>
           </div>
           <div className="d-flex justify-content-between my-4 mx-1 mt-0">
-            {/* <Button
-            classType="outline-secondary me-2 px-4 py-2"
-            label="Kembali"
-            onClick={() => onChangePage("index")}
-          />
-          <Button
-            classType="primary ms-2 px-4 py-2"
-            type="submit"
-            label="Simpan"
-            isDisabled={isFormDisabled || dataSaved}
-          />
-          <Button
-            classType="dark ms-3 px-4 py-2"
-            label="Berikutnya"
-            onClick={() => onChangePage("pretestAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
-            // isDisabled={!isFormSubmitted}
-          /> */}
             <div className="ml-4">
               <Button
-            classType="outline-secondary me-2 px-4 py-2"
-            label="Sebelumnya"
-            onClick={() => onChangePage("pengenalanBefore", AppContext_master.MateriForm, AppContext_master.dataIDMateri)}
-          />
+                classType="outline-secondary me-2 px-4 py-2"
+                label="Sebelumnya"
+                onClick={() =>
+                  onChangePage(
+                    "pengenalanBefore",
+                    AppContext_master.MateriForm,
+                    AppContext_master.dataIDMateri, AppContext_master.dataIdSection,
+                    AppContext_master.dataSectionSharing,
+                    AppContext_master.dataIdSectionSharing,
+                    AppContext_master.dataIdSectionPretest,
+                    AppContext_master.dataIdSectionPostTest,
+                    (AppContext_master.dataPretest),
+                    (AppContext_master.dataQuizPretest ),
+                    (AppContext_master.dataPostTest ),
+                    (AppContext_master.dataQuizPostTest),
+                    AppContext_test.ForumForm,
+                    AppContext_master.dataTimerQuizPreTest,
+                    AppContext_master.dataTimerPostTest
+                  )
+                }
+              />
             </div>
             <div className="d-flex mr-4">
               <Button
@@ -517,12 +524,6 @@ export default function MastermateriAdd({ onChangePage }) {
                 label="Berikutnya"
                 style={{ marginRight: "10px" }}
               />
-              {/* <Button
-            classType="dark ms-3 px-4 py-2"
-            label="Berikutnya"
-            onClick={() => onChangePage("forumAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
-            // isDisabled={!isFormSubmitted}
-          /> */}
             </div>
           </div>
         </div>

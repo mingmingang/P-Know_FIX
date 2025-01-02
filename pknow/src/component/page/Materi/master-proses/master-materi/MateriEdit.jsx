@@ -379,7 +379,6 @@ export default function MastermateriEdit({ onChangePage}) {
                     handlePdfChange(fileInputRef, "pdf,docx,xlsx,pptx")
                   }
                   errorMessage={errors.mat_file_pdf}
-                  disabled={isFileDisabled || dataSimpan}
                   style={{width:"195%"}}
                 />
                 {AppContext_test.materiPdf && (
@@ -408,7 +407,7 @@ export default function MastermateriEdit({ onChangePage}) {
                     handleVideoChange(vidioInputRef, "mp4,mov")
                   }
                   errorMessage={errors.mat_file_video}
-                  disabled={isFileDisabled || dataSimpan}
+                  // disabled={isFileDisabled || dataSimpan}
                   style={{width:"195%"}}
                 />
                 {AppContext_test.materiVideo && (
@@ -451,7 +450,7 @@ export default function MastermateriEdit({ onChangePage}) {
           <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Sebelumnya"
-            onClick={() => onChangePage("pengenalanEdit")}
+            onClick={() => onChangePage("pengenalanEdit", AppContext_master.MateriForm)}
           />
           </div>
           <div className="d-flex mr-4" >
@@ -464,7 +463,7 @@ export default function MastermateriEdit({ onChangePage}) {
           <Button
             classType="primary ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("forumEdit", AppContext_master.MateriForm, AppContext_master.count += 1)}
+            onClick={() => onChangePage("forumEdit", AppContext_master.MateriForm, AppContext_master.count += 1, AppContext_test.DetailMateriEdit)}
           />
           </div>
         </div>

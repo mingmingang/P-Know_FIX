@@ -215,10 +215,12 @@ export default function MasterProsesIndex({ onChangePage }) {
   }
 
   function handleSearch() {
+    
     const searchTerm = searchQuery.current.value.toLowerCase();
+    
     const statusFilterValue = searchFilterStatus.current.value;
     const isStatusFilterSelected = statusFilterValue !== "" && statusFilterValue !== "Semua";
-
+    console.log("dsajdhaj")
     const newStatus = isStatusFilterSelected ? statusFilterValue : "Semua";
     setCurrentFilter((prevFilter) => ({
       ...prevFilter,
@@ -258,9 +260,11 @@ export default function MasterProsesIndex({ onChangePage }) {
             );
             if (data === "ERROR") {
                 setIsError(true);
-            } else if (data.length === 0) {
-                setCurrentData(inisialisasiData);
-            } else {
+            // } else if (data.length === 0) {
+            //     setCurrentData(inisialisasiData);
+            // }
+            }
+             else {
                 AppContext_test.MateriForm = "";
                 AppContext_test.ForumForm = "";
                 AppContext_test.formSavedMateri = false; 
@@ -473,7 +477,7 @@ export default function MasterProsesIndex({ onChangePage }) {
           <div className="left-feature">
             <div className="tes" style={{ display: "flex" }}>
               <div className="mr-2">
-              <Filter>
+              <Filter handleSearch={handleSearch}>
                   <DropDown
                     ref={searchFilterSort}
                     forInput="ddUrut"
@@ -507,8 +511,16 @@ export default function MasterProsesIndex({ onChangePage }) {
           </div>
         </div>
             <div className="mt-1">
+              {console.log("jumlah",currentData.length)}
+              
+              {currentData.length === 0 && (
+                <div className="" style={{margin:"0px 80px"}}>
+                <Alert type="warning" message="Tidak ada data!" />
+                </div>
+              )}
+              
                 {currentFilter.status === "Semua" ? (
-                  currentData.length >= 1 ? (
+                  currentData.length > 0 ? (
                     <CardMateri
                       materis={currentData}
                       onDetail={onChangePage}
@@ -520,10 +532,10 @@ export default function MasterProsesIndex({ onChangePage }) {
                     />
                   ) : (
                     <div className="" style={{ margin: "0px 85px", width: "90%" }}>
-                      <Alert
+                      {/* <Alert
                         type="warning"
                         message="Tidak ada materi pada kategori ini. Klik Tambah Materi."
-                      />
+                      /> */}
                     </div>
                   )
                 ) : null}

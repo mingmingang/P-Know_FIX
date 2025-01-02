@@ -16,6 +16,7 @@ import BackPage from "../../../../assets/backPage.png";
 import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
 import NoImage from "../../../../assets/NoImage.png";
 import Konfirmasi from "../../../part/Konfirmasi";
+import AppContext_test from "../../master-test/TestContext";
 
 const listKataKunci = [
   { Value: "Alat", Text: "Kat Kunci 1" },
@@ -25,7 +26,6 @@ const listKataKunci = [
 ];
 
 export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
-  console.log("ID: " + JSON.stringify(withID));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -35,8 +35,9 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
   const [isBackAction, setIsBackAction] = useState(false);  
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const fileInputRef = useRef(null);
-  const gambarInputRef = useRef(null);
+  const fileInputRef = useRef(0);
+  const gambarInputRef = useRef(0);
+  
 
   const handleGoBack = () => {
     setIsBackAction(true);  
@@ -62,10 +63,10 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
     pus_id: withID.Key,
     pus_judul: withID.Judul,
     kke_id: withID.kke_id,
-    pus_file: withID.File,
+    pus_file: '',
     pus_keterangan: withID.Keterangan,
     pus_kata_kunci: withID["Kata Kunci"],
-    pus_gambar: withID.Gambar,
+    pus_gambar: '',
     pus_status: "Aktif",
   });
 
@@ -82,12 +83,14 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
 
   const resetForm = () => {
     formDataRef.current = {
-      pus_file: "",
-    pus_judul: "",
-    pus_keterangan: "",
-    pus_kata_kunci: "",
-    pus_gambar: "",
-    pus_status: "Aktif",
+      pus_id: withID.Key,
+      pus_judul: withID.Judul,
+      kke_id: withID.kke_id,
+      pus_file: withID.File,
+      pus_keterangan: withID.Keterangan,
+      pus_kata_kunci: withID["Kata Kunci"],
+      pus_gambar: withID.Gambar,
+      pus_status: "Aktif",
     };
     setFilePreview(false);
     setErrors({});
@@ -112,7 +115,37 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
     }));
   };
 
-  const handleFileChange = async (ref, extAllowed) => {
+  const handleFileChange = (ref, extAllowed) => {
+    const { name, value } = ref.current;
+    const file = ref.current.files[0];
+    const fileName = file ? file.name : "";
+    const fileSize = file ? file.size : 0;
+    const fileExt = fileName.split(".").pop().toLowerCase();
+    const validationError = validateInput(name, value, userSchema);
+    let error = "";
+
+    if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
+    else if (!extAllowed.split(",").includes(fileExt))
+      error = "format berkas tidak valid";
+
+    if (error) ref.current.value = "";
+    else {
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFilePreview(reader.result); // Set the preview
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [validationError.name]: error,
+    }));
+  };
+
+  const handleDocumentChange = async (ref, extAllowed, maxFileSize) => {
     const { name, value } = ref.current;
     const file = ref.current.files[0];
     const fileName = file.name;
@@ -121,11 +154,16 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
     const validationError = await validateInput(name, value, userSchema);
     let error = "";
 
-    if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
-    else if (!extAllowed.split(",").includes(fileExt))
-      error = "format berkas tidak valid";
-
+    if (fileSize / 1024 / 1024 > maxFileSize) {
+      error = `Berkas terlalu besar, maksimal ${maxFileSize}MB`;
+      SweetAlert("Error", error, "error");
+    } else if (!extAllowed.split(",").includes(fileExt)) {
+      error = "Format berkas tidak valid";
+      SweetAlert("Error", error, "error");
+    }
     if (error) ref.current.value = "";
+
+    formDataRef.current[name] = fileName;
 
     setErrors((prevErrors) => ({
       ...prevErrors,
@@ -147,11 +185,13 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
       .then((response) => response.blob())
       .then((blob) => {
         const url = URL.createObjectURL(blob);
-        setFile(url);
+        setFile(`${API_LINK}Upload/GetFile/${withID.File}`);
+       
       })
       .catch((error) => {
         console.error("Error fetching file:", error);
       });
+    
     }
   }, [fileExtension]);
 
@@ -211,24 +251,66 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
         return { ...prevError, error: false };
       });
       setErrors({});
-
+      console.log("reff",fileDocumentRef )
       const uploadPromises = [];
 
-      if (fileInputRef.current.files.length > 0) {
-        uploadPromises.push(
-          UploadFile(fileInputRef.current).then(
-            (data) => (formDataRef.current["pus_file"] = data.newFileName)
-          )
-        );
-      }
+      console.log("dsaf", formDataRef.current["pus_gambar"])
 
-      if (gambarInputRef.current.files.length > 0) {
-        uploadPromises.push(
-          UploadFile(gambarInputRef.current).then(
-            (data) => (formDataRef.current["pus_gambar"] = data.newFileName)
-          )
-        );
-      }
+    //  if (fileDocumentRef.current && fileDocumentRef.current.files) {
+    //   if (fileDocumentRef.current.files.length > 0) {
+    //     uploadPromises.push(
+    //       UploadFile(fileDocumentRef).then(
+    //         (data) => (formDataRef.current["pus_file"] = data.Hasil)
+    //       )
+    //     );
+    //   } else {
+    //     console.log("Tidak ada file pustaka yang diunggah.");
+    //     formDataRef.current["pus_file"] = "";
+    //   }
+    // } else {
+    //   console.error("Referensi fileDocumentRef tidak valid atau tidak tersedia.");
+    //   formDataRef.current["pus_file"] = "";
+    // }
+
+    // if (fileGambarRef.current && fileGambarRef.current.files) {
+    //   if (fileGambarRef.current.files.length > 0) {
+    //     uploadPromises.push(
+    //       UploadFile(fileGambarRef).then(
+    //         (data) => (formDataRef.current["pus_gambar"] = data.Hasil)
+    //       )
+    //     );
+    //   } else {
+    //     console.log("Tidak ada file gambar yang diunggah.");
+    //     formDataRef.current["pus_gambar"] = "";
+    //   }
+    // } else {
+    //   console.error("Referensi fileGambarRef tidak valid atau tidak tersedia.");
+    //   formDataRef.current["pus_gambar"] = "";
+    // }
+
+
+    if (fileDocumentRef.current.files.length > 0) {
+      uploadPromises.push(
+        UploadFile(fileDocumentRef.current).then(
+          (data) => (formDataRef.current["pus_file"] = data.Hasil)
+        )
+      );
+    }else {
+          console.log("Tidak ada file pustaka yang diunggah.");
+          formDataRef.current["pus_file"] = "";
+        }
+
+    if (fileGambarRef.current.files.length > 0) {
+      uploadPromises.push(
+        UploadFile(fileGambarRef.current).then(
+          (data) => (formDataRef.current["pus_gambar"] = data.Hasil)
+        )
+      );
+    } else {     console.log("Tidak ada file pustaka yang diunggah.");
+    formDataRef.current["pus_gambar"] = "";
+  }
+
+      
 
       // console.log(fileInputRef.current);
       console.log("FORM: "+JSON.stringify(formDataRef.current));
@@ -306,7 +388,7 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
                           }}
                         >
                           <img
-                            src={`${API_LINK}Upload/GetFile/${formDataRef.current.pus_gambar}`}// Use fallback image if no preview available
+                            src={`${API_LINK}Upload/GetFile/${withID.Gambar}`}// Use fallback image if no preview available
                             alt="No Preview Available"
                             style={{
                               width: "200px",
@@ -326,7 +408,6 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
                         ref={fileGambarRef}
                         onChange={() => handleFileChange(fileGambarRef, "png")}
                         errorMessage={errors.pus_gambar}
-                        isRequired={true}
                       />
                 </div>
               </div>
@@ -367,16 +448,35 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
                 />
               </div>
               <div className="col-lg-4">
-                <FileUpload
+              <FileUpload
                   ref={fileDocumentRef}
                   forInput="pus_file"
+                  maxFileSize="250"
                   label="File Pustaka (.pdf, .docx, .xlsx, .pptx, .mp4)"
                   formatFile=".pdf,.docx,.xlsx,.pptx,.mp4"
-                  onChange={() => handleDocumentChange(fileDocumentRef, "pdf,docx,xlsx,pptx,mp4")}
+                  onChange={() => handleDocumentChange(fileDocumentRef, "pdf,docx,xlsx,pptx,mp4", 250)}
                   errorMessage={errors.pus_file}
-                  isRequired
                 />
               </div>
+
+              <Label
+                  // key={index}
+                  title={"File Pustaka Sebelumnya"}
+                  data={
+                    file ? (
+                      <a
+                        href={file}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{textDecoration:"none"}}
+                      >
+                        Tampilkan Berkas
+                      </a>
+                    ) : (
+                      "Tidak ada lampiran"
+                    )
+                  }
+                />
               
               <div className="col-lg-12">
                 <Input

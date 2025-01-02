@@ -27,12 +27,34 @@ export default function PengajuanAdd({ onChangePage, withID }) {
   const [lampiranCount, setLampiranCount] = useState(1);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isBackAction, setIsBackAction] = useState(false);  
+  const lampiranRefs = useRef([]);
+  const [fileInfos, setFileInfos] = useState([]);
+
 
   const [userData, setUserData] = useState({
     Role: "",
     Nama: "",
     kry_id: "",
   });
+
+  // const handleHapusLampiran = (index) => {
+  //   // Hapus file dari fileInfos
+  //   setFileInfos((prevInfos) => prevInfos.filter((_, i) => i !== index));
+  
+  //   // Hapus referensi file
+  //   lampiranRefs.current = lampiranRefs.current.filter((_, i) => i !== index);
+  
+  //   // Kurangi jumlah lampiran
+  //   setLampiranCount((prevCount) => prevCount - 1);
+  // };
+  
+
+  const handleHapusLampiran = (index) => {
+    setFileInfos((prevInfos) => prevInfos.filter((_, i) => i !== index));
+    lampiranRefs.current = lampiranRefs.current.filter((_, i) => i !== index);
+    setLampiranCount((prevCount) => prevCount - 1);
+  };
+  
 
   const handleGoBack = () => {
     setIsBackAction(true);  
@@ -58,8 +80,6 @@ export default function PengajuanAdd({ onChangePage, withID }) {
     lampirans: [],
   });
 
-  console.log("prodi", withID["Kode Prodi"]);
-
   const userSchema = object({
     kke_id: string(),
     kry_id: string(),
@@ -70,17 +90,23 @@ export default function PengajuanAdd({ onChangePage, withID }) {
 
   const resetForm = () => {
     formDataRef.current = {
-        kke_id: withID["ID KK"],
-        kry_id: userData.kry_id,
-        status: "Menunggu Acc",
-        creaby: activeUser,
-        lampirans: [],
-    }
+      kke_id: withID["ID KK"],
+      kry_id: userData.kry_id,
+      status: "Menunggu Acc",
+      creaby: activeUser,
+      lampirans: [],
+    };
+
+    lampiranRefs.current.forEach((ref) => {
+      if (ref && ref.current) {
+        ref.current.value = "";
+      }
+    });
+
+    setLampiranCount(1);
+    setFileInfos([]);
+    setErrors({});
   };
-
-  const [fileInfos, setFileInfos] = useState([]);
-
-  const lampiranRefs = useRef([]);
 
   const handleTambahLampiran = () => {
     setLampiranCount((prevCount) => {
@@ -246,19 +272,38 @@ export default function PengajuanAdd({ onChangePage, withID }) {
         const uploadPromises = [];
         formDataRef.current.lampirans = [];
 
-        lampiranRefs.current.forEach((ref) => {
+        // lampiranRefs.current.forEach((ref) => {
+        //   if (ref && ref.current && ref.current.files.length > 0) {
+        //     uploadPromises.push(
+        //       uploadFile(ref.current).then((data) => {
+        //         if (data !== "ERROR" && data.Hasil) {
+        //           console.log("hasil", data.Hasil)
+        //           formDataRef.current.lampirans.push({
+        //             pus_file: data.Hasil,
+        //           });
+        //         } else {
+        //           throw new Error("File upload failed");
+        //         }
+        //       })
+        //     );
+        //   }
+        // });
+
+        lampiranRefs.current.forEach((ref, index) => {
           if (ref && ref.current && ref.current.files.length > 0) {
+            console.log(`Memproses lampiran ke-${index}:`, ref.current.files[0].name);
             uploadPromises.push(
               uploadFile(ref.current).then((data) => {
                 if (data !== "ERROR" && data.Hasil) {
-                  formDataRef.current.lampirans.push({
-                    pus_file: data.Hasil,
-                  });
+                  console.log(`File ${index + 1} berhasil diunggah:`, data.Hasil); // Debugging
+                  formDataRef.current.lampirans.push({ pus_file: data.Hasil });
                 } else {
-                  throw new Error("File upload failed");
+                  console.error(`File ${index + 1} gagal diunggah.`);
                 }
               })
             );
+          } else {
+            console.warn(`Lampiran ke-${index} tidak memiliki file.`);
           }
         });
 
@@ -280,15 +325,27 @@ export default function PengajuanAdd({ onChangePage, withID }) {
         //     }
         //   });
           
-              
-
           try {
             await Promise.all(uploadPromises);
 
+            console.log("Data lampiran:", JSON.stringify(formDataRef.current.lampirans, null, 2));
             const response = await UseFetch(
               API_LINK + "PengajuanKK/SaveAnggotaKK",
-              formDataRef.current
+              {
+              kke_id: withID["ID KK"],
+              kry_id: userData.kry_id,
+              status: "Menunggu Acc",
+              creaby: activeUser,
+              lampirans: JSON.stringify(formDataRef.current.lampirans, null, 2),
+              }
             );
+            console.log("response", {
+              kke_id: withID["ID KK"],
+              kry_id: userData.kry_id,
+              status: "Menunggu Acc",
+              creaby: activeUser,
+              lampirans: JSON.stringify(formDataRef.current.lampirans, null, 2),
+              })
             if (response === "ERROR") {
               setIsError({
                 error: true,
@@ -415,7 +472,9 @@ export default function PengajuanAdd({ onChangePage, withID }) {
                         </div>
                         </div>
                         {[...Array(lampiranCount)].map((_, index) => (
-                          <div key={index}>
+                          <>
+                          <div className="d-flex">
+                          <div key={index} style={{width:"130%"}}>
                             <FileUpload
                               isRequired="true"
                               forInput={`lampiran_${index}`}
@@ -433,7 +492,7 @@ export default function PengajuanAdd({ onChangePage, withID }) {
                                 (lampiranRefs.current[index] =
                                   React.createRef())
                               }
-                              style={{width:"197%"}}
+                              style={{width:"185%"}}
                             />
                             {fileInfos[index] && (
                               <div className="mt-2">
@@ -445,7 +504,19 @@ export default function PengajuanAdd({ onChangePage, withID }) {
                                 </ul>
                               </div>
                             )}
+                             
                           </div>
+                          <div style={{marginTop:"60px"}}>
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-sm ms-3"
+                            onClick={() => handleHapusLampiran(index)}
+                          >
+                            Hapus
+                          </button>
+                          </div>
+                          </div>
+                          </>
                         ))}
                       </div>
                     </div>

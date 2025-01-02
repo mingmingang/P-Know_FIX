@@ -68,7 +68,7 @@ export default function KKEdit({ onChangePage, withID }) {
     programStudi: string().required("harus dipilih"),
     personInCharge: string(),
     deskripsi: string().min(100,"minimum 100 karakter")
-      .max(130, "maksimum 130 karakter")
+      .max(200, "maksimum 200 karakter")
       .required("harus diisi"),
     gambar: string(),
   });

@@ -3,36 +3,14 @@ import Icon from "../part/Icon";
 
 let active_menu;
 const activeURL = location.protocol + "//" + location.host + location.pathname;
-
-// function checkIcon(menu) {
-//   let menuIcon = "angle-down";
-
-//   switch (menu) {
-//     case "Logout":
-//       menuIcon = "sign-out-alt";
-//       break;
-//     case "Beranda":
-//       menuIcon = "home";
-//       break;
-//   }
-
-//   return menuIcon;
-// }
-
 function setActiveMenu(menu) {
   active_menu = menu;
 }
-
-// function setActiveCollapse(id) {
-//   active_collapse = id;
-// }
 
 export default function Menu({ listMenu }) {
   useEffect(() => {
     if (document.getElementById("spanMenu")) {
       document.getElementById("spanMenu").innerHTML = active_menu;
-      // if (active_collapse)
-      //   document.getElementById(active_collapse).classList.add("show");
     }
   }, [listMenu]);
 

@@ -95,25 +95,34 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
               const groupAnswer = {};
               data.forEach((answer) => {
                 const trqId = answer.trq_id;
-                if(!groupAnswer[trqId]){
+                if (!groupAnswer[trqId]) {
                   groupAnswer[trqId] = {
-                    trq_id : trqId,
-                    mat_id : answer.mat_id,
-                    qui_id: answer.quiId,
+                    trq_id: trqId,
+                    mat_id: answer.mat_id,
+                    qui_id: answer.qui_id,
                     usr_id: answer.usr_id,
                     trq_status: answer.trq_status,
                     nilai: answer.trq_nilai,
-                    qui_judul: answer.qui_judul, 
+                    qui_judul: answer.qui_judul,
                     trq_created_by: answer.trq_created_by,
-                    qui_tipe : answer.qui_tipe,
-                    nama : answer.Nama,
+                    qui_tipe: answer.qui_tipe,
+                    nama: answer.Nama,
                     answer: [],
-                  }
+                  };
                 }
-                groupAnswer[trqId].answer.push({
-                  ans_jawaban_pengguna : answer.ans_jawaban_pengguna
-                })
+              
+                // Cek apakah jawaban sudah ada
+                if (
+                  !groupAnswer[trqId].answer.some(
+                    (item) => item.ans_jawaban_pengguna === answer.ans_jawaban_pengguna
+                  )
+                ) {
+                  groupAnswer[trqId].answer.push({
+                    ans_jawaban_pengguna: answer.ans_jawaban_pengguna,
+                  });
+                }
               });
+              
               setCurrentData(Object.values(groupAnswer));
               console.log("data group", groupAnswer)
               setBadges(Array(data.length).fill(null).map(() => Array(0).fill(0)));
@@ -213,6 +222,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
           const filteredAnswer = response.data.filter(answer =>
             answer.Status === "Not Reviewed"
           );
+          console.log("filterr", filteredAnswer)
           setIsLoading(false);
           setCurrentAnswers(filteredAnswer);
         }
@@ -352,29 +362,26 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
 //     namaFile: item[2]
 //   }));
 
-  const downloadFile = async (namaFile) => {
-    try {
-    namaFile = namaFile.trim();
-    // namaFile = " " + namaFile;
-      const response = await axios.get(`${API_LINK}Utilities/Upload/DownloadFile`, {
-            params: {
-              namaFile 
-            },
-            responseType: 'arraybuffer' 
-          }); 
+const downloadFile = async (namaFile) => {
+  try {
+    console.log("Nama file:", namaFile);
+    const response = await axios.get(`${API_LINK}Upload/GetFile/${encodeURIComponent(namaFile)}`, {
+      responseType: "arraybuffer", // Untuk menangani file biner
+    });
 
-          const blob = new Blob([response.data], { type: response.headers['content-type'] });
-          const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = namaFile;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
-    }
-  };
+    const blob = new Blob([response.data], { type: response.headers["content-type"] });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = namaFile;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (error) {
+    console.error("Error downloading file:", error);
+  }
+};
+
 
   const removeHtmlTags = (str) => {
     return str.replace(/<\/?[^>]+(>|$)/g, ''); // Menghapus semua tag HTML
@@ -449,7 +456,9 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
         <Card.Body>
             {currentQuestions.map((question, questionIndex) => {
               const currentRespondent = currentData[currentRespondentIndex];
+              console.log("data", currentRespondent)
               const matchedAnswer = currentRespondent?.answer?.[questionIndex]?.ans_jawaban_pengguna;
+              console.log("answerrr",currentRespondent)
               return (
                 <Card key={question.Key} className="mb-4">
                   <Card.Header className="d-flex align-items-center">
@@ -491,17 +500,21 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
                         </Form.Group>
                       ) : (
                         <Form.Group controlId={`file-${question.Key}`} className="">
+                          {console.log("answer file", matchedAnswer)}
                           <Button
                             className="btn btn-primary"
-                            onClick={() =>
-                              downloadFile(
-                                matchedAnswer ? matchedAnswer.namaFile : "Tidak ada file"
-                              )
-                            }
+                            onClick={() => {
+                              if (matchedAnswer) {
+                                downloadFile(matchedAnswer); // Panggil fungsi downloadFile dengan matchedAnswer
+                              } else {
+                                alert("Tidak ada file untuk diunduh");
+                              }
+                            }}
                           >
                             <i className="fi fi-rr-file-download me-2"></i>
-                            {matchedAnswer ? matchedAnswer.namaFile : "Tidak ada file"}
+                            {matchedAnswer ? matchedAnswer : "Tidak ada file"}
                           </Button>
+
                         </Form.Group>
                       )}
                     </Form>

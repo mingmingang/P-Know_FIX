@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { object, string } from "yup";
-import { validateAllInputs, validateInput } from "../../../../util/ValidateForm";
+import {
+  validateAllInputs,
+  validateInput,
+} from "../../../../util/ValidateForm";
 import SweetAlert from "../../../../util/SweetAlert";
 import Button from "../../../../part/Button copy";
 import Input from "../../../../part/Input";
@@ -10,15 +13,17 @@ import UseFetch from "../../../../util/UseFetch";
 import { API_LINK } from "../../../../util/Constants";
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
-import { Editor } from '@tinymce/tinymce-react';
-import { Stepper, Step, StepLabel, Box } from '@mui/material';
+import { Editor } from "@tinymce/tinymce-react";
+import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import BackPage from "../../../../../assets/backPage.png";
 import Konfirmasi from "../../../../part/Konfirmasi";
 import axios from "axios";
 import CustomStepper from "../../../../part/Stepp";
 
 const userSchema = object({
-  forumJudul: string().max(100, "maksimum 100 karakter").required("harus diisi"),
+  forumJudul: string()
+    .max(100, "maksimum 100 karakter")
+    .required("harus diisi"),
   forumIsi: string().required("Forum harus diisi"),
 });
 
@@ -27,9 +32,9 @@ export default function MasterForumAdd({ onChangePage }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [isFormDisabled, setIsFormDisabled] = useState(false);
-  const [isBackAction, setIsBackAction] = useState(false); 
+  const [isBackAction, setIsBackAction] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [isSectionAction, setIsSectionAction] = useState(false); 
+  const [isSectionAction, setIsSectionAction] = useState(false);
   const [showConfirmationSection, setShowConfirmationSection] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -44,22 +49,21 @@ export default function MasterForumAdd({ onChangePage }) {
     materiId: AppContext_master.dataIDMateri,
     secJudul: "Section Materi " + AppContext_master.dataIDMateri,
     createdby: AppContext_test.activeUser,
-    secType: ""
+    secType: "",
   });
   const handleGoBack = () => {
     console.log(AppContext_test.activeUser);
-    setIsBackAction(true);  
-    setShowConfirmation(true);  
+    setIsBackAction(true);
+    setShowConfirmation(true);
   };
 
   const handleConfirmYes = () => {
-    setShowConfirmation(false); 
+    setShowConfirmation(false);
     window.location.reload();
   };
 
-
   const handleConfirmNo = () => {
-    setShowConfirmation(false);  
+    setShowConfirmation(false);
   };
 
   const [resetStepper, setResetStepper] = useState(0);
@@ -99,11 +103,15 @@ export default function MasterForumAdd({ onChangePage }) {
   //console.log("langkah forum", steps);
 
   const handleAdd = async (e) => {
-    console.log("tess")
+    console.log("tess");
     e.preventDefault();
 
-    const validationErrors = await validateAllInputs(formData, userSchema, setErrors);
-    const isEmptyData = Object.values(formData).some(value => value === "");
+    const validationErrors = await validateAllInputs(
+      formData,
+      userSchema,
+      setErrors
+    );
+    const isEmptyData = Object.values(formData).some((value) => value === "");
 
     if (isEmptyData) {
       setIsError({
@@ -121,69 +129,49 @@ export default function MasterForumAdd({ onChangePage }) {
 
     try {
       console.log("Data yang dikirim ke backend:", formData);
-      const response = await UseFetch(API_LINK + "Forum/SaveDataForum", formData);
+      const response = await UseFetch(
+        API_LINK + "Forum/SaveDataForum",
+        formData
+      );
       if (response === "ERROR") {
-        setIsError({ error: true, message: "Terjadi kesalahan: Gagal menyimpan data Sharing." });
+        setIsError({
+          error: true,
+          message: "Terjadi kesalahan: Gagal menyimpan data Sharing.",
+        });
       } else {
-        if(steps.length == 3){
-        //SweetAlert("Sukses", "Data Forum berhasil disimpan", "success");
-        setIsFormDisabled(false);
-        setResetStepper((prev) => !prev + 1);
-        AppContext_test.formSavedForum = true;
-        setResetStepper((prev) => !prev + 1);
-        SweetAlert("Sukses", "Materi berhasil ditambahkan", "success");
-        window.location.reload();
+        if (steps.length == 3) {
+          //SweetAlert("Sukses", "Data Forum berhasil disimpan", "success");
+          setIsFormDisabled(false);
+          setResetStepper((prev) => !prev + 1);
+          AppContext_test.formSavedForum = true;
+          setResetStepper((prev) => !prev + 1);
+          SweetAlert("Sukses", "Materi berhasil ditambahkan", "success");
+          window.location.reload();
         } else {
           setIsFormDisabled(false);
           setResetStepper((prev) => !prev + 1);
           AppContext_test.formSavedForum = true;
           setResetStepper((prev) => !prev + 1);
-          if(steps.length > 3){
-          // try {
-          //   axios.post(API_LINK + "Section/CreateSection", dataSection)
-          //   .then(response => {
-          //     const data = response.data;
-          //     console.log("data section", dataSection);
-          //     if (data[0].hasil === "OK") {
-          //       AppContext_master.dataIdSection = data[0].newID;
-          //       console.log("data section new", data[0]);
-          //       console.log("id section", AppContext_master.dataIdSection);
-          //       setIsFormDisabled(false);
-          //       AppContext_master.formSavedMateri = true;
-                console.log("step keempat", stepPage[3]);
-                onChangePage(steps[3], AppContext_master.MateriForm, AppContext_test.ForumForm = formData);
-            //   } else {
-            //     setIsError(prevError => ({
-            //       ...prevError,
-            //       error: true,
-            //       message: "Terjadi kesalahan: Gagal menyimpan data Materi."
-            //     }));
-            //   }
-            // })
-            // .catch(error => {
-            //   console.error('Terjadi kesalahan:', error);
-            //   setIsError(prevError => ({
-            //     ...prevError,
-            //     error: true,
-            //     message: "Terjadi kesalahan: " + error.message
-            //   }));
-            // })
-            // .finally(() => setIsLoading(false));
-                  }
-                }
-              }
-            
-            
-      //     } catch (error) {
-      //       setIsError({
-      //         error: true,
-      //         message: "Failed to save forum data: " + error.message,
-      //       });
-      //       setIsLoading(false);
-      //     }
-      //   }
-      // }
-  
+          if (steps.length > 3) {
+            console.log("step keempat", stepPage[3]);
+            onChangePage(
+              steps[3],
+              AppContext_master.MateriForm,
+              (AppContext_test.ForumForm = formData),
+              AppContext_master.dataIdSection,
+                AppContext_master.dataSectionSharing,
+                AppContext_master.dataIdSectionSharing,
+                AppContext_master.dataIdSectionPretest,
+                (AppContext_master.dataPretest),
+                (AppContext_master.dataQuizPretest ),
+                (AppContext_master.dataPostTest ),
+                (AppContext_master.dataQuizPostTest),
+                AppContext_master.dataTimerQuizPreTest,
+                AppContext_master.dataTimerPostTest
+            );
+          }
+        }
+      }
     } catch (error) {
       setIsError({
         error: true,
@@ -192,16 +180,6 @@ export default function MasterForumAdd({ onChangePage }) {
       setIsLoading(false);
     }
   };
-
-  // useEffect(() => {
-  //   // if (AppContext_test.ForumForm && AppContext_test.ForumForm.current && Object.keys(AppContext_test.ForumForm.current).length > 0) {
-  //   //   formData.current = { ...formData.current, ...AppContext_test.ForumForm.current };
-  //   // }
-
-  //   // if (AppContext_test.formSavedForum === false) {
-  //   //   setIsFormDisabled(false);
-  //   // }
-  // }, [AppContext_test.ForumForm, AppContext_test.formSavedForum]);
 
   const initialSteps = ["Pengenalan", "Materi", "Forum"];
   const additionalSteps = ["Sharing Expert", "Pre-Test", "Post-Test"];
@@ -216,18 +194,18 @@ export default function MasterForumAdd({ onChangePage }) {
 
   const handleStepChange = (stepContent) => {
     onChangePage(stepContent);
-    };
+  };
 
   const [stepPage, setStepPage] = useState([]);
   const handleAllStepContents = (allSteps) => {
-      setStepPage(allSteps);
-      //console.log("Semua Step Contents:", allSteps);
+    setStepPage(allSteps);
+    //console.log("Semua Step Contents:", allSteps);
   };
 
   const [stepCount, setStepCount] = useState(0);
 
   const handleStepCountChange = (count) => {
-      setStepCount(count);
+    setStepCount(count);
   };
 
   // if (isLoading) return <Loading />;
@@ -239,28 +217,54 @@ export default function MasterForumAdd({ onChangePage }) {
           <Alert type="danger" message={isError.message} />
         </div>
       )}
-        <div className="" style={{display:"flex", justifyContent:"space-between", marginTop:"100px", marginLeft:"70px", marginRight:"70px"}}>
-            <div className="back-and-title" style={{display:"flex"}}>
-              <button style={{backgroundColor:"transparent", border:"none"}} onClick={handleGoBack}><img src={BackPage} alt="" /></button>
-                <h4 style={{ color:"#0A5EA8", fontWeight:"bold", fontSize:"30px", marginTop:"10px", marginLeft:"20px"}}>Tambah Forum</h4>
-              </div>
-                <div className="ket-draft">
-                <span className="badge text-bg-dark " style={{fontSize:"16px"}}>Draft</span>
-                </div>
-              </div>
-              
-      <form onSubmit={handleAdd} style={{margin:"20px 100px"}}>
+      <div
+        className=""
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: "100px",
+          marginLeft: "70px",
+          marginRight: "70px",
+        }}
+      >
+        <div className="back-and-title" style={{ display: "flex" }}>
+          <button
+            style={{ backgroundColor: "transparent", border: "none" }}
+            onClick={handleGoBack}
+          >
+            <img src={BackPage} alt="" />
+          </button>
+          <h4
+            style={{
+              color: "#0A5EA8",
+              fontWeight: "bold",
+              fontSize: "30px",
+              marginTop: "10px",
+              marginLeft: "20px",
+            }}
+          >
+            Tambah Forum
+          </h4>
+        </div>
+        <div className="ket-draft">
+          <span className="badge text-bg-dark " style={{ fontSize: "16px" }}>
+            Draft
+          </span>
+        </div>
+      </div>
+
+      <form onSubmit={handleAdd} style={{ margin: "20px 100px" }}>
         <div className="mb-4">
-        <CustomStepper
-        initialSteps={initialSteps}
-        additionalSteps={additionalSteps}
-        onChangeStep={2}
-        onStepAdded={handleStepAdded}
-        onStepRemoved={handleStepRemoved}
-        onChangePage={handleStepChange}
-        onStepCountChanged={handleStepCountChange}
-        onAllStepContents={handleAllStepContents}
-      />
+          <CustomStepper
+            initialSteps={initialSteps}
+            additionalSteps={additionalSteps}
+            onChangeStep={2}
+            onStepAdded={handleStepAdded}
+            onStepRemoved={handleStepRemoved}
+            onChangePage={handleStepChange}
+            onStepCountChanged={handleStepCountChange}
+            onAllStepContents={handleAllStepContents}
+          />
         </div>
         <div className="card mb-4">
           <div className="card-body p-4">
@@ -274,33 +278,37 @@ export default function MasterForumAdd({ onChangePage }) {
                   onChange={handleInputChange}
                   errorMessage={errors.forumJudul}
                   isRequired
-                  disabled={isFormDisabled } 
+                  disabled={isFormDisabled}
                 />
               </div>
               <div className="col-lg-12">
                 <div className="form-group">
                   <label htmlFor="forumIsi" className="form-label fw-bold">
-                    Isi Forum <span style={{ color: 'Red' }}> *</span>
+                    Isi Forum <span style={{ color: "Red" }}> *</span>
                   </label>
                   <Editor
                     id="forumIsi"
                     value={formData.forumIsi}
-                    onEditorChange={(content) => handleInputChange({ target: { name: 'forumIsi', value: content } })}
-                    apiKey='444kasui9s3azxih6ix4chynoxmhw6y1urkpmfhufvrbernz'
+                    onEditorChange={(content) =>
+                      handleInputChange({
+                        target: { name: "forumIsi", value: content },
+                      })
+                    }
+                    apiKey="444kasui9s3azxih6ix4chynoxmhw6y1urkpmfhufvrbernz"
                     init={{
                       height: 300,
                       menubar: false,
                       plugins: [
-                        'advlist autolink lists link image charmap print preview anchor',
-                        'searchreplace visualblocks code fullscreen',
-                        'insertdatetime media table paste code help wordcount'
+                        "advlist autolink lists link image charmap print preview anchor",
+                        "searchreplace visualblocks code fullscreen",
+                        "insertdatetime media table paste code help wordcount",
                       ],
                       toolbar:
-                        'undo redo | formatselect | bold italic backcolor | \
+                        "undo redo | formatselect | bold italic backcolor | \
                         alignleft aligncenter alignright alignjustify | \
-                        bullist numlist outdent indent | removeformat | help'
+                        bullist numlist outdent indent | removeformat | help",
                     }}
-                    disabled={isFormDisabled} 
+                    disabled={isFormDisabled}
                   />
                   {errors.forumIsi && (
                     <div className="invalid-feedback">{errors.forumIsi}</div>
@@ -310,39 +318,58 @@ export default function MasterForumAdd({ onChangePage }) {
             </div>
           </div>
           <div className="d-flex justify-content-between my-4 mx-1 mt-0">
-          <div className="ml-4">
-          <Button
-            classType="outline-secondary me-2 px-4 py-2"
-            label="Sebelumnya"
-            onClick={() => onChangePage("materiAdd", AppContext_test.ForumForm = formData, AppContext_master.Materi)}
-          />
-          </div>
-          <div className="d-flex mr-4" >
-          <Button
-            classType="primary ms-2 px-4 py-2"
-            type="submit"
-            label={steps.length === 3 ? "Simpan" : "Berikutnya"}
-            style={{marginRight:"10px"}}
-            disabled={false}
-          />
-          {/* <Button
+            <div className="ml-4">
+              <Button
+                classType="outline-secondary me-2 px-4 py-2"
+                label="Sebelumnya"
+                onClick={() =>
+                  onChangePage(
+                    "materiAdd",
+                    (AppContext_test.ForumForm = formData),
+                    AppContext_master.Materi, AppContext_master.dataIdSection,
+                    AppContext_master.dataSectionSharing,
+                    AppContext_master.dataIdSectionSharing,
+                    AppContext_master.dataIdSectionPretest,
+                    (AppContext_master.dataPretest),
+                    (AppContext_master.dataQuizPretest ),
+                    (AppContext_master.dataPostTest ),
+                    (AppContext_master.dataQuizPostTest),
+                    AppContext_master.dataTimerQuizPreTest,
+                    AppContext_master.MateriForm,
+                    AppContext_master.dataTimerPostTest
+                  )
+                }
+              />
+            </div>
+            <div className="d-flex mr-4">
+              <Button
+                classType="primary ms-2 px-4 py-2"
+                type="submit"
+                label={steps.length === 3 ? "Simpan" : "Berikutnya"}
+                style={{ marginRight: "10px" }}
+                disabled={false}
+              />
+              {/* <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
             onClick={() => onChangePage("posttestAdd", AppContext_test.ForumForm = formData)}
           /> */}
+            </div>
           </div>
         </div>
-        </div>
-       
       </form>
       {showConfirmation && (
         <Konfirmasi
           title={isBackAction ? "Konfirmasi Kembali" : "Konfirmasi Simpan"}
-          pesan={isBackAction ? "Apakah anda ingin kembali?" : "Anda yakin ingin simpan data?"}
+          pesan={
+            isBackAction
+              ? "Apakah anda ingin kembali?"
+              : "Anda yakin ingin simpan data?"
+          }
           onYes={handleConfirmYes}
           onNo={handleConfirmNo}
         />
-        )}
+      )}
     </>
   );
 }

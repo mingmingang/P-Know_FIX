@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import logo from "../../assets/logoAstratech.png";
 import "../../style/Header.css";
 import Konfirmasi from "../part/Konfirmasi"; // Import your confirmation component
-import Icon from "../part/Icon";
-let active_menu;
 const activeURL = location.protocol + "//" + location.host + location.pathname;
 import { API_LINK, APPLICATION_ID } from "../util/Constants";
 import UseFetch from "../util/UseFetch";

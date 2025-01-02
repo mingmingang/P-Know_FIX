@@ -3,12 +3,10 @@ import Search from "../../part/Search";
 import ButtonPro from "../../part/Button copy";
 import "../../../../src/index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Button from "../../part/Button copy";
 import Input from "../../part/Input";
 import Filter from "../../part/Filter";
 import DropDown from "../../part/Dropdown";
 import Alert from "../../part/Alert";
-import Icon from "../../part/Icon";
 import Loading from "../../part/Loading";
 import CardPustaka from "../../part/CardPustaka";
 import { API_LINK, PAGE_SIZE } from "../../util/Constants";
@@ -57,7 +55,7 @@ export default function DaftarPustaka({ onChangePage }) {
 
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentData, setCurrentData] = useState(inisialisasiData);
+  const [currentData, setCurrentData] = useState([]);
   const [listKK, setListKK] = useState([]);
   const [isEmpty, setIsEmpty] = useState(false);
   const [currentFilter, setCurrentFilter] = useState({
@@ -91,7 +89,6 @@ export default function DaftarPustaka({ onChangePage }) {
         query: searchQuery.current.value,
         status: searchFilterStatus.current.value,
         sort: searchFilterSort.current.value,
-        // kk: searchFilterKK.current.value,
       };
     });
   }
@@ -147,13 +144,12 @@ export default function DaftarPustaka({ onChangePage }) {
         console.log("pustakaa", data);
         if (data === "ERROR") {
           setIsError(true);
-        } else if (data.length === 0) {
-          setIsLoading(true);
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        } else if (data === "data kosong") {
-          setCurrentData([]);
-          setIsLoading(false);
-        } else {
+        } 
+        // else if (data.length === 0) {
+        //   setIsLoading(true);
+        //   await new Promise((resolve) => setTimeout(resolve, 2000));
+        // }  
+        else {
           setIsEmpty(false);
           const formattedData = data.map((value) => {
             return {
@@ -188,9 +184,6 @@ export default function DaftarPustaka({ onChangePage }) {
     getListPustaka();
   }, [currentFilter]);
 
-  useEffect(() => {
-    if (currentData.length === 0) setIsLoading(true);
-  }, [currentData]);
 
   const getListKK = async () => {
     setIsError(false);
@@ -250,7 +243,7 @@ export default function DaftarPustaka({ onChangePage }) {
         setIsError(true);
       } else {
         SweetAlert("Sukses", "Data Pustaka berhasil dihapus.", "success");
-        handleSetCurrentPage(currentFilter.page);
+        window.location.reload();
       }
     }
   }
@@ -377,8 +370,6 @@ export default function DaftarPustaka({ onChangePage }) {
             </div>
           </div>
         </div>
-
-
           {currentData.length === 0 ?  (
             <div className="" style={{margin:"10px 70px"}}>
             <Alert type="warning mt-3" message="Tidak ada data daftar pustaka!" />

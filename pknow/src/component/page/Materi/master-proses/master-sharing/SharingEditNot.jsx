@@ -391,8 +391,8 @@ const handlePageChange = (content) => {
                   <div className="">
           <Button
             classType="outline-secondary me-2 px-4 py-2 ml-4"
-            label="Kembali"
-            onClick={() => onChangePage("forumEdit")}
+            label="Sebelumnya"
+            onClick={() => onChangePage("forumEdit", AppContext_test.ForumForm, AppContext_master.MateriForm)}
           />
           </div>
           <div className="d-flex">
@@ -408,7 +408,7 @@ const handlePageChange = (content) => {
           <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("pretestEdit")}
+            onClick={() => onChangePage("pretestEdit", AppContext_test.ForumForm, AppContext_master.MateriForm)}
           />
           </div>
           </div>

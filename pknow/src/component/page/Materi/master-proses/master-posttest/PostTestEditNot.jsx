@@ -11,7 +11,7 @@ import {
 } from "../../../../util/ValidateForm";
 import { API_LINK } from "../../../../util/Constants";
 import FileUpload from "../../../../part/FileUpload";
-import uploadFile from "../../../../util/UploadImageQuiz";
+import UploadFile from "../../../../util/UploadFile";
 import { Editor } from "@tinymce/tinymce-react";
 import Swal from "sweetalert2";
 import AppContext_master from "../../master-test/TestContext";
@@ -128,6 +128,33 @@ export default function MasterPostTestEditNot({ onChangePage, withID }) {
     setShowConfirmation(false);
   };
 
+  const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await axios.post(
+        `${API_LINK}Upload/UploadFile`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200 && response.data) {
+        console.log("Response data:", response.data); // Debugging log
+        return response.data; // Pastikan ini berisi newFileName
+      } else {
+        throw new Error("Upload file gagal.");
+      }
+    } catch (error) {
+      console.error("Error in uploadFile function:", error);
+      throw error;
+    }
+  };
+
   const [formData, setFormData] = useState({
     materiId: AppContext_master.dataIDMateri,
     sec_id: AppContext_master.dataIdSection,
@@ -222,13 +249,11 @@ export default function MasterPostTestEditNot({ onChangePage, withID }) {
 
   const handleJenisTypeChange = (e, questionIndex) => {
     const { value } = e.target;
-
     setFormContent((prevFormContent) => {
       const updatedFormContent = [...prevFormContent];
       updatedFormContent[questionIndex].jenis = value;
 
-      // Tambahkan nilai cho_tipe berdasarkan jenis pilihan
-      updatedFormContent[questionIndex].cho_tipe = value; // Tunggal atau Jamak
+      updatedFormContent[questionIndex].cho_tipe = value; 
 
       // Reset opsi jika tipe berubah
       updatedFormContent[questionIndex].options = [];
@@ -326,7 +351,62 @@ export default function MasterPostTestEditNot({ onChangePage, withID }) {
     }));
   };
 
+  const handleFileChange = async (e, index) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowedExtensions = ["jpg", "jpeg", "png"];
+    const fileExtension = file.name.split(".").pop().toLowerCase();
+    const maxSizeInMB = 10; // Maksimum ukuran file (dalam MB)
+
+    // Validasi ekstensi file
+    if (!allowedExtensions.includes(fileExtension)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Format Berkas Tidak Valid",
+        text: "Hanya file dengan format .jpg, .jpeg, atau .png yang diizinkan.",
+      });
+      return;
+    }
+
+    // Validasi ukuran file
+    if (file.size / 1024 / 1024 > maxSizeInMB) {
+      Swal.fire({
+        icon: "warning",
+        title: "Ukuran File Terlalu Besar",
+        text: `Ukuran file maksimal adalah ${maxSizeInMB} MB.`,
+      });
+      return;
+    }
+
+    try {
+      // Upload file ke server menggunakan fungsi uploadFile
+      const uploadResponse = await uploadFile(file);
+      console.log("Upload Response:", uploadResponse);
+
+      // Pastikan menggunakan nama properti yang benar dari respons server
+      if (!uploadResponse || !uploadResponse.Hasil) {
+        throw new Error("Respon server tidak valid.");
+      }
+
+      // Perbarui data pertanyaan dengan file gambar
+      const updatedFormContent = [...formContent];
+      updatedFormContent[index] = {
+        ...updatedFormContent[index],
+        selectedFile: file, // Menyimpan file untuk akses nanti
+        gambar: uploadResponse.Hasil, // Nama file yang dikembalikan server
+        previewUrl: URL.createObjectURL(file), // Untuk preview
+      };
+      setFormContent(updatedFormContent);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
+  };
+
+
   const Materi = AppContext_master.MateriForm;
+
+  console.log("dataa", Materi)
 
   const [dataSection, setDataSection] = useState({
     materiId: Materi.Key,
@@ -544,7 +624,7 @@ export default function MasterPostTestEditNot({ onChangePage, withID }) {
               }
               Swal.fire({
                 title: "Berhasil!",
-                text: "Pretest berhasil ditambahkan",
+                text: "Post Test berhasil ditambahkan",
                 icon: "success",
                 confirmButtonText: "OK",
             }).then(() => {
@@ -589,19 +669,17 @@ export default function MasterPostTestEditNot({ onChangePage, withID }) {
     const { checked } = e.target;
     const updatedFormContent = [...formContent];
     const question = updatedFormContent[questionIndex];
-  
-    // Perbarui opsi berdasarkan apakah "Tunggal" atau "Jamak"
+
     if (question.jenis === "Tunggal") {
-      // Reset semua opsi lain jika tipe Tunggal
       question.options.forEach((option, idx) => {
-        option.isChecked = idx === optionIndex; // Hanya aktifkan opsi yang dipilih
-        option.point = idx === optionIndex ? option.point : 0; // Reset poin selain yang dipilih
+        option.isChecked = idx === optionIndex; 
+        option.point = idx === optionIndex ? option.point : 0;
       });
     } else if (question.jenis === "Jamak") {
       // Update opsi tanpa mereset yang lain
       question.options[optionIndex].isChecked = checked;
       if (!checked) {
-        question.options[optionIndex].point = 0; // Reset poin jika opsi tidak dipilih
+        question.options[optionIndex].point = 0;
       }
     }
     setFormContent(updatedFormContent);
@@ -1180,21 +1258,41 @@ export default function MasterPostTestEditNot({ onChangePage, withID }) {
                           </div>
 
                           <FileUpload
-                            forInput={`gambarMateri_${index}`}
-                            label={"Gambar Soal "+question.type+" (.jpg, .png)"}
-                            formatFile=".jpg,.png"
-                            ref={fileGambarRef}
-                            onChange={() =>
-                              handleFileChangeGambar(
-                                fileGambarRef,
-                                index,
-                                "jpg,png"
-                              )
-                            }
-                            hasExisting={question.gambar}
-                          />
+                                forInput={`fileInput_${index}`}
+                                formatFile=".jpg,.jpeg,.png"
+                                label={
+                                  <span className="file-upload-label">
+                                    Gambar (.jpg, .jpeg, .png)
+                                  </span>
+                                }
+                                onChange={(e) => handleFileChange(e, index)}
+                                hasExisting={formContent[index]?.img || null}
+                                style={{ fontSize: "12px" }}
+                              />
 
-                          {question.selectedFile && (
+                              {/* Tampilkan preview gambar jika ada gambar yang dipilih */}
+                              {question.previewUrl && (
+                                <div
+                                  style={{
+                                    maxWidth: "300px",
+                                    maxHeight: "300px",
+                                    overflow: "hidden",
+                                    borderRadius:"20px"
+                                  }}
+                                >
+                                  <img
+                                    src={question.previewUrl}
+                                    alt=""
+                                    style={{
+                                      width: "100%",
+                                      height: "auto",
+                                      objectFit: "contain",
+                                    }}
+                                  />
+                                </div>
+                              )}
+
+                          {/* {question.selectedFile && (
                             <div
                               style={{
                                 maxWidth: "300px",
@@ -1213,7 +1311,7 @@ export default function MasterPostTestEditNot({ onChangePage, withID }) {
                                 }}
                               />
                             </div>
-                          )}
+                          )} */}
                           <div className="mt-2">
                             <Input
                               type="number"
@@ -1375,7 +1473,7 @@ export default function MasterPostTestEditNot({ onChangePage, withID }) {
             <Button
                         classType="outline-secondary me-2 px-4 py-2"
                         label="Sebelumnya"
-                        onClick={() => onChangePage("pretestEdit", AppContext_test.ForumForm, AppContext_test.MateriForm , AppContext_master.count += 1)}
+                        onClick={() => onChangePage("pretestEdit", AppContext_test.ForumForm, AppContext_master.MateriForm , AppContext_master.count += 1)}
                       />
             </div>
             <div className="d-flex mr-4" >

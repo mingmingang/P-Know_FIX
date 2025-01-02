@@ -74,6 +74,29 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
     });
     }
 
+    async function pencaharian() {
+      setIsLoading(true); // Set loading state
+      try {
+        const data = await UseFetch(API_LINK + "PengajuanKK/GetAnggotaKK", {
+          ...currentFilter,
+          query: searchQuery.current.value, // Pastikan query dikirim
+        });
+  
+        if (data && data.length > 0) {
+          setListKK(data); // Perbarui data jika ditemukan
+          console.log("Data ditemukan:", data);
+        } else {
+          setListKK([]); // Kosongkan jika tidak ada hasil
+          console.log("Data tidak ditemukan.");
+        }
+      } catch (error) {
+        console.error("Error during search:", error);
+        setListKK([]); // Kosongkan jika terjadi error
+      } finally {
+        setIsLoading(false); // Set loading state selesai
+      }
+    }
+
   const [show, setShow] = useState(false);
   const [isError, setIsError] = useState(false);
   const [dataAktif, setDataAktif] = useState(false);
@@ -303,7 +326,7 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
                 iconName="search"
                 classType="px-4"
                 title="Cari"
-                onClick={handleSearch}
+                onClick={pencaharian}
                 style={{ backgroundColor: "transparent", color: "#08549F" }}
               />
             </div>
@@ -331,7 +354,7 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
                         </tbody>
                     </table>
                     <div className="" style={{marginLeft:"20px"}}>
-                    <Filter>
+                    <Filter handleSearch={handleSearch}>
                   <DropDown
                     ref={searchFilterSort}
                     forInput="ddUrut"
@@ -421,7 +444,7 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
                   <div className="row mt-0 gx-4">
                     {listKK
                       ?.filter((value) => {
-                        return value.Status !== "Aktif";
+                        return value.Status !== "Aktif" && value.Status !== "Tidak Aktif";
                       })
                       .map((value, index) => (
                         <CardPengajuanBaru
@@ -437,6 +460,18 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
             </div>
           ) : (
             <>
+            {!isLoading &&
+            (listKK.length === 0 ||
+              listKK.every((value) => value.Status === "None")) ? (
+                <>
+               <div className="" style={{marginLeft:"80px", marginRight:"80px"}}>
+              <Alert
+                type="warning mt-3"
+                message="Tidak ada data! Silahkan cari kelompok keahlian diatas.."
+              />
+              </div>
+               </>
+            ) : (
             <div className="flex-fill">
               <div className="container">
                 {listKK.filter((value) => value.Status === "Menunggu Acc")
@@ -496,17 +531,22 @@ export default function PengajuanKelompokKeahlian({ onChangePage }){
                       return value.Status != "Menunggu Acc";
                     })
                     .map((value, index) => (
+                      <>
                       <CardPengajuanBaru
                         key={index}
                         data={value}
                         onChangePage={onChangePage}
                       />
+                      {console.log("dataa", value)}
+                      </>
+                      
                     ))}
                     </div>
 
                 </div>
              
             </div>
+            )}
             </>
           )}
         </div>

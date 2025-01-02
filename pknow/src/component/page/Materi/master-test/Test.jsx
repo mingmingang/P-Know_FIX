@@ -72,6 +72,8 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
     statusSharingExpert_Video: "",
     createdBy: activeUser,
   });
+
+
   function convertEmptyToNull(obj) {
     const newObj = {};
     for (const [key, value] of Object.entries(obj)) {
@@ -141,7 +143,9 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
 
 
   const handleFileChange = (ref, extAllowed, event, currentIndex, id_question) => {
+    console.log("data event", event)
     const file = event.target.files[0];
+    console.log("data file", file)
 
     if (file) {
         const fileExtension = file.name.split('.').pop().toLowerCase();
@@ -162,11 +166,12 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
         }));
 
         // Panggil handleValueAnswer (jika diperlukan)
-        handleValueAnswer("", "", "", "", currentIndex, event, id_question);
+        handleValueAnswer("0", "", "", "Praktikum", currentIndex, event, id_question);
     }
 };
 
 const getUploadedFile = (currentIndex, id_question) => {
+
   return fileAnswers[`${currentIndex}-${id_question}`]?.name || "Tidak ada file yang dipilih";
 };
 
@@ -200,7 +205,7 @@ const getUploadedFile = (currentIndex, id_question) => {
       }
       return accumulator + nilaiSelected;
     }, 0);
-    if(formDataRef.current.status === "Reviewed"){
+    if(formDataRef.current.status === "Reviewed"){  
     if(countBenar < 80){
       formDataRef.current.keterangan = "Tidak Lulus Quiz";
     } else {
@@ -308,7 +313,7 @@ const getUploadedFile = (currentIndex, id_question) => {
   }, [AppContext_test.arrayAnswerQuiz]);
 
   const handleValueAnswer = (urutan, idSoal, answer, nilaiSelected, index, file, id_question) => {
-    console.log("tes answer", nilaiSelected, index, file, id_question )
+    console.log("tes answer", urutan,idSoal, nilaiSelected, index, file, id_question )
     setSelectedOption(answer);
 
     const updatedAnswers = [...answers];
@@ -323,38 +328,82 @@ const getUploadedFile = (currentIndex, id_question) => {
       );
       uploadPromises.push(
         UploadFile(file.target).then((data) => {
+          console.log("data file", data)
+          console.log("data praktikum", nilaiSelected)
           if (nilaiSelected != "essay") {
             if (existingAnswerNonPilgan !== -1) {
+              console.log("ayamm")
               updatedAnswers[existingAnswerNonPilgan] = {urutan,id_question,answer,nilaiSelected};
-              submitAnswer[existingAnswerNonPilgan] = [urutan,id_question,data.newFileName,AppContext_test.dataIdTrQuiz,activeUser];
+              submitAnswer[existingAnswerNonPilgan] = [urutan,id_question,data.Hasil,"0",AppContext_test.dataIdTrQuiz,activeUser];
             }else{
+              console.log("bebek")
               updatedAnswers.push({urutan,id_question,answer,nilaiSelected});
-              submitAnswer.push ([urutan,id_question,data.newFileName,AppContext_test.dataIdTrQuiz,activeUser]) ;
+              submitAnswer.push ([urutan,id_question,data.Hasil,"0",AppContext_test.dataIdTrQuiz,activeUser]) ;
             }
           } else {
             if (existingAnswerNonPilgan !== -1) {
+              console.log("kodok")
               updatedAnswers[existingAnswerNonPilgan] = {nilaiSelected,id_question,answer};
               submitAnswer[existingAnswerNonPilgan] = [urutan,id_question,file,"0",AppContext_test.dataIdTrQuiz,activeUser];
+              console.log("submit answerr", urutan,id_question,file,"0",AppContext_test.dataIdTrQuiz,activeUser)
             }else{
+              console.log("cabee")
               updatedAnswers.push({nilaiSelected,id_question,answer});
-              submitAnswer.push ([urutan,idSoal,answer,"0",AppContext_test.dataIdTrQuiz,activeUser]) ;
+              submitAnswer.push ([urutan,id_question,answer,"0",AppContext_test.dataIdTrQuiz,activeUser]) ;
             }
           }
         })
       )
 
     }else{
-      if (existingAnswerIndex !== -1) {
-        updatedAnswers[existingAnswerIndex] = {urutan,idSoal,answer,nilaiSelected};
-        submitAnswer[existingAnswerIndex] = [urutan,idSoal,answer,nilaiSelected,AppContext_test.dataIdTrQuiz, activeUser];
+      // if (existingAnswerIndex !== -1) {
+      //   updatedAnswers[existingAnswerIndex] = {urutan,idSoal,answer,nilaiSelected};
+      //   submitAnswer[existingAnswerIndex] = [urutan,idSoal,answer,nilaiSelected,AppContext_test.dataIdTrQuiz, activeUser];
+      // } else {
+      //   updatedAnswers.push({urutan,idSoal,answer,nilaiSelected});
+      //   submitAnswer.push ([urutan,idSoal,answer,nilaiSelected,AppContext_test.dataIdTrQuiz,activeUser]) ;
+      // }
+
+      if (currentData[index - 1]?.options[0]?.cho_tipe === "Jamak") {
+        // Jika tipe soal adalah jamak
+        const existingAnswerIndex = updatedAnswers.findIndex(
+          (ans) => ans.idSoal === idSoal && ans.answer === answer
+        );
+        if (existingAnswerIndex !== -1) {
+          // Jika sudah ada di state, hapus jawaban
+          updatedAnswers.splice(existingAnswerIndex, 1);
+          submitAnswer[existingAnswerIndex] = [urutan,id_question,answer,nilaiSelected,AppContext_test.dataIdTrQuiz, activeUser];
+        } else {
+          // Jika belum ada di state, tambahkan jawaban
+          updatedAnswers.push({ urutan, idSoal, answer, nilaiSelected });
+          submitAnswer[existingAnswerIndex] = [urutan,id_question,answer,nilaiSelected,AppContext_test.dataIdTrQuiz, activeUser];
+        }
       } else {
-        updatedAnswers.push({urutan,idSoal,answer,nilaiSelected});
-        submitAnswer.push ([urutan,idSoal,answer,nilaiSelected,AppContext_test.dataIdTrQuiz,activeUser]) ;
+        // Logika untuk pilihan tunggal
+        const existingAnswerIndex = updatedAnswers.findIndex(
+          (ans) => ans.idSoal === idSoal
+        );
+        if (existingAnswerIndex !== -1) {
+          updatedAnswers[existingAnswerIndex] = {
+            urutan,
+            idSoal,
+            answer,
+            nilaiSelected,
+          };
+          
+          submitAnswer[existingAnswerIndex] = [urutan,idSoal,answer,nilaiSelected,AppContext_test.dataIdTrQuiz, activeUser];
+          console.log("tesstimoni", urutan,idSoal,answer,nilaiSelected,AppContext_test.dataIdTrQuiz, activeUser)
+        } else {
+          console.log("bebbeee")
+          updatedAnswers.push({ urutan, idSoal, answer, nilaiSelected });
+          submitAnswer.push ([urutan,idSoal,answer,nilaiSelected,AppContext_test.dataIdTrQuiz,activeUser]) ;
+          console.log("haloo", urutan,idSoal,answer,nilaiSelected,AppContext_test.dataIdTrQuiz, activeUser)
+        }
       }
     }
-      idSoal = index;
+
+    idSoal = index;
     setAnswers(updatedAnswers);
-    console.log("data jabawan", submitAnswer)
     setSubmittedAnswers(submitAnswer);  
     AppContext_test.indexTest = index;
   };
@@ -409,6 +458,7 @@ const getUploadedFile = (currentIndex, id_question) => {
               type: TipeSoal,
               question: Soal,
               correctAnswer: Jawaban,
+              point: NilaiJawaban,
               answerStatus: "none",
               gambar: Gambar ? "" : null,
             };
@@ -427,7 +477,8 @@ const getUploadedFile = (currentIndex, id_question) => {
                   value: choice.Jawaban,
                   urutan: choice.UrutanJawaban,
                   nomorSoal: choice.Key,
-                  nilai: choice.NilaiJawaban1,
+                  nilai: choice.NilaiJawabanOpsi,
+                  cho_tipe: choice.TipePilihan,
                 }));
               question.correctAnswer = question.options.find(option => option.value === Jawaban && option.nilai !== "0");
             }
@@ -479,12 +530,22 @@ const getUploadedFile = (currentIndex, id_question) => {
             placeholder="Cari Kelompok Keahlian"
             showInput={false}
           />
-    <div className="d-flex mt-3" style={{ marginLeft:"100px", marginRight:"100px"}}>
+    <div className="d-flex mt-3" style={{ marginLeft:"100px", marginRight:"100px", height:"100vh"}}>
       <div className=" p-3 d-flex ">
         <div className="mb-3 d-flex" style={{ overflowX: 'auto' }}>
           {currentData.map((item, index) => {
             const key = `${item.question}_${index}`;
             if (index + 1 !== selectedQuestion) return null;
+            const totalPoints =
+            item.type === "Pilgan" && item.options
+              ? item.options.reduce(
+                  (sum, option) => sum + (parseFloat(option.nilai) || 0),
+                  0
+                )
+              : item.type === "Essay" || item.type === "Praktikum"
+              ? parseFloat(item.point || 0) // Ambil poin langsung dari item.point
+              : 0;
+
             const currentIndex = index + 1;
             return (
               <div key={key} className="mb-3" style={{ display: 'block', minWidth: '910px', marginRight: '20px' }}>
@@ -492,7 +553,17 @@ const getUploadedFile = (currentIndex, id_question) => {
                 <div className="mb-3">
                   <h4 style={{ wordWrap: 'break-word', overflowWrap: 'break-word', textAlign:'justify', color:"#002B6C" }}>
                     <div className="">        
-                        {removeHtmlTags(he.decode(item.question))}
+                        <span>{removeHtmlTags(he.decode(item.question))}</span>
+                      <span
+                        style={{
+                          fontSize: "14px",
+                          color: "#6c757d", 
+                          marginLeft: "8px", 
+                        }}
+                      >
+                        ({totalPoints} Points)
+                      </span>
+
                     </div>
                   </h4>
                 {(item.type === "Essay" || item.type === "Praktikum") && item.gambar && (
@@ -534,52 +605,174 @@ const getUploadedFile = (currentIndex, id_question) => {
                     style={{ width: '105vh' }}
                   />
                 ) : (
+                  // <div className="d-flex flex-column">
+                  //   {item.options.map((option, index) => {
+                  //     const isCorrect = option === item.correctAnswer;
+                  //     const isSelected = answers.some(
+                  //       (ans) => ans.idSoal == option.nomorSoal && ans.urutan == option.urutan
+                  //     );
+
+                  //     let borderColor1 = '';
+                  //     let backgroundColor1 = '';
+
+                  //     if (isSelected) {
+                  //       borderColor1 = isCorrect ? '#28a745' : '#dc3545';
+                  //       backgroundColor1 = isCorrect ? '#e9f7eb' : '#ffe3e6';
+                  //     } else if (isCorrect && isSelected) {
+                  //       borderColor1 = '#28a745';
+                  //       backgroundColor1 = '#e9f7eb';
+                  //     }
+
+                  //     return (
+                  //       <div key={option.urutan} className="mt-4 mb-2" style={{ display: "flex", alignItems: "center" }}>
+                  //         <input
+                  //           type="radio"
+                  //           id={`option-${option.urutan}`}
+                  //           name={ `question-${selectedQuestion}`}
+                  //           onChange={() => handleValueAnswer(option.urutan, option.nomorSoal, option.value, option.nilai, currentIndex)}
+                  //           checked={isSelected}
+                  //           style={{ display: "none" }}
+                  //         />
+                  //         <label
+                  //           htmlFor={`option-${option.urutan}`}
+                  //           className={`btn btn-outline-primary ${isSelected ? 'active' : ''}`}
+                  //           style={{
+                  //             width: "40px",
+                  //             height: "40px",
+                  //             display: "flex",
+                  //             alignItems: "center",
+                  //             justifyContent: "center",
+                  //           }}
+                  //         >
+                  //           {String.fromCharCode(65 + index)}
+                  //         </label>
+                  //         <span className="ms-2" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>{option.value}</span>
+                  //       </div>
+                  //     );
+                  //   })}
+                  // </div>
                   <div className="d-flex flex-column">
-                    {item.options.map((option, index) => {
-                      const isCorrect = option === item.correctAnswer;
-                      const isSelected = answers.some(
-                        (ans) => ans.idSoal == option.nomorSoal && ans.urutan == option.urutan
-                      );
-
-                      let borderColor1 = '';
-                      let backgroundColor1 = '';
-
-                      if (isSelected) {
-                        borderColor1 = isCorrect ? '#28a745' : '#dc3545';
-                        backgroundColor1 = isCorrect ? '#e9f7eb' : '#ffe3e6';
-                      } else if (isCorrect && isSelected) {
-                        borderColor1 = '#28a745';
-                        backgroundColor1 = '#e9f7eb';
-                      }
-
-                      return (
-                        <div key={option.urutan} className="mt-4 mb-2" style={{ display: "flex", alignItems: "center" }}>
-                          <input
-                            type="radio"
-                            id={`option-${option.urutan}`}
-                            name={ `question-${selectedQuestion}`}
-                            onChange={() => handleValueAnswer(option.urutan, option.nomorSoal, option.value, option.nilai, currentIndex)}
-                            checked={isSelected}
-                            style={{ display: "none" }}
-                          />
-                          <label
-                            htmlFor={`option-${option.urutan}`}
-                            className={`btn btn-outline-primary ${isSelected ? 'active' : ''}`}
-                            style={{
-                              width: "40px",
-                              height: "40px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            {String.fromCharCode(65 + index)}
-                          </label>
-                          <span className="ms-2" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>{option.value}</span>
+                      {/* Keterangan pada jamak, isi jumlah checkbox sesuai opsi yang benar*/}
+                      {item.options[0].cho_tipe === "Jamak" && (
+                        <div className="">
+                          Pilihlah{" "}
+                          {
+                            item.options.filter(
+                              (option) => parseFloat(option.nilai) !== 0
+                            ).length
+                          }{" "}
+                          opsi jawaban.
                         </div>
-                      );
-                    })}
-                  </div>
+                      )}
+
+                      {item.options.map((option, index) => {
+                        const isCorrect = option === item.correctAnswer;
+                        const isSelected = answers.some(
+                          (ans) =>
+                            ans.idSoal == option.nomorSoal &&
+                            ans.urutan == option.urutan
+                        );
+
+                        let borderColor1 = "";
+                        let backgroundColor1 = "";
+
+                        if (isSelected) {
+                          borderColor1 = isCorrect ? "#28a745" : "#dc3545";
+                          backgroundColor1 = isCorrect ? "#e9f7eb" : "#ffe3e6";
+                        } else if (isCorrect && isSelected) {
+                          borderColor1 = "#28a745";
+                          backgroundColor1 = "#e9f7eb";
+                        }
+
+                        return (
+                          <div
+                            key={option.urutan}
+                            className="mt-4 mb-2"
+                            style={{ display: "flex", alignItems: "center" }}
+                          >
+                            {console.log("item", item.options)}
+                            {item.options[0].cho_tipe === "Tunggal" ? (
+                              // Tampilkan Radio Button untuk Tunggal
+                              <>
+                                <input
+                                  type="radio"
+                                  id={`option-${option.urutan}`}
+                                  name={`question-${selectedQuestion}`}
+                                  onChange={() =>
+                                    handleValueAnswer(
+                                      option.urutan,
+                                      option.nomorSoal,
+                                      option.value,
+                                      option.nilai,
+                                      currentIndex
+                                    )
+                                  }
+                                  checked={isSelected}
+                                  style={{ display: "none" }}
+                                />
+                                <label
+                                  htmlFor={`option-${option.urutan}`}
+                                  className={`btn btn-outline-primary ${
+                                    isSelected ? "active" : ""
+                                  }`}
+                                  style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                >
+                                  {String.fromCharCode(65 + index)}
+                                </label>
+                                <span
+                                  className="ms-2"
+                                  style={{
+                                    wordWrap: "break-word",
+                                    overflowWrap: "break-word",
+                                  }}
+                                >
+                                  {option.value}
+                                </span>
+                              </>
+                            ) : (
+                              // Tampilkan Checkbox untuk Jamak
+                              <>
+                                <input
+                                  type="checkbox"
+                                  id={`option-${option.urutan}`}
+                                  name={`question-${selectedQuestion}`}
+                                  onChange={(e) =>
+                                    handleValueAnswer(
+                                      option.urutan,
+                                      option.nomorSoal,
+                                      option.value,
+                                      option.nilai,
+                                      currentIndex
+                                    )
+                                  }
+                                  checked={isSelected}
+                                  style={{
+                                    marginLeft: "6px",
+                                    marginRight: "10px",
+                                    transform: "scale(2)",
+                                    borderColor: "#000",
+                                  }}
+                                />
+                                <span
+                                  style={{
+                                    wordWrap: "break-word",
+                                    overflowWrap: "break-word",
+                                  }}
+                                >
+                                  {option.value}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                 )}
           <form onSubmit={handleAdd}>
           <div className="mt-4">
@@ -613,6 +806,7 @@ const getUploadedFile = (currentIndex, id_question) => {
         checkMainContent="test"
         setTimeRemaining={setTimeRemaining}
         timeRemaining={durasi}
+        onChangePage={onChangePage}
       />
     </div>
   </>

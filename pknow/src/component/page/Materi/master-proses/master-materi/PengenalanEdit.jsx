@@ -101,6 +101,7 @@ function getStepContent(stepIndex) {
     return doc.body.textContent || "";
   };
   
+  console.log("materi", AppContext_test.DetailMateriEdit )
   const cleanedPengenalan = stripHTMLTags(Materi.Pengenalan);
   const formDataRef = useRef({
     mat_id:Materi.Key,
@@ -463,15 +464,10 @@ useEffect(() => {
                 </div>
               </div>
             </div>
-            <div className="d-flex justify-content-between my-4 mx-1 mt-0">
+            <div className="d-flex justify-content-between my-4  mt-0">
           <div className="ml-4">
-          {/* <Button
-            classType="outline-secondary me-2 px-4 py-2"
-            label="Kembali"
-            onClick={() => onChangePage("kk")}
-          /> */}
           </div>
-          <div className="d-flex mr-4" >
+          <div className="d-flex" >
             <div className="mr-2">
             <Button
             classType="primary ms-2 px-4 py-2"
@@ -482,7 +478,7 @@ useEffect(() => {
           <Button
             classType="primary ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("materiEdit", AppContext_master.MateriForm = AppContext_test.DetailMateriEdit, AppContext_master.count += 1)}
+            onClick={() => onChangePage("materiEdit", AppContext_master.MateriForm = AppContext_test.DetailMateriEdit, AppContext_master.count += 1, AppContext_test.DetailMateriEdit)}
           />
           </div>
         </div>

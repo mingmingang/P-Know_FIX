@@ -93,7 +93,6 @@ export default function MasterForumEdit({ onChangePage }) {
   const [formData, setFormData] = useState({
     forumJudul: "",
     forumIsi: "",
-    // modifBY:"ika",
   });
   const [forumDataExists, setForumDataExists] = useState(false);
   const Materi = AppContext_master.MateriForm;
@@ -330,7 +329,7 @@ export default function MasterForumEdit({ onChangePage }) {
           <Button
             classType="primary ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("sharingEdit", AppContext_test.ForumForm = formData, AppContext_master.MateriForm = AppContext_test.DetailMateriEdit, AppContext_master.count += 1)}
+            onClick={() => onChangePage("sharingEdit", AppContext_test.ForumForm = formData, AppContext_master.MateriForm, AppContext_master.count += 1)}
           />
           </div>
         </div>

@@ -56,6 +56,10 @@ export default function PengerjaanTest({
     }
   };
 
+  const idTrq = quizId;
+
+  console.log("idd", quizId)
+
   AppContext_test.quizType = quizType;
   console.log("tipe", AppContext_test.quizType);
   const selectNextQuestion = () => {
@@ -124,9 +128,10 @@ export default function PengerjaanTest({
         const answerResponse = await axios.post(
           API_LINK + "Quiz/GetDataAnswer",
           {
-            IdTrq: quizId,
+            IdTrq: idTrq,
           }
         );
+        console.log("id trq", quizId)
         console.log("id quiz",AppContext_test.IdQuiz)
         console.log("question", questionResponse.data)
         console.log("answer", answerResponse.data);
@@ -144,6 +149,7 @@ export default function PengerjaanTest({
           que_soal: item.que_soal,
           ans_jawaban_pengguna: item.ans_jawaban_pengguna,
           ans_nilai: item.ans_nilai,
+          ans_urutan: item.ans_urutan
         }));
 
         // const jawabanPenggunaStr = answerResponse.data[0].JawabanPengguna;
@@ -234,7 +240,8 @@ export default function PengerjaanTest({
                 TipeSoal,
                 Jawaban,
                 UrutanJawaban,
-                NilaiJawaban1,
+                NilaiJawaban,
+                NilaiJawabanOpsi,
                 ForeignKey,
                 Key,
                 JawabanPengguna,
@@ -247,6 +254,7 @@ export default function PengerjaanTest({
                     question: Soal,
                     correctAnswer: Jawaban,
                     answerStatus: "none",
+                    point: NilaiJawaban,
                     id: Key,
                   };
                 } else if (TipeSoal === "Praktikum") {
@@ -255,6 +263,7 @@ export default function PengerjaanTest({
                     question: Soal,
                     correctAnswer: Jawaban,
                     answerStatus: "none",
+                    point: NilaiJawaban,
                     id: Key,
                   };
                 } else {
@@ -264,7 +273,7 @@ export default function PengerjaanTest({
                       value: choice.Jawaban,
                       urutan: choice.UrutanJawaban,
                       nomorSoal: choice.Key,
-                      nilai: choice.NilaiJawaban1,
+                      nilai: choice.NilaiJawabanOpsi,
                       id: Key,
                     }));
                     console.log("optionnnnn", options);
@@ -278,7 +287,7 @@ export default function PengerjaanTest({
                       option.nilai !== "0"
                     ),
                     urutan: UrutanJawaban,
-                    nilaiJawaban: NilaiJawaban1,
+                    nilaiJawaban: NilaiJawabanOpsi,
                     jawabanPengguna_value: 
                     penggunaJawaban.find((jawaban) => jawaban.que_soal === Soal && jawaban.que_id === Key)?.value || "",
                     jawabanPengguna_soal: penggunaJawaban.find(
@@ -377,6 +386,7 @@ export default function PengerjaanTest({
   };
 
   AppContext_test.durasiTest = 10000;
+  
   return (
     <>
      <Search
@@ -391,9 +401,19 @@ export default function PengerjaanTest({
           style={{ marginLeft: "4vw" }}
         >
           <div className="mb-3 d-flex flex-wrap" style={{ overflowX: "auto" }}>
+            {console.log("dsad", currentData)}
             {currentData.map((item, index) => {
+              console.log("dkdsd", item.jawabanPengguna_soal.ans_nilai )
               // const matchedAnswer = formattedAnswers.find(answer => answer.idSoal === " " + item.Key);
               if (index + 1 !== selectedQuestion) return null;
+              const totalPoints =
+              item.type === "Pilgan" && item.jawabanPengguna_soal?.ans_nilai
+                ? parseFloat(item.jawabanPengguna_soal.ans_nilai) || 0
+                : item.type === "Essay" || item.type === "Praktikum"
+                ? parseFloat(item.point || 0)
+                : 0;
+
+                console.log("total", totalPoints)
               return (
                 <div
                   key={index}
@@ -414,7 +434,19 @@ export default function PengerjaanTest({
                         textAlign: "justify",
                       }}
                     >
-                      <div className="">  {removeHtmlTags(he.decode(item.question))}</div>
+                      <div className="">  <span>{removeHtmlTags(he.decode(item.question))}</span>
+                      <span
+                        style={{
+                          fontSize: "14px",
+                          color: "#6c757d", 
+                          marginLeft: "8px", 
+                        }}
+                      >
+                        ({item.jawabanPengguna_soal.ans_nilai} Points)
+                      </span>
+
+
+                      </div>
                     </h4>
                   </div>
                   
@@ -458,7 +490,7 @@ export default function PengerjaanTest({
                     //   (pengguna) => option.nomorSoal === pengguna.que_id
                     // );
                                         
-                    const isSelected =  option.value === item.jawabanPengguna_soal.ans_jawaban_pengguna;
+                    const isSelected =  option.urutan === item.jawabanPengguna_soal.ans_urutan;
 
                     const isCorrect = option.nilai !== 0;
 
@@ -521,6 +553,12 @@ export default function PengerjaanTest({
             </div>
           </form>
         </div>
+        <>
+   
+        <div style={{ height: '100%', width: '1px', backgroundColor: '#E4E4E4', margin: '0 auto' }} ></div>
+   
+        </>
+        
         <KMS_Sidebar
           onChangePage={onChangePage}
           questionNumbers={questionNumbers}

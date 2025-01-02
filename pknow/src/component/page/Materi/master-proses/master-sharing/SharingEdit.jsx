@@ -339,7 +339,7 @@ export default function MasterSharingEdit({ onChangePage }) {
                     errorMessage={errors.mat_sharing_expert_pdf}
                   />
                   {AppContext_test.sharingExpertPDF && (
-                    <a
+                    <a style={{textDecoration:"none"}}
                       href="#"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -363,7 +363,7 @@ export default function MasterSharingEdit({ onChangePage }) {
                     errorMessage={errors.mat_sharing_expert_video}
                   />
                   {AppContext_test.sharingExpertVideo && (
-                    <a
+                    <a style={{textDecoration:"none"}}
                       href="#"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -400,7 +400,7 @@ export default function MasterSharingEdit({ onChangePage }) {
            <Button
             classType="primary ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("pretestEdit", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
+            onClick={() => onChangePage("pretestEdit", AppContext_master.MateriForm, AppContext_master.count += 1)}
           />
           </div>
         </div>
@@ -410,7 +410,7 @@ export default function MasterSharingEdit({ onChangePage }) {
               <div className="" style={{marginLeft:"20px", marginRight:"20px"}}>
               <Alert type="warning" message={(
                 <span>
-                  Data Sharing Expert belum ditambahkan. <a onClick={() => onChangePage("sharingEditNot", AppContext_master.MateriForm = AppContext_test.DetailMateriEdit)} className="text-primary">Tambah Data</a>
+                  Data Sharing Expert belum ditambahkan. <a onClick={() => onChangePage("sharingEditNot", AppContext_master.MateriForm)} className="text-primary">Tambah Data</a>
                 </span>
               )} />
               </div>
@@ -426,7 +426,7 @@ export default function MasterSharingEdit({ onChangePage }) {
           <Button
             classType="primary ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("pretestEdit", AppContext_master.MateriForm, AppContext_master.count += 1)}
+            onClick={() => onChangePage("pretestEdit", AppContext_master.MateriForm, AppContext_master.count += 1, AppContext_test.ForumForm)}
           />
           </div>
         </div>

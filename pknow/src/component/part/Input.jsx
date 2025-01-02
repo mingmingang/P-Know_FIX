@@ -54,6 +54,12 @@ const Input = forwardRef(function Input(
       )}
       {label === "" && (
         <>
+        {errorMessage && (
+            <span className="small ms-1 text-danger">
+              {
+                errorMessage}
+            </span>
+          )}
           {type === "textarea" ? (
             <textarea
               rows="5"
@@ -77,14 +83,7 @@ const Input = forwardRef(function Input(
               {...props}
             />
           )}
-          {errorMessage && (
-            <span className="small ms-1 text-danger">
-              {placeholder.charAt(0).toUpperCase() +
-                placeholder.substr(1).toLowerCase() +
-                " " +
-                errorMessage}
-            </span>
-          )}
+          
         </>
       )}
     </>

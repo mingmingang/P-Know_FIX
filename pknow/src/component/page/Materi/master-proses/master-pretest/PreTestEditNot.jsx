@@ -1372,7 +1372,7 @@ export default function MasterPreTestEditNot({ onChangePage, withID }) {
             <Button
                         classType="outline-secondary me-2 px-4 py-2"
                         label="Sebelumnya"
-                        onClick={() => onChangePage("sharingEdit", AppContext_test.ForumForm, AppContext_test.MateriForm , AppContext_master.count += 1)}
+                        onClick={() => onChangePage("sharingEdit", AppContext_test.ForumForm, AppContext_master.MateriForm , AppContext_master.count += 1)}
                       />
             </div>
             <div className="d-flex mr-4" >

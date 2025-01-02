@@ -361,7 +361,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
             ) : (
               <div className="">
                 {!isLoading && currentData.length === 0 && (
-                  <div className="" style={{ margin: "5px 20px" }}>
+                  <div className="" style={{ margin: "5px 80px" }}>
                     <Alert type="warning" message="Tidak ada data!" />
                   </div>
                 )}

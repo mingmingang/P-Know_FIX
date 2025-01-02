@@ -69,9 +69,7 @@ const [showSharingExpertVideo, setShowSharingExpertVideo] = useState(false);
   useEffect(() => {
     setShowMainContent_SideBar(isOpen);
   }, [isOpen]);
-
-console.log("cek materi", materiId);
-
+  
   const isDataReadyTemp = "";
   const materiIdTemp = "";
   const isOpenTemp = true;
